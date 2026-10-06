@@ -22,7 +22,7 @@
 
 ## Decisions
 
-**D1. Python only, managed with uv.** Python 3.11+, FastAPI, Jinja2, Playwright for Python, the Anthropic SDK, Pydantic v2, SQLite through `sqlite3`, Typer for the CLI, pytest. One language keeps a one-person, few-day build moving and makes the interview walkthrough simple.
+**D1. Python only, managed with uv.** Python 3.11+, FastAPI, Jinja2, Playwright for Python, the Google Gen AI SDK and the OpenAI SDK (for OpenAI-compatible servers), Pydantic v2, SQLite through `sqlite3`, Typer for the CLI, pytest. One language keeps a one-person, few-day build moving and makes the interview walkthrough simple.
 
 **D2. No agent framework.** The loop is about 300 lines of our own code. The interview will ask why the agent did each thing; we need to own every line of the loop. Frameworks would hide the parts we are judged on: observation, recovery and verification.
 
@@ -30,7 +30,12 @@
 
 **D4. The worker uses a real browser through an accessibility snapshot.** Each observation is a compact text snapshot of the page, with element refs (`[e14] button "Save draft"`), the URL and the title. Actions are `goto`, `click(ref)`, `fill(ref, text)`, `select(ref, option)`, `download(ref)` → local file, `read_file(path)` (PDF text) and `back`. Screenshots are taken after every action for the console and for evidence only. Why not pixel-based computer use: it is slower, costs more and is less reliable, and the JD rewards reliability. It is still real browser use. Pixel mode is listed under "next steps".
 
-**D5. Model: Claude through the Anthropic Messages API with tool use.** The default is `claude-sonnet-5-5` for every step; set `PRECEDENT_MODEL` to change it. Goal contracts, context building and verification-check compilation may use `PRECEDENT_MODEL_STRONG` (default `claude-opus-5-5`). Use prompt caching on the system prompt and the company-context block. Both workers use the same model and budget in the ghost run.
+**D5. The model sits behind one small interface; Gemini by default.** `worker/llm.py` defines `LLM.complete(system, messages, tools, force_tool=None) -> Reply(text, tool_calls, usage)`. There are three adapters:
+- `gemini`, the default. Google Gen AI SDK, function calling, `gemini-3.8-flash`.
+- `openai_compat`. Any OpenAI-compatible server, so open-weight models (Qwen, Llama, Gemma) can run through Ollama, vLLM, OpenRouter or Groq.
+- `anthropic`. An optional extra, used only if the others prove insufficient.
+
+Tool schemas are written once as Pydantic models. Each adapter converts them; Gemini needs `$defs` inlined and unsupported keys stripped. A client-side rate limiter (`PRECEDENT_RPM`) and backoff on 429 handle free-tier limits; a 429 is a `tool` failure. The ghost run always uses the same provider and model as Precedent. Why: no paid key is needed to build or review, and if the loop works on a mid-sized model, the architecture is doing real work.
 
 **D6. The loop is explicit and has named stages.** The runner calls stages in order, and each stage emits events:
 1. `goal`: the request becomes a `GoalContract` (structured output via a tool schema), including what must not happen.
@@ -65,6 +70,7 @@
 | Risk | Fallback |
 |---|---|
 | The browser agent is too slow or flaky | Fewer, larger steps; deterministic "macro" tools for known form fills (D6, "automate what is known"), clearly labelled |
+| A free-tier model is too weak or rate-limited | Swap provider by env var (D5); smaller snapshots; the macro tools for known form fills |
 | Context building costs too much | Cache precedents per seed and task family; show the cost in the receipt |
 | The ghost run does as well as Precedent | Report it honestly; it is kill criterion 1. The story falls back to state reconstruction and verification |
 | Time runs out | Cut in the order P2 → Globex → eval breadth. Never cut Act 1, the verifier or the console |

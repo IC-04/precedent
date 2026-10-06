@@ -25,7 +25,7 @@
 7. **Evaluation:** the real results table from `precedent eval`, with seeds, repeats and cost. No invented numbers.
 8. **Limitations:** honest and specific (browser snapshot instead of pixels, one domain, synthetic company, scripted human answers in eval, cost per task).
 9. **Next:** pixel computer-use mode, real connectors, learning precedents from feedback over time, multi-task scheduling.
-10. **Assumptions** and **components used**: Claude models and IDs, the Anthropic SDK, Playwright, FastAPI, Jinja2, SQLite, fpdf2, pypdf, uv.
+10. **Assumptions** and **components used**: the model provider and model IDs actually used (Gemini by default), the Google Gen AI SDK, the OpenAI SDK for open models, Playwright, FastAPI, Jinja2, SQLite, fpdf2, pypdf, uv.
 
 ## Demo video (under 5 minutes)
 

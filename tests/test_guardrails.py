@@ -23,3 +23,13 @@ def test_worker_has_no_company_specific_names():
     for path, text in _worker_sources():
         for word in banned:
             assert word not in text, f"{path.name} hard-codes {word!r}"
+
+
+def test_only_llm_module_imports_provider_sdks():
+    sdks = ["import anthropic", "from anthropic", "from google import genai", "import openai",
+            "from openai"]
+    for path, text in _worker_sources():
+        if path.name == "llm.py":
+            continue
+        for s in sdks:
+            assert s not in text, f"{path.name} imports a provider SDK; go through worker/llm.py"
