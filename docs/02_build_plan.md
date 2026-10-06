@@ -2,6 +2,15 @@
 
 Each day ends with something that runs. If a day slips, cut from the bottom of that day; never skip the gate.
 
+## Start here: the first hour today
+
+1. Open a terminal in the repo: `make setup`, then put your Anthropic API key in `.env`. `make test` should pass.
+2. Start Claude Code in the repo root (`claude`). It reads `CLAUDE.md` automatically.
+3. Session A: `/ws WS1` (world generator). When `contracts.py` needs no change, open a second terminal.
+4. Session B: `/ws WS2` (apps). It can write against the schema before WS1 finishes.
+5. When the apps serve seed 7, Session C: `/ws WS3` (worker loop).
+6. Before each commit, ask Claude Code to "use the reviewer agent on this change". Use `/status` whenever you lose track.
+
 ## Day 1: 7 October. Gate: Act 1 runs end to end, even if it is naive
 
 | Order | Workstream | Output | Brief |
