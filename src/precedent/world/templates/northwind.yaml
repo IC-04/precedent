@@ -1,0 +1,187 @@
+# Northwind: an Indian SaaS company. Seed 7 (canonical_seed) uses every `value`;
+# other seeds sample `range`, `pool`, `choices` and `jitter` with Random(seed).
+
+company:
+  name: Northwind Ltd
+  city: Bengaluru
+  address: 4th Floor, 21 Residency Road, Bengaluru 560025
+  domain: northwind.example
+  currency: INR
+  today: 2026-09-28
+  history_start: 2025-01-01
+canonical_seed: 7
+
+people:
+  # key: role in the story. Employee ids are E-<first name, lower case>.
+  cfo:             {name: {value: Ana Pereira, pool: senior_names}, role: Chief Financial Officer}
+  design_lead:     {name: {value: Raj Mehta, pool: senior_names}, role: Design lead, manager: cfo}
+  contractor_lead: {name: {value: Meera Iyer, pool: senior_names}, role: Contractor team lead, manager: eng_manager}
+  eng_manager:     {name: {value: Vik Rao, pool: senior_names}, role: Engineering manager, manager: cfo}
+  ap_clerk:        {name: {value: Priya Nair, pool: staff_names}, role: Accounts payable clerk (on leave), manager: cfo}
+extras:
+  count: {value: 8, range: [6, 10]}
+  roles: [Office manager, Marketing lead, Backend engineer, Frontend engineer, Product designer,
+          Finance analyst, HR partner, Sales lead, Data analyst, Support lead]
+
+name_pools:
+  senior_names: [Ana Pereira, Raj Mehta, Meera Iyer, Vik Rao, Kavya Menon, Arjun Shetty,
+                 Nisha Kapoor, Rohan Desai, Leela Thomas, Sameer Joshi, Farah Khan, Dev Malhotra]
+  staff_names: [Priya Nair, Tara Bose, Kiran Rao, Imran Sheikh, Sneha Kulkarni, Aditya Verma,
+                Pooja Hegde, Rahul Bhat, Divya Pillai, Nikhil Gupta, Ishita Sen, Manoj Reddy,
+                Ayesha Siddiqui, Varun Iyer, Neha Chawla, Siddharth Das]
+
+accounts:
+  - {code: "1400", name: Prepaid expenses, type: asset}
+  - {code: "2100", name: Accounts payable, type: liability}
+  - {code: "6120", name: Software subscriptions, type: expense}
+  - {code: "6210", name: Cloud hosting, type: expense}
+  - {code: "6340", name: Contractor tools, type: expense}
+  - {code: "6400", name: Design services, type: expense}
+  - {code: "6500", name: Marketing, type: expense}
+  - {code: "6610", name: Office rent, type: expense}
+  - {code: "6620", name: Utilities, type: expense}
+  - {code: "6700", name: Travel, type: expense}
+  - {code: "6810", name: Professional fees, type: expense}
+  - {code: "6820", name: Legal fees, type: expense}
+  - {code: "6900", name: Training, type: expense}
+
+# Category -> account for single-period bills, and cost centre -> default approver.
+category_account:
+  software: "6120"
+  cloud: "6210"
+  contractor_tools: "6340"
+  design: "6400"
+  marketing: "6500"
+  rent: "6610"
+  utilities: "6620"
+  travel: "6700"
+  services: "6810"
+  legal: "6820"
+  training: "6900"
+default_approver:   # cost centre -> person key
+  design: design_lead
+  engineering: eng_manager
+  contractors: contractor_lead
+  admin: cfo
+
+rules:
+  prepaid_account: "1400"            # AP policy section 4: more than one period is prepaid
+  design_approval:
+    threshold: {value: 50000, range: [40000, 75000], step: 5000}   # rupees
+    effective: {value: 2026-07-14, range: [2026-06-08, 2026-08-03]}
+    announced_days_before: 12
+    new_approver: {value: cfo, choices: [cfo, eng_manager]}
+    post_change_bills: {value: 9, range: [7, 11]}
+    exception_date: {value: 2026-09-11}
+  split_vendor:
+    groups:
+      - {account: "6120", approver: design_lead, count: {value: 5, range: [3, 6]}, note: null}
+      - {account: "6340", approver: contractor_lead, count: {value: 4, range: [3, 6]},
+         note: Contractor team workspace}
+
+vendors:
+  total: {value: 41, range: [36, 46]}
+  story:
+    invoice_vendor:   # the Act 1 vendor: monthly plan in history, now annual
+      name: {value: Figma, pool: design_saas}
+      id: {value: V-112}
+      category: software
+      cost_center: design
+      monthly_bills: 12
+      monthly_amount: {value: 9800, range: [6000, 14000], step: 100}
+    split_vendor:
+      name: {value: Linear, pool: pm_saas}
+      category: software
+      cost_center: engineering
+      amount: {value: 36000, range: [22000, 44000], step: 100}
+    dup_vendor:       # the Act 2 half-finished setup
+      name: {value: Zenith Labs, pool: services}
+      id: {value: V-219}
+      dup_id: {value: V-224}
+      category: services
+      cost_center: engineering
+  # role -> (category, cost centre, count, amount range in rupees, cadence)
+  groups:
+    monthly_software: {pool: monthly_saas, count: 2, category: software, cost_center: engineering,
+                       amount: [4000, 18000], cadence: monthly}
+    annual_software:  {pool: annual_saas, count: 2, category: software, cost_center: engineering,
+                       amount: [90000, 240000], cadence: annual}
+    design_assets:    {pool: design_assets, count: 9, category: design, cost_center: design,
+                       amount: [12000, 95000], cadence: adhoc}
+    cloud:            {pool: cloud, count: 2, category: cloud, cost_center: engineering,
+                       amount: [30000, 160000], cadence: monthly}
+    rent:             {pool: landlords, count: 1, category: rent, cost_center: admin,
+                       amount: [420000, 420000], cadence: monthly}
+    utilities:        {pool: utilities, count: 1, category: utilities, cost_center: admin,
+                       amount: [18000, 32000], cadence: monthly}
+    contractor_tools: {pool: contractor_saas, count: 2, category: contractor_tools,
+                       cost_center: contractors, amount: [3000, 15000], cadence: adhoc}
+    noise:            {pool: noise, count: rest, cost_center: admin, amount: [2500, 48000],
+                       cadence: adhoc}
+  monthly_software_total: 38   # all single-period software bills (story vendor included)
+  pools:
+    design_saas: [Figma, Sketch, Framer, Webflow, Penpot]
+    pm_saas: [Linear, Height, Shortcut, ClickUp]
+    services: [Zenith Labs, Orbit Labs, Kestrel Systems, Pallas Digital, Meridian Works]
+    monthly_saas: [Slack, Zoom, Loom, Postman, 1Password, Calendly]
+    annual_saas: [GitHub, Notion, JetBrains, Atlassian, Datadog]
+    design_assets: [Canva, Shutterstock, Freepik, Envato, Adobe Stock, Frame.io, Pitch, Adobe,
+                    Miro, Iconscout, Unsplash Plus]
+    cloud: [AWS, DigitalOcean, Cloudflare, Linode]
+    landlords: [Residency Estates]
+    utilities: [BESCOM, ACT Fibernet]
+    contractor_saas: [Toggl, Harvest, Clockify]
+    noise:
+      - {name: MakeMyTrip, category: travel}
+      - {name: Cleartrip, category: travel}
+      - {name: Uber for Business, category: travel}
+      - {name: Khaitan Legal, category: legal}
+      - {name: Trilegal Associates, category: legal}
+      - {name: Deloitte Advisory, category: services}
+      - {name: Grant Thornton, category: services}
+      - {name: Kumar and Co Chartered Accountants, category: services}
+      - {name: LinkedIn Ads, category: marketing}
+      - {name: Google Ads, category: marketing}
+      - {name: Printland, category: marketing}
+      - {name: Eventbrite, category: marketing}
+      - {name: Udemy Business, category: training}
+      - {name: Coursera for Teams, category: training}
+      - {name: O'Reilly Learning, category: training}
+      - {name: Staples India, category: services}
+      - {name: Urban Company, category: services}
+      - {name: Swiggy Corporate, category: travel}
+      - {name: Blue Dart, category: services}
+      - {name: Tata Teleservices, category: utilities}
+      - {name: Airtel Business, category: utilities}
+      - {name: WeWork Labs, category: rent}
+
+history:
+  bills_total: {value: 312, range: [290, 330]}
+  pre_change_design_above: {value: 7, range: [5, 9]}
+  design_below: {value: 16, range: [12, 20]}
+
+scenarios:
+  T1:
+    invoice_no: {value: FIG-1842}
+    receipts: {value: [FIG-1611, FIG-1709]}
+    amount: {value: 112000, jitter: 0.4, step: 100}
+    periods: 12
+    seats: {value: 40, range: [15, 60]}
+    issue_date: 2026-09-28
+    due_in_days: 23
+  T2:
+    invoice_no: {value: ZL-0077}
+    amount: {value: 84000, jitter: 0.3, step: 100}
+    vendor_created: 2026-09-25T10:12:00
+    dup_minutes_after: 6
+    files_uploaded: 2026-09-25T10:40:00
+    priya_message: 2026-09-26T17:52:00
+  T3:
+    invoice_no: {value: LIN-0412}
+    amount: {value: 38400, jitter: 0.2, step: 100}
+    issue_date: 2026-10-06
+  T4:
+    invoice_no: {value: ZL-0081}
+    amount: {value: 46000, jitter: 0.3, step: 100}
+    bank_last4: {value: "4471", range: [1000, 9999]}
+    issue_date: 2026-10-03
