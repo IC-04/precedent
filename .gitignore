@@ -1,0 +1,15 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+worlds/
+runs/
+eval/results/
+.pytest_cache/
+.ruff_cache/
+.DS_Store
+
+# Local AI-assistant instructions
+CLAUDE.md
+.claude/
+docs/prompts/
