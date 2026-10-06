@@ -17,7 +17,13 @@ def _todo(ws: str) -> None:
 @app.command()
 def world(template: str = "northwind", seed: int = 7) -> None:
     """Generate worlds/<seed>/ from a template (WS1)."""
-    _todo("WS1_world")
+    from precedent.world.db import world_dir
+    from precedent.world.generator import generate
+
+    out = world_dir(seed)
+    m = generate(template, seed, out)
+    counts = ", ".join(f"{k} {v}" for k, v in m.counts.items() if k != "audit_log")
+    typer.echo(f"Generated {template} seed {seed} in {out}: {counts}.")
 
 
 @app.command()
