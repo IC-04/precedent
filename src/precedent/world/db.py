@@ -11,7 +11,12 @@ from typing import Any
 
 SCHEMA = Path(__file__).with_name("schema.sql")
 WORLDS = Path("worlds")
-PRIMARY_KEYS = {"accounts": "code", "mail_attachments": "message_id"}
+PRIMARY_KEYS = {"accounts": "code"}
+INSERT_ONLY = {"mail_attachments", "audit_log"}  # no single-column key: never updated
+
+
+class StaleWrite(Exception):
+    """The row changed (or vanished) since the caller read it; nothing was written."""
 
 
 def world_dir(seed: int, root: Path = WORLDS) -> Path:
@@ -51,22 +56,22 @@ def write(
     """Apply one change to `entity` (a table) and record it in audit_log.
 
     before=None inserts `after`; after=None deletes the row; otherwise the
-    fields in `after` that differ from `before` are updated.
+    fields in `after` that differ from `before` are updated. Table and column
+    names are checked against the schema. An update whose changed fields no
+    longer match `before` raises StaleWrite, so a colleague's edit is not lost.
     """
-    pk = PRIMARY_KEYS.get(entity, "id")
+    cols = _columns(conn, entity)
+    unknown = set(after or {}) - cols
+    if unknown:
+        raise ValueError(f"unknown columns for {entity}: {sorted(unknown)}")
     if before is None and after is not None:
-        cols = ", ".join(after)
+        names = ", ".join(after)
         marks = ", ".join("?" for _ in after)
-        conn.execute(f"INSERT INTO {entity} ({cols}) VALUES ({marks})", list(after.values()))
-    elif after is None:
-        conn.execute(f"DELETE FROM {entity} WHERE {pk} = ?", [entity_id])
+        conn.execute(f"INSERT INTO {entity} ({names}) VALUES ({marks})", list(after.values()))
     else:
-        changed = {k: v for k, v in after.items() if before.get(k) != v}
-        if changed:
-            sets = ", ".join(f"{k} = ?" for k in changed)
-            conn.execute(
-                f"UPDATE {entity} SET {sets} WHERE {pk} = ?", [*changed.values(), entity_id]
-            )
+        if entity in INSERT_ONLY:
+            raise ValueError(f"{entity} is insert-only")
+        _update_or_delete(conn, entity, entity_id, before or {}, after)
     conn.execute(
         "INSERT INTO audit_log (ts, actor, app, action, entity, entity_id, before_json, after_json)"
         " VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
@@ -81,6 +86,37 @@ def write(
             json.dumps(after, sort_keys=True) if after is not None else None,
         ],
     )
+
+
+def _columns(conn: sqlite3.Connection, entity: str) -> set[str]:
+    cols = {r[1] for r in conn.execute("SELECT * FROM pragma_table_info(?)", [entity])}
+    if not cols:
+        raise ValueError(f"unknown table {entity!r}")
+    return cols
+
+
+def _update_or_delete(
+    conn: sqlite3.Connection,
+    entity: str,
+    entity_id: str,
+    before: dict[str, Any],
+    after: dict[str, Any] | None,
+) -> None:
+    """Refuse to write over a row that differs from what the caller saw (lost update)."""
+    pk = PRIMARY_KEYS.get(entity, "id")
+    current = row(conn, entity, entity_id)
+    if current is None:
+        raise StaleWrite(f"{entity} {entity_id} does not exist")
+    if after is None:
+        conn.execute(f"DELETE FROM {entity} WHERE {pk} = ?", [entity_id])
+        return
+    changed = {k: v for k, v in after.items() if before.get(k) != v}
+    stale = [k for k in changed if k in before and current[k] != before[k]]
+    if stale:
+        raise StaleWrite(f"{entity} {entity_id} changed since it was read: {stale}")
+    if changed:
+        sets = ", ".join(f"{k} = ?" for k in changed)
+        conn.execute(f"UPDATE {entity} SET {sets} WHERE {pk} = ?", [*changed.values(), entity_id])
 
 
 def row(conn: sqlite3.Connection, entity: str, entity_id: str) -> dict[str, Any] | None:

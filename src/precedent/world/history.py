@@ -16,7 +16,6 @@ class VendorSpec:
     role: str  # invoice_vendor, split_vendor, monthly_software, noise, ...
     category: str
     cost_center: str
-    cadence: str  # monthly | annual | adhoc | none
     amount: tuple[int, int]  # rupees
     prefix: str  # invoice number prefix
 
@@ -173,14 +172,9 @@ class History:
                 tags=(f"split_{i}",),
             )
 
-    def adhoc(self, v: VendorSpec, count: int) -> None:
-        for _ in range(count):
-            self.add(
-                v,
-                self.random_day(self.start, self.today - timedelta(days=2)),
-                self.amount(v),
-                tags=("noise",),
-            )
+    def adhoc(self, v: VendorSpec) -> None:
+        day = self.random_day(self.start, self.today - timedelta(days=2))
+        self.add(v, day, self.amount(v), tags=("noise",))
 
     def _distinct_days(self, lo: date, hi: date, n: int) -> list[date]:
         days = [lo + timedelta(days=i) for i in range((hi - lo).days + 1)]

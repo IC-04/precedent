@@ -189,53 +189,25 @@ class Builder:
         vt = self.tpl["vendors"]
         story = vt["story"]
         specs: list[VendorSpec] = []
+
+        def add(name: str, role: str, category: str, cost_center: str, amount: list[int]) -> None:
+            prefix = initials(name)  # unique per world, so an invoice number names one vendor
+            while prefix in {v.prefix for v in specs}:
+                prefix += "X"
+            specs.append(VendorSpec("", name, role, category, cost_center, tuple(amount), prefix))
+
         for role in ("invoice_vendor", "split_vendor"):
             s = story[role]
-            name = self.R(s["name"])
-            specs.append(
-                VendorSpec(
-                    "",
-                    name,
-                    role,
-                    s["category"],
-                    s["cost_center"],
-                    "monthly",
-                    (0, 0),
-                    initials(name),
-                )
-            )
+            add(self.R(s["name"]), role, s["category"], s["cost_center"], [0, 0])
         for role, g in vt["groups"].items():
             if g["count"] == "rest":
                 continue
             for _ in range(g["count"]):
-                name = self.R.take(g["pool"])
-                specs.append(
-                    VendorSpec(
-                        "",
-                        name,
-                        role,
-                        g["category"],
-                        g["cost_center"],
-                        g["cadence"],
-                        tuple(g["amount"]),
-                        initials(name),
-                    )
-                )
+                add(self.R.take(g["pool"]), role, g["category"], g["cost_center"], g["amount"])
         noise = vt["groups"]["noise"]
-        for _ in range(self.R(vt["total"]) - len(specs) - 2):
+        for _ in range(self.R(vt["total"]) - len(specs) - 2):  # 2: the planted pair
             item = self.R.take(noise["pool"])
-            specs.append(
-                VendorSpec(
-                    "",
-                    item["name"],
-                    "noise",
-                    item["category"],
-                    noise["cost_center"],
-                    "adhoc",
-                    tuple(noise["amount"]),
-                    initials(item["name"]),
-                )
-            )
+            add(item["name"], "noise", item["category"], noise["cost_center"], noise["amount"])
         self._assign_vendor_ids(specs, story)
 
     def _assign_vendor_ids(self, specs: list[VendorSpec], story: dict[str, Any]) -> None:
@@ -383,7 +355,7 @@ class Builder:
                 h.monthly(v, 99, this_month, h.amount(v))
         adhoc = by_role["noise"] + by_role["contractor_tools"]
         for _ in range(self.R(ht["bills_total"]) - len(h.bills)):
-            h.adhoc(self.rng.choice(adhoc), 1)
+            h.adhoc(self.rng.choice(adhoc))
         self.history = h
         self._write_bills(h)
 
@@ -395,8 +367,9 @@ class Builder:
             receipts = [f"{fig.prefix}-{n}", f"{fig.prefix}-{n + self.rng.randint(60, 120)}"]
         bills = [b for b in h.bills if b.vendor_id == fig.id]
         n = int(receipts[0].split("-")[1])
-        for i, b in enumerate(reversed(bills[:-2])):
-            b.invoice_no = f"{fig.prefix}-{n - (i + 1) * self.rng.randint(85, 110)}"
+        for b in reversed(bills[:-2]):
+            n -= self.rng.randint(85, 110)
+            b.invoice_no = f"{fig.prefix}-{n}"
         bills[-2].invoice_no, bills[-1].invoice_no = receipts
         for b in bills[-2:]:
             b.tags.append("receipt")
@@ -468,31 +441,28 @@ class Builder:
         )
 
     # ------------------------------------------------------------------ files and mail
-    def add_file(
-        self, folder: str, path: Path, by: str | None, at: datetime, table: bool = True
-    ) -> str:
+    def add_file(self, folder: str, path: Path, by: str | None, at: datetime) -> str:
         self.file_count += 1
         fid = f"f-{self.file_count:04d}"
-        if table:
-            mime = "text/csv" if path.suffix == ".csv" else "application/pdf"
-            self.w(
-                by or "system",
-                "drive",
-                "file.upload",
-                "files",
-                fid,
-                {
-                    "id": fid,
-                    "folder": folder,
-                    "name": path.name,
-                    "mime": mime,
-                    "path": str(path.relative_to(self.out)),
-                    "uploaded_by": by,
-                    "uploaded_at": iso(at),
-                    "sha256": sha256(path),
-                },
-                iso(at),
-            )
+        mime = "text/csv" if path.suffix == ".csv" else "application/pdf"
+        self.w(
+            by or "system",
+            "drive",
+            "file.upload",
+            "files",
+            fid,
+            {
+                "id": fid,
+                "folder": folder,
+                "name": path.name,
+                "mime": mime,
+                "path": str(path.relative_to(self.out)),
+                "uploaded_by": by,
+                "uploaded_at": iso(at),
+                "sha256": sha256(path),
+            },
+            iso(at),
+        )
         return fid
 
     def queue_mail(

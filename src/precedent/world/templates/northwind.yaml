@@ -80,7 +80,7 @@ rules:
          note: Contractor team workspace}
 
 vendors:
-  total: {value: 41, range: [36, 46]}
+  total: {value: 41, range: [36, 44]}   # noise pool has 22 names
   story:
     invoice_vendor:   # the Act 1 vendor: monthly plan in history, now annual
       name: {value: Figma, pool: design_saas}
@@ -100,24 +100,23 @@ vendors:
       dup_id: {value: V-224}
       category: services
       cost_center: engineering
-  # role -> (category, cost centre, count, amount range in rupees, cadence)
+  # role -> category, cost centre, count, amount range in rupees (history.py sets the cadence)
   groups:
     monthly_software: {pool: monthly_saas, count: 2, category: software, cost_center: engineering,
-                       amount: [4000, 18000], cadence: monthly}
+                       amount: [4000, 18000]}
     annual_software:  {pool: annual_saas, count: 2, category: software, cost_center: engineering,
-                       amount: [90000, 240000], cadence: annual}
+                       amount: [90000, 240000]}
     design_assets:    {pool: design_assets, count: 9, category: design, cost_center: design,
-                       amount: [12000, 95000], cadence: adhoc}
+                       amount: [12000, 95000]}
     cloud:            {pool: cloud, count: 2, category: cloud, cost_center: engineering,
-                       amount: [30000, 160000], cadence: monthly}
+                       amount: [30000, 160000]}
     rent:             {pool: landlords, count: 1, category: rent, cost_center: admin,
-                       amount: [420000, 420000], cadence: monthly}
+                       amount: [420000, 420000]}
     utilities:        {pool: utilities, count: 1, category: utilities, cost_center: admin,
-                       amount: [18000, 32000], cadence: monthly}
+                       amount: [18000, 32000]}
     contractor_tools: {pool: contractor_saas, count: 2, category: contractor_tools,
-                       cost_center: contractors, amount: [3000, 15000], cadence: adhoc}
-    noise:            {pool: noise, count: rest, cost_center: admin, amount: [2500, 48000],
-                       cadence: adhoc}
+                       cost_center: contractors, amount: [3000, 15000]}
+    noise:            {pool: noise, count: rest, cost_center: admin, amount: [2500, 48000]}
   monthly_software_total: 38   # all single-period software bills (story vendor included)
   pools:
     design_saas: [Figma, Sketch, Framer, Webflow, Penpot]

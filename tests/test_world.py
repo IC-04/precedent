@@ -189,3 +189,18 @@ def test_seeds_vary_the_story(worlds):
     assert len(set(seen.values())) == len(SEEDS)
     thresholds = {_rule(d, "design_approval")["threshold_minor"] for d, _ in worlds.values()}
     assert len(thresholds) > 1
+
+
+@pytest.mark.parametrize("seed", range(1, 26))
+def test_seed_sweep_keeps_business_keys_unique(tmp_path, seed):
+    generate("northwind", seed, tmp_path)
+    c = _db(tmp_path)
+    dup = c.execute(
+        "select vendor_id, invoice_no from bills group by 1, 2 having count(*) > 1"
+    ).fetchall()
+    assert not dup
+    for t in _hidden(tmp_path).tasks:
+        n = c.execute(
+            "select count(*) from bills where invoice_no=?", [t.expected["invoice_no"]]
+        ).fetchone()[0]
+        assert n == 0, f"{t.task_id} invoice already in Books"
