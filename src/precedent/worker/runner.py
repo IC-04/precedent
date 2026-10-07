@@ -171,11 +171,12 @@ class Fallback:
         self.agent: LlmAgent | None = None
 
     async def __call__(self, callback_context, llm_request, error) -> Any:
+        failed = llm_request.model
         for round_no in range(self.ROUNDS):
             if round_no:
                 await asyncio.sleep(10 * round_no)
             for name in self.order:
-                if name == llm_request.model and round_no == 0:
+                if name == failed and round_no == 0:
                     continue  # it has just failed
                 try:
                     llm_request.model = name
@@ -217,11 +218,70 @@ def _intentions(previous: Path) -> str:
     )
 
 
+def _build_agent(
+    cfg: RunConfig, guard: Guard, toolset: McpToolset, base: str, goal, fallback: Fallback
+) -> LlmAgent:
+    context = "Not built yet (WS4). Read the company's policies and history yourself."
+    agent = LlmAgent(
+        name="ava",
+        model=make_model(cfg.model),
+        instruction=INSTRUCTION.format(
+            base=base, goal=goal.model_dump_json(indent=1), context=context
+        ),
+        tools=[toolset, *guard.tools()],
+        before_tool_callback=guard.before_tool,
+        after_tool_callback=guard.after_tool,
+        on_tool_error_callback=guard.on_tool_error,
+        before_model_callback=guard.before_model,
+        after_model_callback=guard.after_model,
+        on_model_error_callback=fallback,
+        generate_content_config=types.GenerateContentConfig(
+            tool_config=types.ToolConfig(
+                function_calling_config=types.FunctionCallingConfig(
+                    mode=types.FunctionCallingConfigMode.ANY
+                )
+            )
+        ),
+    )
+    fallback.agent = agent
+    return agent
+
+
+async def _act(
+    cfg: RunConfig,
+    guard: Guard,
+    log: EventLog,
+    gateway: Gateway,
+    holder: dict,
+    previous: Path | None,
+) -> None:
+    """Everything that can fail: goal, browser, agent, the loop itself."""
+    base = gateway.start()
+    (log.dir / "mcp").mkdir(exist_ok=True)
+    holder["toolset"] = toolset = browser_toolset(base, log.dir / "mcp", cfg.headed)
+    goal = await write_goal(
+        cfg.request, make_model(cfg.strong), on_model_error=Fallback(cfg.strong, cfg.fallbacks, log)
+    )
+    log.emit("goal_contract", **goal.model_dump())
+    log.emit("note", kind="context", text=f"context stage not built yet; worker={cfg.worker}")
+    agent = _build_agent(cfg, guard, toolset, base, goal, Fallback(cfg.model, cfg.fallbacks, log))
+    try:
+        await asyncio.wait_for(
+            _drive(agent, guard, cfg, previous), timeout=cfg.budgets.seconds + 60
+        )
+    except TimeoutError as e:
+        # wait_for's own timeout means the budget; any other TimeoutError is a call timing out
+        if guard.seconds() >= cfg.budgets.seconds:
+            reason = f"time budget of {cfg.budgets.seconds} s used"
+        else:
+            reason = f"a model or browser call timed out ({e or 'no detail'})"
+        guard.stop_reason = guard.stop_reason or reason
+
+
 async def run(cfg: RunConfig) -> dict[str, Any]:
     task_id = task_id_for(cfg.seed, cfg.request)
     previous = unfinished_run(task_id, cfg.runs_root) if cfg.resume else None
-    run_id = new_run_id()
-    log = EventLog(run_id, task_id=task_id, root=cfg.runs_root)
+    log = EventLog(new_run_id(), task_id=task_id, root=cfg.runs_root)
     log.emit(
         "run_started",
         request=cfg.request,
@@ -234,52 +294,10 @@ async def run(cfg: RunConfig) -> dict[str, Any]:
     gateway = Gateway(cfg.apps_url, gate)
     guard = Guard(log, gate, gateway.lock, log.dir / "mcp", cfg.budgets)
     gateway.on_exchange = guard.on_exchange
-    base = gateway.start()
-    (log.dir / "mcp").mkdir(exist_ok=True)
-    toolset = browser_toolset(base, log.dir / "mcp", cfg.headed)
-    fallback = Fallback(cfg.model, cfg.fallbacks, log)
+    holder: dict[str, Any] = {}
     outcome, error = "unknown", None
     try:
-        goal = await write_goal(
-            cfg.request,
-            make_model(cfg.strong),
-            on_model_error=Fallback(cfg.strong, cfg.fallbacks, log),
-        )
-        log.emit("goal_contract", **goal.model_dump())
-        context = "Not built yet (WS4). Read the company's policies and history yourself."
-        log.emit("note", kind="context", text=f"context stage not built yet; worker={cfg.worker}")
-        agent = LlmAgent(
-            name="ava",
-            model=make_model(cfg.model),
-            instruction=INSTRUCTION.format(
-                base=base, goal=goal.model_dump_json(indent=1), context=context
-            ),
-            tools=[toolset, *guard.tools()],
-            before_tool_callback=guard.before_tool,
-            after_tool_callback=guard.after_tool,
-            before_model_callback=guard.before_model,
-            after_model_callback=guard.after_model,
-            on_model_error_callback=fallback,
-            generate_content_config=types.GenerateContentConfig(
-                tool_config=types.ToolConfig(
-                    function_calling_config=types.FunctionCallingConfig(
-                        mode=types.FunctionCallingConfigMode.ANY
-                    )
-                )
-            ),
-        )
-        fallback.agent = agent
-        try:
-            await asyncio.wait_for(
-                _drive(agent, guard, cfg, previous), timeout=cfg.budgets.seconds + 60
-            )
-        except TimeoutError as e:
-            # wait_for's own timeout means the budget; any other TimeoutError is a call timing out
-            if guard.seconds() >= cfg.budgets.seconds:
-                reason = f"time budget of {cfg.budgets.seconds} s used"
-            else:
-                reason = f"a model or browser call timed out ({e or 'no detail'})"
-            guard.stop_reason = guard.stop_reason or reason
+        await _act(cfg, guard, log, gateway, holder, previous)
         if guard.stop_reason:
             log.emit("note", kind="stopped", reason=guard.stop_reason)
         log.emit("note", kind="verify", text="verifier not built yet (WS5); outcome is unknown")
@@ -287,30 +305,31 @@ async def run(cfg: RunConfig) -> dict[str, Any]:
         error = f"{type(e).__name__}: {e}"
         log.emit("note", kind="error", text=error[:2000])
     finally:
-        await toolset.close()
-        gateway.stop()
-    log.emit(
-        "run_finished",
-        outcome=outcome,
-        tokens_in=guard.tokens_in,
-        tokens_out=guard.tokens_out,
-        usd=None,
-        seconds=guard.seconds(),
-        steps=guard.steps,
-        claimed=(guard.finished or {}).get("claimed"),
-        error=error,
-    )
-    return {
-        "run_id": run_id,
+        await _close(holder.get("toolset"), gateway, log)
+    summary = {
         "outcome": outcome,
-        "claimed": guard.finished,
-        "steps": guard.steps,
         "tokens_in": guard.tokens_in,
         "tokens_out": guard.tokens_out,
+        "usd": None,
         "seconds": guard.seconds(),
+        "steps": guard.steps,
+        "questions": guard.questions,
+        "claimed": (guard.finished or {}).get("claimed"),
         "error": error,
-        "dir": str(log.dir),
     }
+    log.emit("run_finished", **summary)
+    return {**summary, "run_id": log.run_id, "claimed": guard.finished, "dir": str(log.dir)}
+
+
+async def _close(toolset: McpToolset | None, gateway: Gateway, log: EventLog) -> None:
+    """Close the browser and the gateway; a failure in one never skips the other."""
+    try:
+        if toolset is not None:
+            await toolset.close()
+    except Exception as e:  # noqa: BLE001
+        log.emit("note", kind="error", text=f"closing the browser failed: {e}"[:500])
+    finally:
+        gateway.stop()
 
 
 async def _drive(agent: LlmAgent, guard: Guard, cfg: RunConfig, previous: Path | None) -> None:

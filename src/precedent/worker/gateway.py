@@ -40,6 +40,16 @@ class Exchange:
     kind: FailureKind | None = None
 
 
+AUTOMATIC = ("/favicon.ico", "/robots.txt", "/apple-touch-icon")
+STATIC = (".ico", ".png", ".jpg", ".svg", ".css", ".js", ".woff", ".woff2", ".map")
+
+
+def is_automatic(method: str, path: str) -> bool:
+    """Requests the browser makes by itself, which say nothing about Ava's work."""
+    bare = path.split("?", 1)[0].lower()
+    return method.upper() == "GET" and (bare.startswith(AUTOMATIC) or bare.endswith(STATIC))
+
+
 def _page(title: str, text: str) -> bytes:
     return (
         f"<!doctype html><title>{escape(title)}</title><h1>{escape(title)}</h1>"
@@ -65,14 +75,19 @@ class Gateway:
 
     def start(self) -> str:
         threading.Thread(target=self.server.serve_forever, daemon=True).start()
+        self.started = True
         return self.url
 
     def stop(self) -> None:
-        self.server.shutdown()
+        if getattr(self, "started", False):
+            self.server.shutdown()
+        self.server.server_close()
         self.client.close()
 
     def forward(self, method: str, path: str, headers: dict[str, str], body: bytes):
         """Returns (status, headers, body) for the browser, and records the exchange."""
+        if is_automatic(method, path):  # the browser's own requests (favicon...): not Ava's
+            return self._pass_through(method, path, headers, body)
         with self.lock:
             refused = self.gate.on_request(method)
         if refused:
@@ -99,9 +114,17 @@ class Gateway:
         }
         return r.status_code, out, r.content
 
+    def _pass_through(self, method: str, path: str, headers: dict[str, str], body: bytes):
+        clean = {k: v for k, v in headers.items() if k.lower() not in HOP_HEADERS}
+        try:
+            r = self.client.request(method, self.upstream + path, headers=clean, content=body)
+        except httpx.HTTPError:
+            return 404, {}, b""
+        return r.status_code, {"Content-Type": r.headers.get("content-type", "")}, r.content
+
     def _lost(self, method: str, path: str, timed_out: bool):
         with self.lock:
-            kind = self.gate.on_response(method, path, None, timed_out=True)
+            kind = self.gate.on_response(method, path, None, timed_out=timed_out)
         self.on_exchange(Exchange(method, path, None, timed_out=timed_out, kind=kind))
         text = (
             "No response from the company app. If this was a save, it may or may not have happened."

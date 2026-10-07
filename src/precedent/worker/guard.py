@@ -16,12 +16,13 @@ from pathlib import Path
 from typing import Any
 
 from precedent.contracts import DecisionRecord, PlanStep
-from precedent.worker.compact import inline_snapshot, one_line, page_of
+from precedent.worker.compact import OLD, inline_snapshot, one_line, page_of
 from precedent.worker.events import EventLog
 from precedent.worker.failures import ADVICE, WriteGate, classify_tool_error
 from precedent.worker.gateway import Exchange
 
 KEEP_SNAPSHOTS = 3
+OLD_PREFIX = OLD.split("{", 1)[0]
 OUTCOMES = ("pass", "fail", "blocked", "unknown")
 
 
@@ -160,6 +161,8 @@ class Guard:
     def after_tool(self, tool, args: dict, tool_context, tool_response) -> dict | None:
         if not tool.name.startswith("browser_"):
             return None
+        if isinstance(tool_response, dict) and "error" in tool_response:
+            return None  # our own refusal from before_tool: pass it to the model unchanged
         text, is_error = _text(tool_response)
         notes = []
         if is_error:
@@ -179,6 +182,15 @@ class Guard:
         if notes:
             text += "\n### Notes from Ava's safety checks\n" + "\n".join(f"- {n}" for n in notes)
         return {"content": [{"type": "text", "text": text}], "isError": is_error}
+
+    def on_tool_error(self, tool, args: dict, tool_context, error: Exception) -> dict:
+        """A tool raised instead of answering: classify it and tell the model what to do."""
+        kind = classify_tool_error(str(error))
+        self.log.emit(
+            "failure", kind=kind.value, detail=f"{tool.name}: {error}"[:300], response=ADVICE[kind]
+        )
+        notes = [ADVICE[kind], *self._drain_exchanges()]
+        return {"error": f"{tool.name} failed: {str(error)[:300]}", "advice": notes}
 
     def _drain_exchanges(self) -> list[str]:
         with self.lock:
@@ -209,9 +221,11 @@ class Guard:
                 if fr is None or not (fr.name or "").startswith("browser_"):
                     continue
                 seen += 1
-                if seen > KEEP_SNAPSHOTS:
-                    text, _ = _text(fr.response or {})
-                    fr.response = {"content": [{"type": "text", "text": one_line(text)}]}
+                text, _ = _text(fr.response or {})
+                if seen > KEEP_SNAPSHOTS and not text.startswith(OLD_PREFIX):
+                    # replace, never mutate: the part's response is also the session's history
+                    short = {"content": [{"type": "text", "text": one_line(text)}]}
+                    part.function_response = fr.model_copy(update={"response": short})
         return None
 
     def after_model(self, callback_context, llm_response) -> None:

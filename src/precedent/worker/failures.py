@@ -26,7 +26,6 @@ ADVICE = {
     "finish with outcome 'blocked', citing the evidence.",
 }
 
-MAX_TOOL_RETRIES = 2
 MAX_UNCERTAIN_WRITES = 2  # the second one ends the run with 'unknown'
 
 
@@ -37,9 +36,9 @@ def classify_response(
     is_write = method.upper() != "GET"
     if timed_out or status is None or status >= 500:
         return FailureKind.uncertain_write if is_write else FailureKind.tool
-    if status in (400, 404, 409, 422):
-        return FailureKind.interface
-    return None
+    if is_write and status in (400, 404, 409, 422):
+        return FailureKind.interface  # the app refused the save; nothing changed
+    return None  # a 4xx on a read is a page the model looked at, shown to it as it is
 
 
 def classify_tool_error(text: str) -> FailureKind:
