@@ -273,8 +273,13 @@ async def run(cfg: RunConfig) -> dict[str, Any]:
             await asyncio.wait_for(
                 _drive(agent, guard, cfg, previous), timeout=cfg.budgets.seconds + 60
             )
-        except TimeoutError:
-            guard.stop_reason = guard.stop_reason or f"time budget of {cfg.budgets.seconds} s used"
+        except TimeoutError as e:
+            # wait_for's own timeout means the budget; any other TimeoutError is a call timing out
+            if guard.seconds() >= cfg.budgets.seconds:
+                reason = f"time budget of {cfg.budgets.seconds} s used"
+            else:
+                reason = f"a model or browser call timed out ({e or 'no detail'})"
+            guard.stop_reason = guard.stop_reason or reason
         if guard.stop_reason:
             log.emit("note", kind="stopped", reason=guard.stop_reason)
         log.emit("note", kind="verify", text="verifier not built yet (WS5); outcome is unknown")
