@@ -195,3 +195,79 @@ def test_drive_never_serves_hidden_or_held_files(world):
     client, _ = world
     for url in ["/drive/f/..%2Fhidden.json", "/drive/held", "/drive/f/held%2FZL-0081.pdf"]:
         assert client.get(url).status_code == 404
+
+
+def test_chat_post_as_ava(world):
+    client, conn = world
+    page = client.get("/chat/finance-approvals").text
+    assert "Started setting up Zenith Labs" in page and 'name="body"' in page
+    r = client.post("/chat/finance-approvals", data={"body": "Could SOP 3.2 be updated?"},
+                    follow_redirects=False)  # fmt: skip
+    assert r.status_code == 303
+    assert "Could SOP 3.2 be updated?" in client.get(r.headers["location"]).text
+    assert tuple(_audit(conn)[0])[:2] == ("ava", "message.post")
+    assert client.post("/chat/finance-approvals", data={"body": " "}).status_code == 400
+
+
+def _hook(client, path, **kw):
+    return client.post(f"/__scenario/{path}", headers={"X-Scenario-Token": TOKEN}, **kw)
+
+
+def test_scenario_hooks_need_the_token(world):
+    client, _ = world
+    assert client.post("/__scenario/relabel?field=due_date&label=x").status_code == 403
+    bad = {"X-Scenario-Token": "wrong"}
+    assert client.post("/__scenario/relabel?field=due_date&label=x", headers=bad).status_code == 403
+
+
+def test_colleague_edit_is_logged_as_the_colleague(world):
+    client, conn = world
+    r = _hook(
+        client,
+        "edit",
+        json={
+            "entity": "vendors",
+            "id": "V-219",
+            "fields": {"phone": "+91 80 5555 0000"},
+            "actor": "E-raj",
+        },
+    )
+    assert r.status_code == 200
+    assert conn.execute("select phone from vendors where id='V-219'").fetchone()[0] == (
+        "+91 80 5555 0000"
+    )
+    assert tuple(_audit(conn)[0])[:2] == ("E-raj", "vendors.update")
+    assert "Raj Mehta" in client.get("/books/vendors/V-219").text  # visible in Activity
+
+
+def test_dropped_response_still_commits_the_bill(world):
+    client, conn = world
+    assert (
+        _hook(client, "drop-next-response", params={"path": "/books/bills/new"}).status_code == 200
+    )
+    r = client.post("/books/bills/new", data=_bill_form(conn), follow_redirects=False)
+    assert r.status_code == 502
+    n = conn.execute("select count(*) from bills where invoice_no='FIG-1842'").fetchone()[0]
+    assert n == 1  # the write landed; only the acknowledgement was lost
+    r = client.post("/books/bills/new", data=_bill_form(conn, invoice_no="X-1"),
+                    follow_redirects=False)  # fmt: skip
+    assert r.status_code == 303  # armed once only
+
+
+def test_relabel_changes_the_label_not_the_name(world):
+    client, _ = world
+    _hook(client, "relabel", params={"field": "due_date", "label": "Payment due"})
+    form = client.get("/books/bills/new").text
+    assert 'for="f-due_date">Payment due</label>' in form and 'name="due_date"' in form
+
+
+def test_deliver_held_item(world):
+    client, conn = world
+    assert client.get("/mail/?q=LIN-0412").text.count("/mail/m/") == 0
+    r = _hook(client, "deliver", params={"item": "T3"})
+    assert r.status_code == 200
+    page = client.get("/mail/?q=LIN-0412").text
+    assert "Invoice LIN-0412" in page
+    fid = r.json()["file_ids"][0]
+    assert "contractor-only" in client.get(f"/drive/f/{fid}").text
+    assert _hook(client, "deliver", params={"item": "T3"}).status_code == 409
