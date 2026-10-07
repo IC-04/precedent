@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import os
+
 import typer
 from dotenv import load_dotenv
 
@@ -33,6 +35,13 @@ def apps(seed: int = 7, port: int = 8100) -> None:
 
     from precedent.apps.server import create_app
 
+    if os.getenv("PRECEDENT_SCENARIO_TOKEN", "change-me") == "change-me":
+        typer.secho(
+            "Set PRECEDENT_SCENARIO_TOKEN in .env (make setup generates one); "
+            "the scenario hooks must not use a guessable token.",
+            fg=typer.colors.RED,
+        )
+        raise typer.Exit(code=2)
     typer.echo(f"Company apps for seed {seed} on http://localhost:{port}/mail/")
     uvicorn.run(create_app(seed), host="127.0.0.1", port=port, log_level="warning")
 

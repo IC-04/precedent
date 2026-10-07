@@ -64,10 +64,13 @@ def _blank_to_none(values: dict[str, Any]) -> dict[str, Any]:
     return {k: (v if v not in ("", None) else None) for k, v in values.items()}
 
 
-def _options(conn: sqlite3.Connection) -> dict[str, Any]:
+def _options(conn: sqlite3.Connection, keep_vendor: str = "") -> dict[str, Any]:
+    """Choices for forms. keep_vendor stays listed even if retired (a bill's own vendor)."""
     return {
         "vendors": conn.execute(
-            "SELECT id, name, status FROM vendors WHERE status != 'retired' ORDER BY name"
+            "SELECT id, name, status FROM vendors WHERE status != 'retired' OR id = ?"
+            " ORDER BY name",
+            [keep_vendor],
         ).fetchall(),
         "accounts": conn.execute("SELECT code, name FROM accounts ORDER BY code").fetchall(),
         "files": conn.execute(
@@ -187,7 +190,7 @@ def _bill_form(
         error=error,
         bill=bill,
         was=was,
-        **_options(conn),
+        **_options(conn, bill["vendor_id"] if bill else ""),
     )
 
 
@@ -196,12 +199,17 @@ def bill_new(request: Request, conn: Conn):
     return _bill_form(request, conn, {"currency": "INR"})
 
 
-def _parse_bill(conn: sqlite3.Connection, values: dict[str, str]) -> dict[str, Any]:
-    """Validate a bill form. Raises ValueError with a message for the user."""
+def _parse_bill(
+    conn: sqlite3.Connection, values: dict[str, str], current_vendor: str = ""
+) -> dict[str, Any]:
+    """Validate a bill form. Raises ValueError with a message for the user.
+
+    A new vendor must be active; a bill keeping its current vendor may be edited anyway.
+    """
     vendor = db.row(conn, "vendors", values.get("vendor_id", ""))
     if vendor is None:
         raise ValueError("Choose a vendor.")
-    if vendor["status"] != "active":
+    if vendor["status"] != "active" and vendor["id"] != current_vendor:
         raise ValueError(
             f"Vendor {vendor['id']} is {vendor['status']}; bills need an active vendor."
         )
@@ -327,7 +335,7 @@ async def bill_update(request: Request, conn: Conn, bid: str):
     values = {k: str(form.get(k, "")).strip() for k in BILL_FIELDS}
     was = {k: str(form.get(f"was__{k}", "")).strip() for k in BILL_FIELDS}
     try:
-        after = _parse_bill(conn, values)
+        after = _parse_bill(conn, values, current_vendor=bill["vendor_id"])
         before = _blank_to_none({k: was[k] for k in BILL_FIELDS if k != "amount"})
         before["amount_minor"] = parse_amount(was["amount"]) if was["amount"] else None
     except ValueError as e:
@@ -405,7 +413,7 @@ async def request_approval(request: Request, conn: Conn, bid: str):
             link=f"/books/bills/{bid}",
         )
     now = _now()
-    aid = f"A-{bid.split('-')[1]}"
+    aid = _next_id(conn, "approvals", "A")
     approval = {
         "id": aid,
         "bill_id": bid,

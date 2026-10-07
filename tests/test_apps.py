@@ -271,3 +271,53 @@ def test_deliver_held_item(world):
     fid = r.json()["file_ids"][0]
     assert "contractor-only" in client.get(f"/drive/f/{fid}").text
     assert _hook(client, "deliver", params={"item": "T3"}).status_code == 409
+
+
+def _was(conn, **over):
+    form = _bill_form(conn, **over)
+    return {f"was__{k}": v for k, v in {**form, "amount": "1,12,000.00"}.items()}
+
+
+def test_stale_bill_edit_is_refused(world):
+    client, conn = world
+    client.post("/books/bills/new", data=_bill_form(conn, account_code="6120"))
+    was = _was(conn, account_code="6120")
+    conn.execute("update bills set account_code = '6400' where id = 'INV-921'")  # a colleague
+    conn.commit()
+    r = client.post("/books/bills/INV-921/edit",
+                    data={**_bill_form(conn, account_code="1400"), **was})  # fmt: skip
+    assert r.status_code == 409
+    assert conn.execute("select account_code from bills where id='INV-921'").fetchone()[0] == "6400"
+    # an unchanged form round-trips (amount formatting included) without a false conflict
+    r = client.post("/books/bills/INV-921/edit",
+                    data={**_bill_form(conn, account_code="6120"), **was, "notes": "ok"},
+                    follow_redirects=False)  # fmt: skip
+    assert r.status_code == 303
+
+
+def test_bill_keeps_its_vendor_after_the_vendor_is_retired(world):
+    client, conn = world
+    client.post("/books/bills/new", data=_bill_form(conn))
+    client.post("/books/vendors/V-112/retire")
+    assert 'value="V-112" selected' in client.get("/books/bills/INV-921/edit").text
+    r = client.post("/books/bills/INV-921/edit", data={**_bill_form(conn, notes="x"), **_was(conn)},
+                    follow_redirects=False)  # fmt: skip
+    assert r.status_code == 303
+    assert client.post("/books/bills/new", data=_bill_form(conn)).status_code == 400
+
+
+def test_request_approval_rejects_a_bad_approver(world):
+    client, conn = world
+    client.post("/books/bills/new", data=_bill_form(conn))
+    for who in ["", "E-nobody", "ava"]:
+        r = client.post("/books/bills/INV-921/request-approval", data={"approver_id": who})
+        assert r.status_code == 400
+    assert conn.execute("select status from bills where id='INV-921'").fetchone()[0] == "draft"
+
+
+def test_scenario_edit_rejects_unknown_tables(world):
+    client, _ = world
+    body = {"entity": "vendors; drop table bills", "id": "V-1", "fields": {}, "actor": "E-raj"}
+    assert _hook(client, "edit", json=body).status_code == 400
+    body = {"entity": "vendors", "id": "V-219", "fields": {"nope": 1}, "actor": "E-raj"}
+    assert _hook(client, "edit", json=body).status_code == 400

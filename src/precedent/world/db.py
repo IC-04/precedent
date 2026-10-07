@@ -61,7 +61,7 @@ def write(
     names are checked against the schema. An update whose changed fields no
     longer match `before` raises StaleWrite, so a colleague's edit is not lost.
     """
-    cols = _columns(conn, entity)
+    cols = columns(conn, entity)
     unknown = set(after or {}) - cols
     if unknown:
         raise ValueError(f"unknown columns for {entity}: {sorted(unknown)}")
@@ -89,7 +89,7 @@ def write(
     )
 
 
-def _columns(conn: sqlite3.Connection, entity: str) -> set[str]:
+def columns(conn: sqlite3.Connection, entity: str) -> set[str]:
     cols = {r[1] for r in conn.execute("SELECT * FROM pragma_table_info(?)", [entity])}
     if not cols:
         raise ValueError(f"unknown table {entity!r}")

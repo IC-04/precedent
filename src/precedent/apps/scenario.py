@@ -41,9 +41,10 @@ class Edit(BaseModel):
 def edit(change: Edit, conn: Conn) -> dict[str, Any]:
     """A colleague's edit, logged with the colleague as the actor."""
     try:
-        before = db.row(conn, change.entity, change.id)
-    except sqlite3.OperationalError:
+        db.columns(conn, change.entity)  # checks the table name before any SQL uses it
+    except ValueError:
         raise HTTPException(status_code=400, detail="Unknown entity.") from None
+    before = db.row(conn, change.entity, change.id)
     if before is None:
         raise HTTPException(status_code=404, detail="No such record.")
     try:
@@ -85,10 +86,12 @@ def deliver(request: Request, conn: Conn, item: str) -> dict[str, Any]:
     entry = next((i for i in held if i["id"] == item), None)
     if entry is None:
         raise HTTPException(status_code=404, detail="No such held item.")
+    for f in entry["files"]:  # check everything before touching disk or the database
+        seen = conn.execute("SELECT 1 FROM files WHERE sha256 = ?", [f["sha256"]]).fetchone()
+        if seen or (world / "files" / f["name"]).exists():
+            raise HTTPException(status_code=409, detail="Already delivered.")
     file_ids = []
     for f in entry["files"]:
-        if conn.execute("SELECT 1 FROM files WHERE sha256 = ?", [f["sha256"]]).fetchone():
-            raise HTTPException(status_code=409, detail="Already delivered.")
         dest = world / "files" / f["name"]
         shutil.copyfile(world / f["path"], dest)
         fid = _next(conn, "files", "f")
