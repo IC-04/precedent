@@ -31,7 +31,7 @@
 **D4. The worker uses a real browser through an accessibility snapshot.** Each observation is a compact text snapshot of the page, with element refs (`[e14] button "Save draft"`), the URL and the title. Actions are `goto`, `click(ref)`, `fill(ref, text)`, `select(ref, option)`, `download(ref)` → local file, `read_file(path)` (PDF text) and `back`. Screenshots are taken after every action for the console and for evidence only. Why not pixel-based computer use: it is slower, costs more and is less reliable, and the JD rewards reliability. It is still real browser use. Pixel mode is listed under "next steps".
 
 **D5. The model sits behind one small interface; Gemini by default.** `worker/llm.py` defines `LLM.complete(system, messages, tools, force_tool=None) -> Reply(text, tool_calls, usage)`. There are three adapters:
-- `gemini`, the default. Google Gen AI SDK, function calling, `gemini-3.8-flash`.
+- `gemini`, the default. Google Gen AI SDK, function calling, `gemini-3.8-flash`; on repeated 503 or 429 it falls back through `PRECEDENT_MODEL_FALLBACK` (Flash only: Pro has no free-tier quota).
 - `openai_compat`. Any OpenAI-compatible server, so open-weight models (Qwen, Llama, Gemma) can run through Ollama, vLLM, OpenRouter or Groq.
 - `anthropic`. An optional extra, used only if the others prove insufficient.
 
