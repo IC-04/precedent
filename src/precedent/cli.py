@@ -75,7 +75,19 @@ def run(
 @app.command()
 def grade(seed: int = 7, task: str = "T1_figma", run: str = typer.Option(...)) -> None:
     """Grade a run against hidden truth (WS5 part A)."""
-    _todo("WS5_verify_eval")
+    from precedent.grader.grade import RUNS
+    from precedent.grader.grade import grade as grade_run
+
+    result = grade_run(seed, task, run)
+    for item in result.items:
+        line = f"{item.result:<8} {item.kind:<9} {item.name:<26} expected {item.expected!r}"
+        if item.result != "pass":
+            line += f", got {item.actual!r}"
+        typer.echo(line)
+    typer.echo(f"Overall: {result.overall}" + (f" ({result.note})" if result.note else ""))
+    (RUNS / run).mkdir(parents=True, exist_ok=True)
+    (RUNS / run / "grade.json").write_text(result.model_dump_json(indent=2))
+    raise typer.Exit(code={"pass": 0, "fail": 1}.get(result.overall, 2))
 
 
 @app.command("eval")
