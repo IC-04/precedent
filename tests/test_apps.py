@@ -161,3 +161,37 @@ def test_history_report_counts(world):
     client, _ = world
     r = client.get("/books/history?account=6400&min_amount=50000&from=2026-07-14")
     assert "Summary: 9 bills" in r.text
+
+
+def test_mail_search_and_attachment_links(world):
+    client, conn = world
+    r = client.get("/mail/?q=FIGMA")  # case-insensitive
+    assert "Invoice FIG-1842 from Figma" in r.text and "Your receipt from Figma" in r.text
+    mid = conn.execute("select id from mail_messages where subject like 'Invoice FIG-1842%'")
+    page = client.get(f"/mail/m/{mid.fetchone()[0]}").text
+    fid = _file_id(conn, "FIG-1842.pdf")
+    assert f'href="/drive/f/{fid}"' in page and "Download FIG-1842.pdf" in page
+
+
+def test_mail_paginates_at_25(world):
+    client, _ = world
+    first = client.get("/mail/").text
+    assert first.count('<li><a href="/mail/m/') == 25 and "Next page" in first
+    assert "Previous page" in client.get("/mail/?page=2").text
+
+
+def test_drive_viewer_shows_text_and_download_matches(world, tmp_path):
+    client, conn = world
+    fid = _file_id(conn, "FIG-1842.pdf")
+    view = client.get(f"/drive/f/{fid}").text
+    assert "Annual, 12 months prepaid" in view and "1,12,000" in view
+    data = client.get(f"/drive/f/{fid}/download").content
+    assert data == (tmp_path / "7" / "files" / "FIG-1842.pdf").read_bytes()
+    assert client.get("/drive/Policies").status_code == 200
+    assert "AP-SOP-v3.pdf" in client.get("/drive/Policies").text
+
+
+def test_drive_never_serves_hidden_or_held_files(world):
+    client, _ = world
+    for url in ["/drive/f/..%2Fhidden.json", "/drive/held", "/drive/f/held%2FZL-0081.pdf"]:
+        assert client.get(url).status_code == 404

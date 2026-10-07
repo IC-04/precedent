@@ -7,7 +7,7 @@ from pathlib import Path
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 
-from precedent.apps import books
+from precedent.apps import books, drive, mail
 from precedent.world.db import WORLDS, world_dir
 
 
@@ -19,7 +19,8 @@ def create_app(seed: int, root: Path = WORLDS) -> FastAPI:
     app.state.world = world
     app.state.labels = {}  # field -> label override (scenario hook)
     app.state.drop_next = set()  # POST paths whose next response is dropped
-    app.include_router(books.router)
+    for module in (mail, books, drive):
+        app.include_router(module.router)
 
     @app.middleware("http")
     async def drop_response(request: Request, call_next):

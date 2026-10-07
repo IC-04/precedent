@@ -1,0 +1,10 @@
+{% extends "drive/base.html" %}
+{% block content %}
+{% if missing %}<p class="error" role="alert">Nothing found at "{{ missing }}".</p>{% endif %}
+<h1>Folders</h1>
+<div class="grid">
+{% for f in folders %}
+  <div class="card"><a href="/drive/{{ f.folder }}">{{ f.folder }}</a><small>{{ f.n }} files, last change {{ f.latest[:10] }}</small></div>
+{% endfor %}
+</div>
+{% endblock %}

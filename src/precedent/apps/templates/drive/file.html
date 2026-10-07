@@ -1,0 +1,15 @@
+{% extends "drive/base.html" %}
+{% block title %}{{ f.name }}{% endblock %}
+{% block content %}
+<div class="crumbs"><a href="/drive/">My drive</a> / <a href="/drive/{{ f.folder }}">{{ f.folder }}</a> / {{ f.name }}</div>
+<h1>{{ f.name }}</h1>
+<table>
+  <tr><th>File ID</th><td>{{ f.id }}</td></tr>
+  <tr><th>Uploaded</th><td>{{ f.uploaded_at.replace("T", " ") }} by {{ names.get(f.uploaded_by, f.uploaded_by or "Mail") }}</td></tr>
+  <tr><th>Size</th><td>{{ size }} bytes</td></tr>
+  <tr><th>SHA-256</th><td>{{ f.sha256 }}</td></tr>
+</table>
+<p><a href="/drive/f/{{ f.id }}/download">Download {{ f.name }}</a></p>
+<h2>Text of the file</h2>
+<pre class="text">{{ text }}</pre>
+{% endblock %}
