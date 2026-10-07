@@ -23,8 +23,9 @@ def world_dir(seed: int, root: Path = WORLDS) -> Path:
     return root / str(seed)
 
 
-def connect(path: Path | str) -> sqlite3.Connection:
-    conn = sqlite3.connect(path)
+def connect(path: Path | str, any_thread: bool = False) -> sqlite3.Connection:
+    """any_thread: the apps open one connection per request, used across threads."""
+    conn = sqlite3.connect(path, check_same_thread=not any_thread)
     conn.row_factory = sqlite3.Row
     return conn
 

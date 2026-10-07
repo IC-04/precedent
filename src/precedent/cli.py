@@ -29,7 +29,12 @@ def world(template: str = "northwind", seed: int = 7) -> None:
 @app.command()
 def apps(seed: int = 7, port: int = 8100) -> None:
     """Serve Mail, Books, Drive and Chat for a seed (WS2)."""
-    _todo("WS2_apps")
+    import uvicorn
+
+    from precedent.apps.server import create_app
+
+    typer.echo(f"Company apps for seed {seed} on http://localhost:{port}/mail/")
+    uvicorn.run(create_app(seed), host="127.0.0.1", port=port, log_level="warning")
 
 
 @app.command()

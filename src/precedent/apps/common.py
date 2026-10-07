@@ -9,6 +9,7 @@ from collections.abc import Iterator
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlencode
 
 from fastapi import Request
 from fastapi.responses import RedirectResponse
@@ -35,7 +36,7 @@ DONE = {
 
 
 def get_conn(request: Request) -> Iterator[sqlite3.Connection]:
-    conn = db.connect(request.app.state.world / "world.db")
+    conn = db.connect(request.app.state.world / "world.db", any_thread=True)
     try:
         yield conn
     finally:
@@ -49,16 +50,23 @@ def money(minor: int | None) -> str:
 
 
 templates.env.filters["money"] = money
+templates.env.filters["pairs"] = lambda xs: [(x, x) for x in xs]
 
 
-def render(request: Request, name: str, status: int = 200, **ctx: Any):
+def render(request: Request, name: str, code: int = 200, **ctx: Any):
     labels = request.app.state.labels
 
     def label(field: str, default: str) -> str:
         return labels.get(field, default)
 
-    ctx.update(banner=DONE.get(request.query_params.get("done", "")), label=label)
-    return templates.TemplateResponse(request, name, ctx, status_code=status)
+    def query(**changes: Any) -> str:
+        """The current query string with some keys replaced (for pager links)."""
+        params = {k: v for k, v in request.query_params.items() if k != "done"}
+        params.update({k: str(v) for k, v in changes.items()})
+        return urlencode(params)
+
+    ctx.update(banner=DONE.get(request.query_params.get("done", "")), label=label, query=query)
+    return templates.TemplateResponse(request, name, ctx, status_code=code)
 
 
 def redirect(url: str, done: str) -> RedirectResponse:

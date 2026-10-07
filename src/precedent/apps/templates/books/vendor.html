@@ -1,0 +1,36 @@
+{% extends "books/base.html" %}
+{% block title %}{{ vendor.name }}{% endblock %}
+{% block content %}
+<h1>Vendor {{ vendor.id }}: {{ vendor.name }}</h1>
+<dl class="record">
+  <dt>Status</dt><dd class="status">{{ vendor.status }}</dd>
+  <dt>Name</dt><dd>{{ vendor.name }}</dd>
+  <dt>Legal name</dt><dd>{{ vendor.legal_name or "" }}</dd>
+  <dt>Tax ID (GSTIN)</dt><dd>{{ vendor.tax_id or "Missing" }}</dd>
+  <dt>Email</dt><dd>{{ vendor.email or "" }}</dd>
+  <dt>Phone</dt><dd>{{ vendor.phone or "" }}</dd>
+  <dt>Address</dt><dd>{{ vendor.address or "" }}</dd>
+  <dt>Bank account</dt><dd>{% if vendor.bank_account %}{{ vendor.bank_account.split(" A/c ")[0] }}, account ending {{ vendor.bank_account[-4:] }}{% else %}Not set{% endif %}</dd>
+  <dt>Created</dt><dd>{{ vendor.created_at or "" }} by {{ names.get(vendor.created_by, vendor.created_by or "") }}</dd>
+  <dt>Bills</dt><dd><a href="/books/bills?vendor={{ vendor.id }}">{{ count }} bills</a></dd>
+</dl>
+<div class="actions">
+  <a href="/books/vendors/{{ vendor.id }}/edit">Edit vendor</a>
+  {% if vendor.status != "retired" %}
+  <form method="post" action="/books/vendors/{{ vendor.id }}/retire"><button class="secondary" type="submit">Retire vendor</button></form>
+  {% endif %}
+</div>
+<h2>Recent bills</h2>
+{% set rows = recent %}{% set show_notes = true %}
+<table>
+  <thead><tr><th>Bill</th><th>Invoice no.</th><th>Invoice date</th><th class="num">Amount</th><th>Account</th><th>Approver</th><th>Status</th><th>Notes</th></tr></thead>
+  <tbody>
+  {% for b in recent %}
+    <tr><td><a href="/books/bills/{{ b.id }}">{{ b.id }}</a></td><td>{{ b.invoice_no }}</td><td>{{ b.issue_date }}</td><td class="num">{{ b.currency }} {{ b.amount_minor | money }}</td><td>{{ b.account_code or "" }}</td><td>{{ names.get(b.approver_id, "") }}</td><td class="status">{{ b.status | replace("_", " ") }}</td><td>{{ b.notes or "" }}</td></tr>
+  {% else %}
+    <tr><td colspan="8">No bills for this vendor.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{{ m.activity(events) }}
+{% endblock %}

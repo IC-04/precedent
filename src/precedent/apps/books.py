@@ -176,14 +176,17 @@ def _bill_form(
     error: str | None = None,
     bill: Any = None,
     status: int = 200,
+    was: dict[str, Any] | None = None,
 ):
+    """`was` holds the values as first rendered; an edit form posts them back."""
     return render(
         request,
         "books/bill_form.html",
-        status=status,
+        code=status,
         values=values,
         error=error,
         bill=bill,
+        was=was,
         **_options(conn),
     )
 
@@ -254,7 +257,7 @@ def _bill_or_404(request: Request, conn: sqlite3.Connection, bid: str):
         return None, render(
             request,
             "books/message.html",
-            status=404,
+            code=404,
             title="Bill not found",
             text=f"There is no bill {bid}.",
         )
@@ -299,11 +302,12 @@ def bill_edit_form(request: Request, conn: Conn, bid: str):
         return render(
             request,
             "books/message.html",
-            status=409,
+            code=409,
             title="Bill is locked",
             text=f"{bid} is {bill['status']}. Only draft bills can be edited.",
         )
-    return _bill_form(request, conn, _bill_values(bill), bill=bill)
+    shown = _bill_values(bill)
+    return _bill_form(request, conn, shown, bill=bill, was={k: shown[k] for k in BILL_FIELDS})
 
 
 @router.post("/bills/{bid}/edit")
@@ -315,7 +319,7 @@ async def bill_update(request: Request, conn: Conn, bid: str):
         return render(
             request,
             "books/message.html",
-            status=409,
+            code=409,
             title="Bill is locked",
             text=f"{bid} is {bill['status']}. Only draft bills can be edited.",
         )
@@ -327,7 +331,7 @@ async def bill_update(request: Request, conn: Conn, bid: str):
         before = _blank_to_none({k: was[k] for k in BILL_FIELDS if k != "amount"})
         before["amount_minor"] = parse_amount(was["amount"]) if was["amount"] else None
     except ValueError as e:
-        return _bill_form(request, conn, values, error=str(e), bill=bill, status=400)
+        return _bill_form(request, conn, values, error=str(e), bill=bill, status=400, was=was)
     return _save(
         request,
         conn,
@@ -366,7 +370,7 @@ def _save(
         return render(
             request,
             "books/message.html",
-            status=409,
+            code=409,
             title="This record changed since you opened it",
             text="Someone else saved a change to the same field. Nothing was "
             "saved. Open the record again and re-apply your change. " + "; ".join(clash),
@@ -387,7 +391,7 @@ async def request_approval(request: Request, conn: Conn, bid: str):
         return render(
             request,
             "books/message.html",
-            status=409,
+            code=409,
             title="Approval not requested",
             text=f"{bid} is {bill['status']}. Approval can be requested for drafts.",
         )
@@ -395,7 +399,7 @@ async def request_approval(request: Request, conn: Conn, bid: str):
         return render(
             request,
             "books/message.html",
-            status=400,
+            code=400,
             title="Approval not requested",
             text="Choose an approver.",
             link=f"/books/bills/{bid}",
@@ -459,14 +463,16 @@ def _vendor_form(
     error: str | None = None,
     vendor: Any = None,
     status: int = 200,
+    was: dict[str, Any] | None = None,
 ):
     return render(
         request,
         "books/vendor_form.html",
-        status=status,
+        code=status,
         values=values,
         error=error,
         vendor=vendor,
+        was=was,
         statuses=VENDOR_STATUSES,
     )
 
@@ -504,7 +510,7 @@ def _vendor_or_404(request: Request, conn: sqlite3.Connection, vid: str):
         return None, render(
             request,
             "books/message.html",
-            status=404,
+            code=404,
             title="Vendor not found",
             text=f"There is no vendor {vid}.",
         )
@@ -536,7 +542,7 @@ def vendor_edit_form(request: Request, conn: Conn, vid: str):
     vendor, missing = _vendor_or_404(request, conn, vid)
     if missing:
         return missing
-    return _vendor_form(request, vendor, vendor=vendor)
+    return _vendor_form(request, vendor, vendor=vendor, was={k: vendor[k] for k in VENDOR_FIELDS})
 
 
 @router.post("/vendors/{vid}/edit")
@@ -550,7 +556,8 @@ async def vendor_update(request: Request, conn: Conn, vid: str):
     try:
         after = _parse_vendor(values)
     except ValueError as e:
-        return _vendor_form(request, values, error=str(e), vendor=vendor, status=400)
+        was = {k: str(form.get(f"was__{k}", "")) for k in VENDOR_FIELDS}
+        return _vendor_form(request, values, error=str(e), vendor=vendor, status=400, was=was)
     return _save(
         request,
         conn,

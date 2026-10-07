@@ -1,0 +1,30 @@
+{% extends "books/base.html" %}
+{% block title %}Bills{% endblock %}
+{% block content %}
+<h1>Bills</h1>
+<form class="filters" method="get" action="/books/bills" role="search">
+  {{ m.input("q", "Search", f.q, hint="") }}
+  <div class="field"><label for="f-vendor">Vendor</label>
+    <select id="f-vendor" name="vendor"><option value="">Any vendor</option>
+      {% for v in vendors %}<option value="{{ v.id }}"{% if v.id == f.vendor %} selected{% endif %}>{{ v.name }} ({{ v.id }})</option>{% endfor %}
+    </select></div>
+  <div class="field"><label for="f-account">Account</label>
+    <select id="f-account" name="account"><option value="">Any account</option>
+      {% for a in accounts %}<option value="{{ a.code }}"{% if a.code == f.account %} selected{% endif %}>{{ a.code }} {{ a.name }}</option>{% endfor %}
+    </select></div>
+  <div class="field"><label for="f-approver">Approver</label>
+    <select id="f-approver" name="approver"><option value="">Any approver</option>
+      {% for e in employees %}<option value="{{ e.id }}"{% if e.id == f.approver %} selected{% endif %}>{{ e.name }}</option>{% endfor %}
+    </select></div>
+  <div class="field"><label for="f-status">Status</label>
+    <select id="f-status" name="status"><option value="">Any status</option>
+      {% for s in ["draft", "pending_approval", "approved", "paid"] %}<option value="{{ s }}"{% if s == f.status %} selected{% endif %}>{{ s | replace("_", " ") }}</option>{% endfor %}
+    </select></div>
+  {{ m.input("from", "Invoice date from", f["from"], type="date") }}
+  {{ m.input("to", "Invoice date to", f.to, type="date") }}
+  {{ m.input("min_amount", "Amount above", f.min_amount) }}
+  <button type="submit">Search bills</button>
+</form>
+{% include "books/_bill_table.html" %}
+{{ m.pager(page, has_next) }}
+{% endblock %}

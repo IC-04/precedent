@@ -1,0 +1,55 @@
+{# Shared form pieces. Every input has a visible label and a stable name. #}
+
+{% macro input(name, text, value="", type="text", required=false, hint="") -%}
+<div class="field">
+  <label for="f-{{ name }}">{{ label(name, text) }}</label>
+  <input id="f-{{ name }}" name="{{ name }}" type="{{ type }}" value="{{ value if value is not none else '' }}"{% if required %} required{% endif %}>
+  {% if hint %}<span class="hint">{{ hint }}</span>{% endif %}
+</div>
+{%- endmacro %}
+
+{% macro textarea(name, text, value="") -%}
+<div class="field">
+  <label for="f-{{ name }}">{{ label(name, text) }}</label>
+  <textarea id="f-{{ name }}" name="{{ name }}" rows="3">{{ value if value is not none else '' }}</textarea>
+</div>
+{%- endmacro %}
+
+{% macro select(name, text, options, value="", blank="") -%}
+{# options: list of (value, text) pairs #}
+<div class="field">
+  <label for="f-{{ name }}">{{ label(name, text) }}</label>
+  <select id="f-{{ name }}" name="{{ name }}">
+    {% if blank %}<option value="">{{ blank }}</option>{% endif %}
+    {% for v, t in options %}<option value="{{ v }}"{% if v == value %} selected{% endif %}>{{ t }}</option>{% endfor %}
+  </select>
+</div>
+{%- endmacro %}
+
+{% macro was(fields, values) -%}
+{# The values as rendered, so the server can tell a colleague's later change from ours. #}
+{% for f in fields %}<input type="hidden" name="was__{{ f }}" value="{{ values.get(f) if values.get(f) is not none else '' }}">{% endfor %}
+{%- endmacro %}
+
+{% macro pager(page, has_next) -%}
+<nav class="pager" aria-label="Pages">
+  {% if page > 1 %}<a href="?{{ query(page=page - 1) }}">Previous page</a>{% endif %}
+  <span>Page {{ page }}</span>
+  {% if has_next %}<a href="?{{ query(page=page + 1) }}">Next page</a>{% else %}<span>End of list</span>{% endif %}
+</nav>
+{%- endmacro %}
+
+{% macro activity(events) -%}
+<section class="activity">
+  <h2>Activity</h2>
+  {% if not events %}<p>No activity recorded.</p>{% endif %}
+  <table>
+    <thead><tr><th>When</th><th>Who</th><th>Action</th><th>Changes</th></tr></thead>
+    <tbody>
+    {% for e in events %}
+      <tr><td>{{ e.ts }}</td><td>{{ e.actor }}</td><td>{{ e.action }}</td><td>{{ e.changed | join("; ") }}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</section>
+{%- endmacro %}

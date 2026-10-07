@@ -1,0 +1,31 @@
+{% extends "books/base.html" %}
+{% block title %}{% if bill %}Edit {{ bill.id }}{% else %}New bill{% endif %}{% endblock %}
+{% block content %}
+<h1>{% if bill %}Edit bill {{ bill.id }}{% else %}New bill{% endif %}</h1>
+{% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+<form method="post" action="{% if bill %}/books/bills/{{ bill.id }}/edit{% else %}/books/bills/new{% endif %}">
+  <div class="field"><label for="f-vendor_id">{{ label("vendor_id", "Vendor") }}</label>
+    <select id="f-vendor_id" name="vendor_id"><option value="">Choose a vendor</option>
+      {% for v in vendors %}<option value="{{ v.id }}"{% if v.id == values.vendor_id %} selected{% endif %}>{{ v.name }} ({{ v.id }}){% if v.status != "active" %}, {{ v.status }}{% endif %}</option>{% endfor %}
+    </select></div>
+  {{ m.input("invoice_no", "Invoice number", values.invoice_no, required=true) }}
+  {{ m.input("amount", "Amount", values.amount, required=true, hint="For example 1,12,000 or 112000.50") }}
+  {{ m.input("currency", "Currency", values.currency or "INR") }}
+  {{ m.input("issue_date", "Invoice date", values.issue_date, type="date", required=true) }}
+  {{ m.input("due_date", "Due date", values.due_date, type="date", required=true) }}
+  <div class="field"><label for="f-account_code">{{ label("account_code", "Account") }}</label>
+    <select id="f-account_code" name="account_code"><option value="">Choose an account</option>
+      {% for a in accounts %}<option value="{{ a.code }}"{% if a.code == values.account_code %} selected{% endif %}>{{ a.code }} {{ a.name }}</option>{% endfor %}
+    </select></div>
+  <div class="field"><label for="f-attachment_file_id">{{ label("attachment_file_id", "Attachment") }}</label>
+    <select id="f-attachment_file_id" name="attachment_file_id"><option value="">No attachment</option>
+      {% for f in files %}<option value="{{ f.id }}"{% if f.id == values.attachment_file_id %} selected{% endif %}>{{ f.name }} ({{ f.folder }})</option>{% endfor %}
+    </select></div>
+  {{ m.textarea("notes", "Notes", values.notes) }}
+  {% if was %}{{ m.was(was.keys() | list, was) }}{% endif %}
+  <div class="actions">
+    <button type="submit">{% if bill %}Save changes{% else %}Save draft{% endif %}</button>
+    <a href="{% if bill %}/books/bills/{{ bill.id }}{% else %}/books/bills{% endif %}">Cancel</a>
+  </div>
+</form>
+{% endblock %}

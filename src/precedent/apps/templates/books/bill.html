@@ -1,0 +1,45 @@
+{% extends "books/base.html" %}
+{% block title %}{{ bill.id }}{% endblock %}
+{% block content %}
+<h1>Bill {{ bill.id }}</h1>
+<dl class="record">
+  <dt>Status</dt><dd class="status">{{ bill.status | replace("_", " ") }}</dd>
+  <dt>Vendor</dt><dd><a href="/books/vendors/{{ bill.vendor_id }}">{{ vendor.name }} ({{ bill.vendor_id }})</a></dd>
+  <dt>Invoice number</dt><dd>{{ bill.invoice_no }}</dd>
+  <dt>Amount</dt><dd>{{ bill.currency }} {{ bill.amount_minor | money }}</dd>
+  <dt>{{ label("issue_date", "Invoice date") }}</dt><dd>{{ bill.issue_date }}</dd>
+  <dt>{{ label("due_date", "Due date") }}</dt><dd>{{ bill.due_date }}</dd>
+  <dt>Account</dt><dd>{% if account %}{{ account.code }} {{ account.name }}{% else %}Not set{% endif %}</dd>
+  <dt>Approver</dt><dd>{{ names.get(bill.approver_id, "Not requested") }}</dd>
+  <dt>Attachment</dt><dd>{% if file %}<a href="/drive/f/{{ file.id }}">{{ file.name }}</a>{% else %}None{% endif %}</dd>
+  <dt>Notes</dt><dd>{{ bill.notes or "" }}</dd>
+  <dt>Created</dt><dd>{{ bill.created_at }} by {{ names.get(bill.created_by, bill.created_by) }}</dd>
+</dl>
+
+{% if bill.status == "draft" %}
+<div class="actions">
+  <a href="/books/bills/{{ bill.id }}/edit">Edit bill</a>
+</div>
+<h2>Request approval</h2>
+<form method="post" action="/books/bills/{{ bill.id }}/request-approval">
+  <div class="field"><label for="f-approver_id">Approver</label>
+    <select id="f-approver_id" name="approver_id"><option value="">Choose an approver</option>
+      {% for e in employees %}<option value="{{ e.id }}">{{ e.name }}, {{ e.role }}</option>{% endfor %}
+    </select></div>
+  <button type="submit">Request approval</button>
+</form>
+{% endif %}
+
+<h2>Approvals</h2>
+<table>
+  <thead><tr><th>Approver</th><th>Status</th><th>Requested</th><th>Decided</th></tr></thead>
+  <tbody>
+  {% for a in approvals %}
+    <tr><td>{{ names.get(a.approver_id, a.approver_id) }}</td><td class="status">{{ a.status }}</td><td>{{ a.requested_at }} by {{ names.get(a.requested_by, a.requested_by) }}</td><td>{{ a.decided_at or "" }}</td></tr>
+  {% else %}
+    <tr><td colspan="4">No approval requested.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{{ m.activity(events) }}
+{% endblock %}

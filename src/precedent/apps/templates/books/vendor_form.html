@@ -1,0 +1,21 @@
+{% extends "books/base.html" %}
+{% block title %}{% if vendor %}Edit {{ vendor.id }}{% else %}New vendor{% endif %}{% endblock %}
+{% block content %}
+<h1>{% if vendor %}Edit vendor {{ vendor.id }}{% else %}New vendor{% endif %}</h1>
+{% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+<form method="post" action="{% if vendor %}/books/vendors/{{ vendor.id }}/edit{% else %}/books/vendors/new{% endif %}">
+  {{ m.input("name", "Name", values.name, required=true) }}
+  {{ m.input("legal_name", "Legal name", values.legal_name) }}
+  {{ m.input("tax_id", "Tax ID (GSTIN)", values.tax_id) }}
+  {{ m.input("email", "Email", values.email, type="email") }}
+  {{ m.input("phone", "Phone", values.phone) }}
+  {{ m.input("address", "Address", values.address) }}
+  {{ m.input("bank_account", "Bank account", values.bank_account) }}
+  {{ m.select("status", "Status", statuses | pairs, values.status) }}
+  {% if was %}{{ m.was(was.keys() | list, was) }}{% endif %}
+  <div class="actions">
+    <button type="submit">{% if vendor %}Save changes{% else %}Create vendor{% endif %}</button>
+    <a href="{% if vendor %}/books/vendors/{{ vendor.id }}{% else %}/books/vendors{% endif %}">Cancel</a>
+  </div>
+</form>
+{% endblock %}
