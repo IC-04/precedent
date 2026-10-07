@@ -156,30 +156,48 @@ def browser_toolset(gateway_url: str, out_dir: Path, headed: bool) -> McpToolset
 
 
 class Fallback:
-    """When a model keeps failing (overloaded or rate-limited), move to the next one and stay."""
+    """When a model keeps failing (overloaded or rate-limited), try the others.
 
-    def __init__(self, names: list[str], log: EventLog):
-        self.names, self.log = list(names), log
+    Models are tried in order (the fallbacks, then the primary again), for up to ROUNDS
+    passes with a growing pause, because Flash capacity changes minute to minute. The
+    model that answers is kept for the rest of the run. Every switch is logged.
+    """
+
+    ROUNDS = 3
+
+    def __init__(self, primary: str, names: list[str], log: EventLog):
+        self.order = [n for n in names if n != primary] + [primary]
+        self.log = log
         self.agent: LlmAgent | None = None
 
     async def __call__(self, callback_context, llm_request, error) -> Any:
-        while self.names:
-            name = self.names.pop(0)
-            self.log.emit(
-                "failure",
-                kind="tool",
-                detail=f"model error: {str(error)[:200]}",
-                response=f"switching to {name} for the rest of the run",
-            )
-            try:
-                llm_request.model = name
-                model = make_model(name)
-                async for response in model.generate_content_async(llm_request):
-                    if self.agent is not None:
-                        self.agent.model = model
-                    return response
-            except Exception as e:  # noqa: BLE001 - try the next model
-                error = e
+        for round_no in range(self.ROUNDS):
+            if round_no:
+                await asyncio.sleep(10 * round_no)
+            for name in self.order:
+                if name == llm_request.model and round_no == 0:
+                    continue  # it has just failed
+                try:
+                    llm_request.model = name
+                    model = make_model(name)
+                    async for response in model.generate_content_async(llm_request):
+                        if self.agent is not None:
+                            self.agent.model = model
+                        self.log.emit(
+                            "failure",
+                            kind="tool",
+                            detail=f"model error: {str(error)[:200]}",
+                            response=f"answered by {name}; using it from now on",
+                        )
+                        return response
+                except Exception as e:  # noqa: BLE001 - try the next model
+                    error = e
+        self.log.emit(
+            "failure",
+            kind="tool",
+            detail=f"model error: {str(error)[:200]}",
+            response=f"no model answered after {self.ROUNDS} rounds",
+        )
         return None
 
 
@@ -219,11 +237,13 @@ async def run(cfg: RunConfig) -> dict[str, Any]:
     base = gateway.start()
     (log.dir / "mcp").mkdir(exist_ok=True)
     toolset = browser_toolset(base, log.dir / "mcp", cfg.headed)
-    fallback = Fallback(cfg.fallbacks, log)
+    fallback = Fallback(cfg.model, cfg.fallbacks, log)
     outcome, error = "unknown", None
     try:
         goal = await write_goal(
-            cfg.request, make_model(cfg.strong), on_model_error=Fallback(cfg.fallbacks, log)
+            cfg.request,
+            make_model(cfg.strong),
+            on_model_error=Fallback(cfg.strong, cfg.fallbacks, log),
         )
         log.emit("goal_contract", **goal.model_dump())
         context = "Not built yet (WS4). Read the company's policies and history yourself."
