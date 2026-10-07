@@ -8,6 +8,7 @@ eval/results/
 .pytest_cache/
 .ruff_cache/
 .DS_Store
+node_modules/
 
 # Local AI-assistant instructions
 CLAUDE.md

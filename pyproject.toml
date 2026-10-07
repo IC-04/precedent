@@ -19,6 +19,7 @@ dependencies = [
   "httpx>=0.27",
   "python-dotenv>=1.0",
   "sse-starlette>=2.1",
+  "google-adk[mcp]>=2.11,<3",
 ]
 
 [project.optional-dependencies]

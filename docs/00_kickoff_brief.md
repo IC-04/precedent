@@ -2,6 +2,8 @@
 
 Status: engineering starts 7 October 2026. The product spec is `Precedent_Product_Vision_North_Star_v2.pdf`; this brief turns it into a build.
 
+> These documents are a guiding force, not the final ground truth. When the build or a real run teaches us something different, we update the spec and log the reason in `decisions_log.md`.
+
 ## Deadline
 
 The JD says **9 October, 5:30 PM IST**. We were told **12 October, 11:59 PM**. The plan is built so a complete, submittable demo exists by the end of 8 October. Days after that make it stronger; they are not needed for a submission. If the earlier date holds, we submit on the morning of 9 October.

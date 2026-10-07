@@ -7,6 +7,7 @@ WORKER ?= precedent
 
 setup:
 	uv sync
+	npm ci --no-fund --no-audit
 	uv run playwright install chromium
 	@test -f .env || cp .env.example .env
 	@uv run python -c "import re, secrets, pathlib; p = pathlib.Path('.env'); s = p.read_text(); p.write_text(re.sub(r'(?m)^PRECEDENT_SCENARIO_TOKEN=change-me.*$$', 'PRECEDENT_SCENARIO_TOKEN=' + secrets.token_urlsafe(16), s))"

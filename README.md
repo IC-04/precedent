@@ -7,7 +7,7 @@ An autonomous AI worker that learns how a company operates from its own records,
 ## Quick start
 
 ```
-make setup            # uv sync + Playwright Chromium + .env
+make setup            # uv sync, npm ci (Playwright MCP; needs Node 18+), Chromium, .env
 make world SEED=7     # generate the Northwind company
 make apps SEED=7      # Mail, Books, Drive, Chat on http://localhost:8100
 make console          # product screen on http://localhost:8000

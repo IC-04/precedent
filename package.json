@@ -1,0 +1,8 @@
+{
+  "name": "precedent-browser",
+  "private": true,
+  "description": "Pinned Playwright MCP server used by the worker's browser.",
+  "dependencies": {
+    "@playwright/mcp": "0.0.83"
+  }
+}
