@@ -51,11 +51,25 @@ def run(
     task: str = typer.Option(..., help="Natural-language request"),
     seed: int = 7,
     worker: str = typer.Option("precedent", help="precedent | baseline"),
-    resume: str | None = typer.Option(None, help="Resume an unfinished task id"),
+    resume: bool = typer.Option(False, help="Continue an unfinished run of the same task"),
     headed: bool = False,
 ) -> None:
     """Run the worker on a request (WS3)."""
-    _todo("WS3_worker_loop")
+    import asyncio
+
+    from precedent.worker.runner import RunConfig
+    from precedent.worker.runner import run as run_worker
+
+    cfg = RunConfig(request=task, seed=seed, worker=worker, headed=headed, resume=bool(resume))
+    summary = asyncio.run(run_worker(cfg))
+    claimed = (summary["claimed"] or {}).get("claimed", "none")
+    typer.echo(
+        f"Run {summary['run_id']}: outcome {summary['outcome']} (Ava claimed {claimed}), "
+        f"{summary['steps']} steps, {summary['tokens_in'] + summary['tokens_out']} tokens, "
+        f"{summary['seconds']} s. Events: {summary['dir']}/events.jsonl"
+    )
+    if summary["error"]:
+        typer.secho(f"Error: {summary['error']}", fg=typer.colors.RED)
 
 
 @app.command()

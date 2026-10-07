@@ -5,10 +5,18 @@ from __future__ import annotations
 from pathlib import Path
 
 from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse
 
 from precedent.apps import books, chat, drive, mail, scenario
 from precedent.world.db import WORLDS, world_dir
+
+LAUNCHER = """<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Apps</title>
+<style>body{font:15px/1.5 system-ui,sans-serif;margin:40px}a{display:block;margin:8px 0}</style>
+</head><body><h1>Company apps</h1><p>Signed in as Ava (AP).</p>
+<nav aria-label="Apps"><a href="/mail/">Mail: the accounts payable inbox</a>
+<a href="/books/">Books: vendors, bills, approvals and history</a>
+<a href="/drive/">Drive: policies and documents</a>
+<a href="/chat/">Chat: team channels</a></nav></body></html>"""
 
 
 def create_app(seed: int, root: Path = WORLDS) -> FastAPI:
@@ -32,8 +40,9 @@ def create_app(seed: int, root: Path = WORLDS) -> FastAPI:
             return HTMLResponse("<h1>502 Bad Gateway</h1>", status_code=502)
         return await call_next(request)
 
-    @app.get("/")
-    def home() -> RedirectResponse:
-        return RedirectResponse("/mail/")
+    @app.get("/", response_class=HTMLResponse)
+    def home() -> str:
+        """The company launcher: an employee's starting page with a link to each app."""
+        return LAUNCHER
 
     return app

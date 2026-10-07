@@ -25,11 +25,15 @@ def test_worker_has_no_company_specific_names():
             assert word not in text, f"{path.name} hard-codes {word!r}"
 
 
-def test_only_llm_module_imports_provider_sdks():
-    sdks = ["import anthropic", "from anthropic", "from google import genai", "import openai",
-            "from openai"]
+def test_only_runner_and_goal_import_model_sdks():
+    """ADK and the model SDKs stay in runner.py and goal.py (architecture D2 and D5)."""
+    sdks = ["anthropic", "google.adk", "google.genai", "from google import genai", "openai"]
+    allowed = {"runner.py", "goal.py"}
     for path, text in _worker_sources():
-        if path.name == "llm.py":
+        if path.name in allowed:
             continue
+        imports = [line for line in text.splitlines() if line.startswith(("import ", "from "))]
         for s in sdks:
-            assert s not in text, f"{path.name} imports a provider SDK; go through worker/llm.py"
+            assert not any(s in line for line in imports), (
+                f"{path.name} imports {s}; only {sorted(allowed)} may"
+            )
