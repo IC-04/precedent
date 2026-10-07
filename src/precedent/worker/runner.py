@@ -7,11 +7,13 @@ verifier (WS5). The browser reaches the company only through the gateway.
 
 from __future__ import annotations
 
+import asyncio
 import os
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+from google import genai
 from google.adk.agents import LlmAgent
 from google.adk.models.google_llm import Gemini
 from google.adk.runners import InMemoryRunner
@@ -96,9 +98,16 @@ class RunConfig:
     runs_root: Path = RUNS
 
 
+MODEL_TIMEOUT_MS = int(os.getenv("PRECEDENT_MODEL_TIMEOUT_MS", "60000"))
+
+
 def make_model(name: str) -> Gemini:
+    """A Gemini model whose requests time out: an overloaded call fails over, never hangs."""
     retry = types.HttpRetryOptions(attempts=2, initial_delay=2, max_delay=10)
-    return Gemini(model=name, retry_options=retry)
+    client = genai.Client(
+        http_options=types.HttpOptions(timeout=MODEL_TIMEOUT_MS, retry_options=retry)
+    )
+    return Gemini(model=name, client=client)
 
 
 def chrome_path() -> str:
@@ -240,7 +249,12 @@ async def run(cfg: RunConfig) -> dict[str, Any]:
             ),
         )
         fallback.agent = agent
-        await _drive(agent, guard, cfg, previous)
+        try:
+            await asyncio.wait_for(
+                _drive(agent, guard, cfg, previous), timeout=cfg.budgets.seconds + 60
+            )
+        except TimeoutError:
+            guard.stop_reason = guard.stop_reason or f"time budget of {cfg.budgets.seconds} s used"
         if guard.stop_reason:
             log.emit("note", kind="stopped", reason=guard.stop_reason)
         log.emit("note", kind="verify", text="verifier not built yet (WS5); outcome is unknown")
