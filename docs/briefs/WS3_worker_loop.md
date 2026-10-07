@@ -50,3 +50,7 @@ It should say: you are Ava, an AP worker at <company>. Work only through the app
 - Use `page.wait_for_load_state("networkidle")` after every action. The apps are server-rendered, so this is reliable.
 - The model should see refs and labels, never CSS selectors.
 - Log the model's short visible reasoning in `note` events if useful, but the *decision records* are what the console shows.
+- Found while testing the WS2 apps in a real browser (7 October):
+  - Collapse `<select>` options in the snapshot: show the label, the selected value and the option count (for example `[e5] combobox "Vendor" value="" (41 options)`), and list the options only for the element the model is about to use. The Books filters alone add about 120 option lines.
+  - After a click that submits a form, wait for the navigation to finish before snapshotting. Reading too early returns the old form page, which looks like a failed write.
+  - The apps' scenario token default in `.env.example` is `change-me`; the worker's browser must never send `X-Scenario-Token`.
