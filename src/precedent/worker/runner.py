@@ -524,7 +524,7 @@ async def _prepare_context(cfg: RunConfig, guard: Guard, log: EventLog, base: st
             on_model_error=Fallback(cfg.strong, cfg.fallbacks, log),
             after_model=guard.after_model,
             name="context",
-            thinking="HIGH",
+            thinking="MEDIUM",
         )
         precedents = ctx.validate(candidates.precedents, evidence)
         for p in precedents:
