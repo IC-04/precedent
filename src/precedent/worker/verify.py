@@ -126,7 +126,7 @@ def _result(
 
 def _equal(actual: str | None, expect: str | None) -> bool | None:
     """Whole-token match, never a substring: '1400' matches '1400 Prepaid expenses' and
-    'V-112' matches 'Figma (V-112)', but 'x' matches nothing. Amounts compare as numbers."""
+    'V-9' matches 'Acme (V-9)', but 'x' matches nothing. Amounts compare as numbers."""
     if expect is None or actual is None:
         return None
     if _tokens(actual) == _tokens(expect):
