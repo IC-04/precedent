@@ -19,6 +19,7 @@ import httpx
 from precedent.contracts import FailureKind
 from precedent.worker.failures import WriteGate
 
+AGENT_HEADER = "X-Precedent-Agent"  # lets the apps leave out links meant for human viewers
 HOP_HEADERS = {
     "host",
     "content-length",
@@ -104,6 +105,7 @@ class Gateway:
                 _page("Save refused by Ava's safety gate", refused),
             )
         clean = {k: v for k, v in headers.items() if k.lower() not in HOP_HEADERS}
+        clean[AGENT_HEADER] = "ava"
         try:
             r = self.client.request(method, self.upstream + path, headers=clean, content=body)
         except httpx.TimeoutException:
@@ -122,6 +124,7 @@ class Gateway:
 
     def _pass_through(self, method: str, path: str, headers: dict[str, str], body: bytes):
         clean = {k: v for k, v in headers.items() if k.lower() not in HOP_HEADERS}
+        clean[AGENT_HEADER] = "ava"
         try:
             r = self.client.request(method, self.upstream + path, headers=clean, content=body)
         except httpx.HTTPError:

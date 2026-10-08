@@ -9,9 +9,11 @@ from __future__ import annotations
 
 import asyncio
 import inspect
+import re
 import sys
 import threading
 import time
+from collections import Counter
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
@@ -23,7 +25,9 @@ from precedent.worker.events import EventLog
 from precedent.worker.failures import ADVICE, WriteGate, classify_tool_error
 from precedent.worker.gateway import Exchange
 
-KEEP_SNAPSHOTS = 3
+KEEP_SNAPSHOTS = 2
+REPEAT_VISITS = 3  # opening the same page this many times earns a nudge
+READS_WITHOUT_PROGRESS = 12  # browser steps with no decision or save earn a nudge
 OLD_PREFIX = OLD.split("{", 1)[0]
 OUTCOMES = ("pass", "fail", "blocked", "unknown")
 
@@ -81,6 +85,10 @@ class Guard:
         self.condition_ids: set[str] = set()
         self.last_url: str | None = None
         self.last_title: str | None = None
+        self.last_snapshot = ""
+        self.visits: Counter[str] = Counter()
+        self.facts: list[str] = []
+        self.since_progress = 0
 
     # ------------------------------------------------------------------ Ava's tools
     def record_decision(
@@ -102,6 +110,7 @@ class Guard:
             check=check or None,
             sources=sources,
         )
+        self.since_progress = 0
         with self.lock:
             result = self.gate.on_decision(sources)
         self.log.emit("decision_record", **record.model_dump(), gate=result)
@@ -109,6 +118,8 @@ class Guard:
 
     def update_plan(self, steps: list[str], reason: str = "") -> dict:
         """Set or change your plan. Each step is 'what you will do | what you expect to see'."""
+        if not steps or any(len(s.partition("|")[0].split()) < 3 for s in steps):
+            return {"error": "Each step must say what you will do in at least a few words."}
         plan = []
         for i, step in enumerate(steps, 1):
             intent, _, expect = step.partition("|")
@@ -157,6 +168,18 @@ class Guard:
         )
         return {"result": "Progress recorded. A fresh goal check is still required."}
 
+    def remember(self, fact: str, source: str) -> dict:
+        """Keep a fact you will need later (an amount, a due date, a record id, a rule) with
+        where you read it. Remembered facts are shown to you every turn, so you need not
+        reopen the page."""
+        if not fact.strip() or not source.strip():
+            return {"error": "Give the fact and where you read it."}
+        entry = f"{fact.strip()} (from {source.strip()})"
+        if entry not in self.facts:
+            self.facts.append(entry)
+            self.log.emit("note", kind="fact", fact=fact.strip(), source=source.strip())
+        return {"result": f"Remembered. {len(self.facts)} facts kept."}
+
     async def ask_human(self, question: str, options: list[str]) -> dict:
         """Ask one specific question when no source governs a choice. Name the options."""
         self.questions += 1
@@ -184,6 +207,7 @@ class Guard:
         return [
             self.record_decision,
             self.update_plan,
+            self.remember,
             self.report_plan_step,
             self.report_goal_progress,
             self.ask_human,
@@ -229,9 +253,14 @@ class Guard:
             kind = classify_tool_error(text)
             self.log.emit("failure", kind=kind.value, detail=text[:300], response=ADVICE[kind])
             notes.append(ADVICE[kind])
+        if is_error and tool.name == "browser_select_option":
+            notes.append(exact_options(self.last_snapshot, args.get("target", "")))
         notes += self._drain_exchanges()
         text = inline_snapshot(text, self.mcp_dir)
+        if "```yaml" in text:
+            self.last_snapshot = text
         url, title = page_of(text)
+        notes += self._stall_notes(url)
         url_current = url is not None
         self.last_url = url or self.last_url
         self.last_title = title or self.last_title
@@ -248,6 +277,44 @@ class Guard:
         if notes:
             text += "\n### Notes from Ava's safety checks\n" + "\n".join(f"- {n}" for n in notes)
         return {"content": [{"type": "text", "text": text}], "isError": is_error}
+
+    def _stall_notes(self, url: str | None) -> list[str]:
+        """Code-side nudges when the worker reads in circles; they never block anything."""
+        notes = []
+        self.since_progress += 1
+        if url:
+            self.visits[url] += 1
+            if self.visits[url] == REPEAT_VISITS:
+                notes.append(
+                    "You have opened this page three times. Use what you read (or "
+                    "remember it) and move to the next step of your plan."
+                )
+        if self.since_progress == READS_WITHOUT_PROGRESS:
+            notes.append(
+                f"{READS_WITHOUT_PROGRESS} browser steps without a decision or save. "
+                "If you have the facts, record a decision and fill the form; if "
+                "something is missing, say what and finish."
+            )
+        return notes
+
+    def run_state(self) -> str:
+        """What the model is reminded of every turn, written by code from what happened."""
+        used = (
+            f"steps {self.steps}/{self.budgets.steps}, tokens "
+            f"{self.tokens_in + self.tokens_out}/{self.budgets.tokens}, seconds "
+            f"{int(time.monotonic() - self.started)}/{self.budgets.seconds}"
+        )
+        plan = "\n".join(f"- {s['id']} [{s['status']}] {s['intent']}" for s in self.plan)
+        pages = "\n".join(f"- {u} (opened {n}x)" for u, n in self.visits.most_common(12))
+        facts = "\n".join(f"- {f}" for f in self.facts[-20:])
+        return (
+            "[Run state, written by the system]\n"
+            f"Budget used: {used}\n"
+            f"Plan:\n{plan or '- (no plan yet: call update_plan first)'}\n"
+            f"Pages already read (do not reopen unless something changed):\n"
+            f"{pages or '- none'}\n"
+            f"Facts you have remembered:\n{facts or '- none'}"
+        )
 
     def on_tool_error(self, tool, args: dict, tool_context, error: Exception) -> dict:
         """A tool raised instead of answering: classify it and tell the model what to do."""
@@ -269,6 +336,7 @@ class Guard:
                 )
                 notes.append(f"Your save was refused before it reached the app: {ex.refused}")
             elif ex.method != "GET" and ex.status and 200 <= ex.status < 400:
+                self.since_progress = 0
                 self.log.emit(
                     "note",
                     kind="app_effect",
@@ -288,8 +356,11 @@ class Guard:
         return notes
 
     def before_model(self, callback_context, llm_request) -> None:
-        """Keep the last few page snapshots in full; older ones become one line."""
+        """Remind the model of the run state; keep the newest snapshots, shrink older ones."""
         self.log.emit("note", kind="model_wait", text="Waiting for the model’s next action")
+        config = getattr(llm_request, "config", None)
+        if config is not None and isinstance(config.system_instruction, str):
+            config.system_instruction += "\n\n" + self.run_state()
         seen = 0
         for content in reversed(llm_request.contents or []):
             for part in content.parts or []:
@@ -313,3 +384,18 @@ class Guard:
 
     def seconds(self) -> float:
         return round(time.monotonic() - self.started, 1)
+
+
+def exact_options(snapshot: str, target: str) -> str:
+    """The exact option texts of the dropdown the model tried, from the last page it saw."""
+    lines = snapshot.splitlines()
+    for i, line in enumerate(lines):
+        if f"[ref={target}]" in line and ("combobox" in line or "listbox" in line):
+            for nxt in lines[i + 1 : i + 3]:
+                m = re.search(r"options \(\d+, selected: \"[^\"]*\"\): (.*)", nxt)
+                if m:
+                    return (
+                        "Use one of these exact option texts (or the record id inside "
+                        f"them): {m.group(1)}"
+                    )
+    return "Take a fresh snapshot and copy the option text exactly as the list shows it."

@@ -50,6 +50,7 @@ BROWSER_TOOLS = [
     "browser_click",
     "browser_type",
     "browser_select_option",
+    "browser_fill_form",
     "browser_wait_for",
 ]
 
@@ -60,6 +61,11 @@ How you work:
 - First call update_plan with your steps, each as "what you will do | what you expect to see".
 - Report actual plan progress with report_plan_step. Use report_goal_progress to distinguish
   inferred choices and app-acknowledged writes; neither is fresh verification.
+- Keep facts you will need (amounts, dates, record ids, rules) with remember, so you never
+  need to reopen a page. The run state at the end of these instructions lists what you have
+  read and remembered, and the budget you have used.
+- Fill a form with one browser_fill_form call covering every field, then save. For a
+  dropdown use the option text exactly as the page lists it.
 - Read before you write. Before any save: search for an existing record by its business key
   (for example invoice number and vendor), check the goal contract, and call record_decision
   citing your sources (record ids, emails, document sections). A save without a recorded
@@ -535,7 +541,10 @@ async def run(cfg: RunConfig) -> dict[str, Any]:
     }
     from precedent.worker.receipt import write_receipt
 
-    write_receipt(log, cfg.request, guard.finished, summary)
+    try:
+        write_receipt(log, cfg.request, guard.finished, summary)
+    except Exception as e:  # noqa: BLE001 - a receipt failure must never hide run_finished
+        log.emit("note", kind="error", text=f"writing the receipt failed: {e}"[:500])
     log.emit("run_finished", **summary)
     return {**summary, "run_id": log.run_id, "claimed": guard.finished, "dir": str(log.dir)}
 

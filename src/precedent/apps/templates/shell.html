@@ -13,7 +13,7 @@
       {% for name,path,icon in [('Overview','/','overview'),('Mail','/mail/','mail'),('Books','/books/bills','books'),('Drive','/drive/','drive'),('Chat','/chat/','chat')] %}
       <a href="{{ path }}" title="{{ name }}"{% if name == app_name %} class="on" aria-current="page"{% endif %}><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#{{ icon }}"/></svg><span class="nav-text">{{ name }}</span></a>
       {% endfor %}
-      <div class="nav-caption separated">Agent</div><a href="{{ console_url }}" title="Ava's tasks"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#tasks"/></svg><span class="nav-text">Ava’s tasks <span class="nav-external">↗</span></span></a>
+      {% if console_url %}<div class="nav-caption separated">Agent</div><a href="{{ console_url }}" title="Ava's tasks"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#tasks"/></svg><span class="nav-text">Ava’s tasks <span class="nav-external">↗</span></span></a>{% endif %}
     </nav>
     <div class="identity"><span class="initial" aria-hidden="true">A</span><div class="identity-copy"><strong>Ava <span class="ai-tag">AI</span></strong><small>Accounts payable</small><small>Signed in as Ava (AP)</small></div></div>
   </aside>

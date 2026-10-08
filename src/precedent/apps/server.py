@@ -95,7 +95,10 @@ def create_app(seed: int, root: Path = WORLDS) -> FastAPI:
             connections.close()
 
     @app.get("/work-status")
-    async def work_status():
+    async def work_status(request: Request):
+        if request.headers.get("x-precedent-agent"):
+            # the console's state is for human viewers, never for the worker it describes
+            return HTMLResponse("Not found", status_code=404)
         try:
             async with httpx.AsyncClient(timeout=1.5) as client:
                 response = await client.get(

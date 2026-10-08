@@ -33,3 +33,5 @@ One line per decision. The README's design-decisions section is built from this 
 - 2026-10-08: use the Vertex AI endpoint for the supplied billed Cloud API key after the Developer API returned API_KEY_SERVICE_BLOCKED; a live structured goal succeeded with the same configured model.
 
 - 2026-10-08: supersede model API-key authentication with Vertex AI + ADC at the existing make_model boundary; centralize project/location, explicitly pass discovered credentials and bind quota to the configured project. Preserve ADK prompts, model IDs, fallbacks, retries and timeouts.
+- 2026-10-08: after the run that spent 635k tokens without saving, the worker is reminded every turn (by code, in the system instruction) of its budget, plan, pages read and remembered facts, and gets non-blocking nudges when it reopens a page or reads without progress; forms are filled in one browser_fill_form call.
+- 2026-10-08: the company apps leave out links to the product console when the request comes from Ava's gateway (X-Precedent-Agent), and /work-status is not served to her; the console describes the worker and must not steer it.

@@ -10,7 +10,7 @@ The initial inspection found a missing console, `screenshot=None`, and missing W
 
 ## Launch and entries
 
-From `precedent`, use two terminals with the existing generated company:
+From `the repository root`, use two terminals with the existing generated company:
 
 ```sh
 UV_CACHE_DIR=/tmp/precedent-uv-cache PRECEDENT_PDFTOPPM=/absolute/path/to/pdftoppm uv run precedent apps --seed 7 --port 8101

@@ -96,7 +96,10 @@ def render(request: Request, name: str, code: int = 200, **ctx: Any):
         params.update({k: str(v) for k, v in changes.items()})
         return urlencode(params)
 
-    ctx.update(company=request.app.state.company, console_url=request.app.state.console_url)
+    console_url = (
+        None if request.headers.get("x-precedent-agent") else request.app.state.console_url
+    )
+    ctx.update(company=request.app.state.company, console_url=console_url)
     ctx.update(banner=DONE.get(request.query_params.get("done", "")), label=label, query=query)
     return templates.TemplateResponse(request, name, ctx, status_code=code)
 
