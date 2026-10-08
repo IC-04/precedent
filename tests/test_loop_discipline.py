@@ -136,3 +136,12 @@ def test_thinking_follows_the_situation(tmp_path):
     guard.attention = "high:a save had an unknown result"
     assert guard.thinking_level() == ("HIGH", "a save had an unknown result")
     assert guard.thinking_level()[0] == "LOW"  # attention is used once
+
+
+def test_view_transitions_for_people_and_no_prerender_for_the_worker(tmp_path):
+    generate("northwind", 7, tmp_path / "7")
+    client = TestClient(create_app(7, tmp_path))
+    css = client.get("/static/workspace.css").text
+    assert "@view-transition{navigation:auto}" in css and "workspace-content" in css
+    assert "speculationrules" in client.get("/mail/").text
+    assert "speculationrules" not in client.get("/mail/", headers={"X-Precedent-Agent": "ava"}).text

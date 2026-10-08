@@ -22,4 +22,5 @@
     <main class="content" id="main">{% if banner %}<p class="banner" role="status">{{ banner }}</p>{% endif %}{% block before_content %}{% endblock %}{% block content %}{% endblock %}</main>
   </div>
 </div>
+{% if console_url %}<script type="speculationrules">{"prerender":[{"where":{"href_matches":["/","/mail/","/books/*","/drive/*","/chat/*"]},"eagerness":"moderate"}]}</script>{% endif %}
 </body></html>

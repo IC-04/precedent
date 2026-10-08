@@ -12,3 +12,17 @@
 .filter-primary{display:flex;gap:10px;align-items:end;width:100%}.filter-primary .field{flex:1;max-width:none}.filter-primary .field:first-child{flex:1.8}.filter-advanced{width:100%;border-top:1px solid var(--line);padding-top:9px}.filter-advanced>summary{font-size:11px;color:var(--muted)}.filter-fields{display:flex;flex-wrap:wrap;gap:12px;padding-top:12px}.filter-fields .field{flex:1 1 130px;max-width:none}.error-details{margin:12px 0}.error-details summary{font-size:11px}
 @media(max-width:700px){.filter-primary{flex-wrap:wrap}.filter-primary .field{flex:1 1 120px}.filter-primary .field:first-child{flex-basis:100%}.filter-primary button{font-size:11px}}
 table{font-size:13px}.mail-list li>a{font-size:13px}
+
+/* Moving between apps feels like one workspace: cross-document view transitions (Chrome 126+).
+   The sidebar and top bar hold still; only the working area changes. */
+@view-transition{navigation:auto}
+.sidebar{view-transition-name:workspace-sidebar}
+.topbar{view-transition-name:workspace-topbar}
+.content{view-transition-name:workspace-content}
+::view-transition-old(workspace-content){animation:180ms cubic-bezier(.4,0,1,1) both workspace-out}
+::view-transition-new(workspace-content){animation:240ms cubic-bezier(0,0,.2,1) 40ms both workspace-in}
+::view-transition-group(workspace-sidebar),::view-transition-group(workspace-topbar){animation-duration:0s}
+@keyframes workspace-out{to{opacity:0;transform:translateY(-4px)}}
+@keyframes workspace-in{from{opacity:0;transform:translateY(6px)}}
+.sidebar nav a{transition:background-color .2s ease,color .2s ease}
+@media (prefers-reduced-motion:reduce){::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){animation:none!important}}
