@@ -1,307 +1,519 @@
-### Page
-- Page URL: http://localhost:8100/books/bills?q=FIG
-- Page Title: Bills · Books
-- Console: 1 errors, 0 warnings
-### Snapshot
-```yaml
-- generic [active] [ref=e1]:
-  - banner [ref=e2]:
-    - generic [ref=e3]: Books
-    - navigation "Books" [ref=e4]:
-      - link "Bills" [ref=e5] [cursor=pointer]:
-        - /url: /books/bills
-      - link "New bill" [ref=e6] [cursor=pointer]:
-        - /url: /books/bills/new
-      - link "Vendors" [ref=e7] [cursor=pointer]:
-        - /url: /books/vendors
-      - link "History report" [ref=e8] [cursor=pointer]:
-        - /url: /books/history
-    - generic [ref=e9]: Signed in as Ava (AP)
-  - main [ref=e10]:
-    - heading "Bills" [level=1] [ref=e11]
-    - search [ref=e12]:
-      - generic [ref=e13]:
-        - generic [ref=e14]: Search
-        - textbox "Search" [ref=e15]: FIG
-      - generic [ref=e16]:
-        - generic [ref=e17]: Vendor
-        - combobox "Vendor" [ref=e18]:
-          - option "Any vendor" [selected]
-          - option "Adobe Stock (V-126)"
-          - option "Airtel Business (V-167)"
-          - option "BESCOM (V-116)"
-          - option "Calendly (V-152)"
-          - option "Canva (V-109)"
-          - option "Cleartrip (V-140)"
-          - option "Clockify (V-169)"
-          - option "Cloudflare (V-176)"
-          - option "Coursera for Teams (V-121)"
-          - option "Datadog (V-174)"
-          - option "Deloitte Advisory (V-172)"
-          - option "Envato (V-124)"
-          - option "Eventbrite (V-162)"
-          - option "Figma (V-112)"
-          - option "Frame.io (V-159)"
-          - option "Freepik (V-150)"
-          - option "GitHub (V-144)"
-          - option "Google Ads (V-133)"
-          - option "Grant Thornton (V-143)"
-          - option "Khaitan Legal (V-111)"
-          - option "Linear (V-139)"
-          - option "LinkedIn Ads (V-164)"
-          - option "Linode (V-151)"
-          - option "Miro (V-132)"
-          - option "Pitch (V-146)"
-          - option "Printland (V-128)"
-          - option "Residency Estates (V-136)"
-          - option "Shutterstock (V-118)"
-          - option "Staples India (V-161)"
-          - option "Swiggy Corporate (V-137)"
-          - option "Tata Teleservices (V-135)"
-          - option "Toggl (V-103)"
-          - option "Trilegal Associates (V-148)"
-          - option "Uber for Business (V-129)"
-          - option "Udemy Business (V-156)"
-          - option "Unsplash Plus (V-123)"
-          - option "Urban Company (V-106)"
-          - option "WeWork Labs (V-113)"
-          - option "Zenith Labs (V-219)"
-          - option "Zenith Labs Pvt (V-224)"
-          - option "Zoom (V-154)"
-      - generic [ref=e19]:
-        - generic [ref=e20]: Account
-        - combobox "Account" [ref=e21]:
-          - option "Any account" [selected]
-          - option "1400 Prepaid expenses"
-          - option "2100 Accounts payable"
-          - option "6120 Software subscriptions"
-          - option "6210 Cloud hosting"
-          - option "6340 Contractor tools"
-          - option "6400 Design services"
-          - option "6500 Marketing"
-          - option "6610 Office rent"
-          - option "6620 Utilities"
-          - option "6700 Travel"
-          - option "6810 Professional fees"
-          - option "6820 Legal fees"
-          - option "6900 Training"
-      - generic [ref=e22]:
-        - generic [ref=e23]: Approver
-        - combobox "Approver" [ref=e24]:
-          - option "Any approver" [selected]
-          - option "Aditya Verma"
-          - option "Ana Pereira"
-          - option "Ishita Sen"
-          - option "Kiran Rao"
-          - option "Manoj Reddy"
-          - option "Meera Iyer"
-          - option "Neha Chawla"
-          - option "Priya Nair"
-          - option "Raj Mehta"
-          - option "Sneha Kulkarni"
-          - option "Tara Bose"
-          - option "Varun Iyer"
-          - option "Vik Rao"
-      - generic [ref=e25]:
-        - generic [ref=e26]: Status
-        - combobox "Status" [ref=e27]:
-          - option "Any status" [selected]
-          - option "draft"
-          - option "pending approval"
-          - option "approved"
-          - option "paid"
-      - generic [ref=e28]:
-        - generic [ref=e29]: Invoice date from
-        - textbox "Invoice date from" [ref=e30]
-      - generic [ref=e31]:
-        - generic [ref=e32]: Invoice date to
-        - textbox "Invoice date to" [ref=e33]
-      - generic [ref=e34]:
-        - generic [ref=e35]: Amount above
-        - textbox "Amount above" [ref=e36]
-      - button "Search bills" [ref=e37] [cursor=pointer]
-    - table [ref=e38]:
-      - rowgroup [ref=e39]:
-        - row [ref=e40]:
-          - columnheader "Bill" [ref=e41]
-          - columnheader "Invoice no." [ref=e42]
-          - columnheader "Vendor" [ref=e43]
-          - columnheader "Invoice date" [ref=e44]
-          - columnheader "Due" [ref=e45]
-          - columnheader "Amount" [ref=e46]
-          - columnheader "Account" [ref=e47]
-          - columnheader "Approver" [ref=e48]
-          - columnheader "Status" [ref=e49]
-      - rowgroup [ref=e50]:
-        - row [ref=e51]:
-          - cell [ref=e52]:
-            - link "INV-896" [ref=e53] [cursor=pointer]:
-              - /url: /books/bills/INV-896
-          - cell "FIG-1709" [ref=e54]
-          - cell [ref=e55]:
-            - link "Figma" [ref=e56] [cursor=pointer]:
-              - /url: /books/vendors/V-112
-          - cell "2026-08-13" [ref=e57]
-          - cell "2026-09-12" [ref=e58]
-          - cell "INR 9,800.00" [ref=e59]
-          - cell "6120" [ref=e60]
-          - cell "Raj Mehta" [ref=e61]
-          - cell "paid" [ref=e62]
-        - row [ref=e63]:
-          - cell [ref=e64]:
-            - link "INV-880" [ref=e65] [cursor=pointer]:
-              - /url: /books/bills/INV-880
-          - cell "FIG-1611" [ref=e66]
-          - cell [ref=e67]:
-            - link "Figma" [ref=e68] [cursor=pointer]:
-              - /url: /books/vendors/V-112
-          - cell "2026-07-13" [ref=e69]
-          - cell "2026-07-28" [ref=e70]
-          - cell "INR 9,800.00" [ref=e71]
-          - cell "6120" [ref=e72]
-          - cell "Raj Mehta" [ref=e73]
-          - cell "paid" [ref=e74]
-        - row [ref=e75]:
-          - cell [ref=e76]:
-            - link "INV-866" [ref=e77] [cursor=pointer]:
-              - /url: /books/bills/INV-866
-          - cell "FIG-1525" [ref=e78]
-          - cell [ref=e79]:
-            - link "Figma" [ref=e80] [cursor=pointer]:
-              - /url: /books/vendors/V-112
-          - cell "2026-06-13" [ref=e81]
-          - cell "2026-06-28" [ref=e82]
-          - cell "INR 9,800.00" [ref=e83]
-          - cell "6120" [ref=e84]
-          - cell "Raj Mehta" [ref=e85]
-          - cell "paid" [ref=e86]
-        - row [ref=e87]:
-          - cell [ref=e88]:
-            - link "INV-853" [ref=e89] [cursor=pointer]:
-              - /url: /books/bills/INV-853
-          - cell "FIG-1433" [ref=e90]
-          - cell [ref=e91]:
-            - link "Figma" [ref=e92] [cursor=pointer]:
-              - /url: /books/vendors/V-112
-          - cell "2026-05-13" [ref=e93]
-          - cell "2026-06-12" [ref=e94]
-          - cell "INR 9,800.00" [ref=e95]
-          - cell "6120" [ref=e96]
-          - cell "Raj Mehta" [ref=e97]
-          - cell "paid" [ref=e98]
-        - row [ref=e99]:
-          - cell [ref=e100]:
-            - link "INV-839" [ref=e101] [cursor=pointer]:
-              - /url: /books/bills/INV-839
-          - cell "FIG-1344" [ref=e102]
-          - cell [ref=e103]:
-            - link "Figma" [ref=e104] [cursor=pointer]:
-              - /url: /books/vendors/V-112
-          - cell "2026-04-13" [ref=e105]
-          - cell "2026-05-13" [ref=e106]
-          - cell "INR 9,800.00" [ref=e107]
-          - cell "6120" [ref=e108]
-          - cell "Raj Mehta" [ref=e109]
-          - cell "paid" [ref=e110]
-        - row [ref=e111]:
-          - cell [ref=e112]:
-            - link "INV-823" [ref=e113] [cursor=pointer]:
-              - /url: /books/bills/INV-823
-          - cell "FIG-1250" [ref=e114]
-          - cell [ref=e115]:
-            - link "Figma" [ref=e116] [cursor=pointer]:
-              - /url: /books/vendors/V-112
-          - cell "2026-03-13" [ref=e117]
-          - cell "2026-03-28" [ref=e118]
-          - cell "INR 9,800.00" [ref=e119]
-          - cell "6120" [ref=e120]
-          - cell "Raj Mehta" [ref=e121]
-          - cell "paid" [ref=e122]
-        - row [ref=e123]:
-          - cell [ref=e124]:
-            - link "INV-807" [ref=e125] [cursor=pointer]:
-              - /url: /books/bills/INV-807
-          - cell "FIG-1146" [ref=e126]
-          - cell [ref=e127]:
-            - link "Figma" [ref=e128] [cursor=pointer]:
-              - /url: /books/vendors/V-112
-          - cell "2026-02-13" [ref=e129]
-          - cell "2026-03-15" [ref=e130]
-          - cell "INR 9,800.00" [ref=e131]
-          - cell "6120" [ref=e132]
-          - cell "Raj Mehta" [ref=e133]
-          - cell "paid" [ref=e134]
-        - row [ref=e135]:
-          - cell [ref=e136]:
-            - link "INV-792" [ref=e137] [cursor=pointer]:
-              - /url: /books/bills/INV-792
-          - cell "FIG-1041" [ref=e138]
-          - cell [ref=e139]:
-            - link "Figma" [ref=e140] [cursor=pointer]:
-              - /url: /books/vendors/V-112
-          - cell "2026-01-13" [ref=e141]
-          - cell "2026-01-28" [ref=e142]
-          - cell "INR 9,800.00" [ref=e143]
-          - cell "6120" [ref=e144]
-          - cell "Raj Mehta" [ref=e145]
-          - cell "paid" [ref=e146]
-        - row [ref=e147]:
-          - cell [ref=e148]:
-            - link "INV-774" [ref=e149] [cursor=pointer]:
-              - /url: /books/bills/INV-774
-          - cell "FIG-943" [ref=e150]
-          - cell [ref=e151]:
-            - link "Figma" [ref=e152] [cursor=pointer]:
-              - /url: /books/vendors/V-112
-          - cell "2025-12-13" [ref=e153]
-          - cell "2026-01-12" [ref=e154]
-          - cell "INR 9,800.00" [ref=e155]
-          - cell "6120" [ref=e156]
-          - cell "Raj Mehta" [ref=e157]
-          - cell "paid" [ref=e158]
-        - row [ref=e159]:
-          - cell [ref=e160]:
-            - link "INV-757" [ref=e161] [cursor=pointer]:
-              - /url: /books/bills/INV-757
-          - cell "FIG-845" [ref=e162]
-          - cell [ref=e163]:
-            - link "Figma" [ref=e164] [cursor=pointer]:
-              - /url: /books/vendors/V-112
-          - cell "2025-11-13" [ref=e165]
-          - cell "2025-11-28" [ref=e166]
-          - cell "INR 9,800.00" [ref=e167]
-          - cell "6120" [ref=e168]
-          - cell "Raj Mehta" [ref=e169]
-          - cell "paid" [ref=e170]
-        - row [ref=e171]:
-          - cell [ref=e172]:
-            - link "INV-740" [ref=e173] [cursor=pointer]:
-              - /url: /books/bills/INV-740
-          - cell "FIG-744" [ref=e174]
-          - cell [ref=e175]:
-            - link "Figma" [ref=e176] [cursor=pointer]:
-              - /url: /books/vendors/V-112
-          - cell "2025-10-13" [ref=e177]
-          - cell "2025-11-12" [ref=e178]
-          - cell "INR 9,800.00" [ref=e179]
-          - cell "6120" [ref=e180]
-          - cell "Raj Mehta" [ref=e181]
-          - cell "paid" [ref=e182]
-        - row [ref=e183]:
-          - cell [ref=e184]:
-            - link "INV-723" [ref=e185] [cursor=pointer]:
-              - /url: /books/bills/INV-723
-          - cell "FIG-648" [ref=e186]
-          - cell [ref=e187]:
-            - link "Figma" [ref=e188] [cursor=pointer]:
-              - /url: /books/vendors/V-112
-          - cell "2025-09-13" [ref=e189]
-          - cell "2025-09-28" [ref=e190]
-          - cell "INR 9,800.00" [ref=e191]
-          - cell "6120" [ref=e192]
-          - cell "Raj Mehta" [ref=e193]
-          - cell "paid" [ref=e194]
-    - navigation "Pages" [ref=e195]:
-      - generic [ref=e196]: Page 1
-      - generic [ref=e197]: End of list
-```
+- generic [active] [ref=f2e1]:
+  - link "Skip to content" [ref=f2e2] [cursor=pointer]:
+    - /url: "#main"
+  - generic [ref=f2e3]:
+    - complementary [ref=f2e4]:
+      - link "Precedent" [ref=f2e5] [cursor=pointer]:
+        - /url: /
+        - generic [aria-hidden] [ref=f2e6]: p
+      - generic [ref=f2e8]:
+        - generic [aria-hidden] [ref=f2e9]: "N"
+        - generic [ref=f2e10]:
+          - generic [ref=f2e11]: Northwind Ltd
+          - text: Company workspace
+      - navigation "Company applications" [ref=f2e12]:
+        - generic [ref=f2e13]: Workspace
+        - link "Overview" [ref=f2e14] [cursor=pointer]:
+          - /url: /
+        - link "Mail" [ref=f2e18] [cursor=pointer]:
+          - /url: /mail/
+        - link "Books" [ref=f2e22] [cursor=pointer]:
+          - /url: /books/bills
+        - link "Drive" [ref=f2e26] [cursor=pointer]:
+          - /url: /drive/
+        - link "Chat" [ref=f2e30] [cursor=pointer]:
+          - /url: /chat/
+        - generic [ref=f2e34]: Agent
+        - link "Ava’s tasks ↗" [ref=f2e35] [cursor=pointer]:
+          - /url: http://localhost:8000
+          - generic [ref=f2e38]:
+            - text: Ava’s tasks
+            - generic [ref=f2e39]: ↗
+      - generic [ref=f2e40]:
+        - generic [aria-hidden] [ref=f2e41]: A
+        - generic [ref=f2e42]:
+          - strong [ref=f2e43]:
+            - text: Ava
+            - generic [ref=f2e44]: AI
+          - generic [ref=f2e45]: Accounts payable
+          - generic [ref=f2e46]: Signed in as Ava (AP)
+    - generic [ref=f2e47]:
+      - banner [ref=f2e48]:
+        - generic [ref=f2e49]:
+          - generic [ref=f2e50]: Northwind Ltd
+          - generic [ref=f2e51]: /
+          - strong [ref=f2e52]: Books
+        - group [ref=f2e53]:
+          - generic "Company apps" [ref=f2e54] [cursor=pointer]
+      - main [ref=f2e55]:
+        - navigation "Books" [ref=f2e56]:
+          - link "Bills" [ref=f2e57] [cursor=pointer]:
+            - /url: /books/bills
+          - link "New bill" [ref=f2e58] [cursor=pointer]:
+            - /url: /books/bills/new
+          - link "Vendors" [ref=f2e59] [cursor=pointer]:
+            - /url: /books/vendors
+          - link "History report" [ref=f2e60] [cursor=pointer]:
+            - /url: /books/history
+        - generic [ref=f2e61]:
+          - generic [ref=f2e62]:
+            - heading "Bills" [level=1] [ref=f2e63]
+            - paragraph [ref=f2e64]: Invoices, accounting and approval status
+          - link "New bill" [ref=f2e65] [cursor=pointer]:
+            - /url: /books/bills/new
+        - search [ref=f2e66]:
+          - generic [ref=f2e67]:
+            - generic [ref=f2e68]:
+              - generic [ref=f2e69]: Search
+              - textbox "Search" [ref=f2e70]
+            - generic [ref=f2e71]:
+              - generic [ref=f2e72]: Vendor
+              - combobox "Vendor" [ref=f2e73]:
+                - option "Any vendor" [selected]
+                - option "Adobe Stock (V-126)"
+                - option "Airtel Business (V-167)"
+                - option "BESCOM (V-116)"
+                - option "Calendly (V-152)"
+                - option "Canva (V-109)"
+                - option "Cleartrip (V-140)"
+                - option "Clockify (V-169)"
+                - option "Cloudflare (V-176)"
+                - option "Coursera for Teams (V-121)"
+                - option "Datadog (V-174)"
+                - option "Deloitte Advisory (V-172)"
+                - option "Envato (V-124)"
+                - option "Eventbrite (V-162)"
+                - option "Figma (V-112)"
+                - option "Frame.io (V-159)"
+                - option "Freepik (V-150)"
+                - option "GitHub (V-144)"
+                - option "Google Ads (V-133)"
+                - option "Grant Thornton (V-143)"
+                - option "Khaitan Legal (V-111)"
+                - option "Linear (V-139)"
+                - option "LinkedIn Ads (V-164)"
+                - option "Linode (V-151)"
+                - option "Miro (V-132)"
+                - option "Pitch (V-146)"
+                - option "Printland (V-128)"
+                - option "Residency Estates (V-136)"
+                - option "Shutterstock (V-118)"
+                - option "Staples India (V-161)"
+                - option "Swiggy Corporate (V-137)"
+                - option "Tata Teleservices (V-135)"
+                - option "Toggl (V-103)"
+                - option "Trilegal Associates (V-148)"
+                - option "Uber for Business (V-129)"
+                - option "Udemy Business (V-156)"
+                - option "Unsplash Plus (V-123)"
+                - option "Urban Company (V-106)"
+                - option "WeWork Labs (V-113)"
+                - option "Zenith Labs (V-219)"
+                - option "Zenith Labs Pvt (V-224)"
+                - option "Zoom (V-154)"
+            - generic [ref=f2e74]:
+              - generic [ref=f2e75]: Status
+              - combobox "Status" [ref=f2e76]:
+                - option "Any status" [selected]
+                - option "draft"
+                - option "pending approval"
+                - option "approved"
+                - option "paid"
+            - button "Search bills" [ref=f2e77] [cursor=pointer]
+          - group [ref=f2e78]:
+            - generic "More filters" [ref=f2e79] [cursor=pointer]
+            - option "Any account" [selected]
+            - option "1400 Prepaid expenses"
+            - option "2100 Accounts payable"
+            - option "6120 Software subscriptions"
+            - option "6210 Cloud hosting"
+            - option "6340 Contractor tools"
+            - option "6400 Design services"
+            - option "6500 Marketing"
+            - option "6610 Office rent"
+            - option "6620 Utilities"
+            - option "6700 Travel"
+            - option "6810 Professional fees"
+            - option "6820 Legal fees"
+            - option "6900 Training"
+            - option "Any approver" [selected]
+            - option "Aditya Verma"
+            - option "Ana Pereira"
+            - option "Ishita Sen"
+            - option "Kiran Rao"
+            - option "Manoj Reddy"
+            - option "Meera Iyer"
+            - option "Neha Chawla"
+            - option "Priya Nair"
+            - option "Raj Mehta"
+            - option "Sneha Kulkarni"
+            - option "Tara Bose"
+            - option "Varun Iyer"
+            - option "Vik Rao"
+        - table [ref=f2e81]:
+          - rowgroup [ref=f2e82]:
+            - row [ref=f2e83]:
+              - columnheader "Bill" [ref=f2e84]
+              - columnheader "Invoice no." [ref=f2e85]
+              - columnheader "Vendor" [ref=f2e86]
+              - columnheader "Invoice date" [ref=f2e87]
+              - columnheader "Due" [ref=f2e88]
+              - columnheader "Amount" [ref=f2e89]
+              - columnheader "Account" [ref=f2e90]
+              - columnheader "Approver" [ref=f2e91]
+              - columnheader "Status" [ref=f2e92]
+          - rowgroup [ref=f2e93]:
+            - row [ref=f2e94]:
+              - cell [ref=f2e95]:
+                - link "INV-921" [ref=f2e96] [cursor=pointer]:
+                  - /url: /books/bills/INV-921
+              - cell "FIG-1842" [ref=f2e97]
+              - cell [ref=f2e98]:
+                - link "Figma" [ref=f2e99] [cursor=pointer]:
+                  - /url: /books/vendors/V-112
+              - cell "2026-09-28" [ref=f2e100]
+              - cell "2026-10-21" [ref=f2e101]
+              - cell "INR 1,12,000.00" [ref=f2e102]
+              - cell "1400" [ref=f2e103]
+              - cell "Ana Pereira" [ref=f2e104]
+              - cell "pending approval" [ref=f2e105]
+            - row [ref=f2e106]:
+              - cell [ref=f2e107]:
+                - link "INV-920" [ref=f2e108] [cursor=pointer]:
+                  - /url: /books/bills/INV-920
+              - cell "RE-1086" [ref=f2e109]
+              - cell [ref=f2e110]:
+                - link "Residency Estates" [ref=f2e111] [cursor=pointer]:
+                  - /url: /books/vendors/V-136
+              - cell "2026-09-25" [ref=f2e112]
+              - cell "2026-10-10" [ref=f2e113]
+              - cell "INR 4,20,000.00" [ref=f2e114]
+              - cell "6610" [ref=f2e115]
+              - cell "Ana Pereira" [ref=f2e116]
+              - cell "pending approval" [ref=f2e117]
+            - row [ref=f2e118]:
+              - cell [ref=f2e119]:
+                - link "INV-917" [ref=f2e120] [cursor=pointer]:
+                  - /url: /books/bills/INV-917
+              - cell "PRI-0955" [ref=f2e121]
+              - cell [ref=f2e122]:
+                - link "Printland" [ref=f2e123] [cursor=pointer]:
+                  - /url: /books/vendors/V-128
+              - cell "2026-09-21" [ref=f2e124]
+              - cell "2026-10-06" [ref=f2e125]
+              - cell "INR 39,900.00" [ref=f2e126]
+              - cell "6500" [ref=f2e127]
+              - cell "Ana Pereira" [ref=f2e128]
+              - cell "pending approval" [ref=f2e129]
+            - row [ref=f2e130]:
+              - cell [ref=f2e131]:
+                - link "INV-919" [ref=f2e132] [cursor=pointer]:
+                  - /url: /books/bills/INV-919
+              - cell "SHU-0341" [ref=f2e133]
+              - cell [ref=f2e134]:
+                - link "Shutterstock" [ref=f2e135] [cursor=pointer]:
+                  - /url: /books/vendors/V-118
+              - cell "2026-09-19" [ref=f2e136]
+              - cell "2026-10-19" [ref=f2e137]
+              - cell "INR 85,800.00" [ref=f2e138]
+              - cell "6400" [ref=f2e139]
+              - cell "Ana Pereira" [ref=f2e140]
+              - cell "approved" [ref=f2e141]
+            - row [ref=f2e142]:
+              - cell [ref=f2e143]:
+                - link "INV-918" [ref=f2e144] [cursor=pointer]:
+                  - /url: /books/bills/INV-918
+              - cell "LINX-1290" [ref=f2e145]
+              - cell [ref=f2e146]:
+                - link "Linode" [ref=f2e147] [cursor=pointer]:
+                  - /url: /books/vendors/V-151
+              - cell "2026-09-19" [ref=f2e148]
+              - cell "2026-10-19" [ref=f2e149]
+              - cell "INR 1,05,200.00" [ref=f2e150]
+              - cell "6210" [ref=f2e151]
+              - cell "Vik Rao" [ref=f2e152]
+              - cell "approved" [ref=f2e153]
+            - row [ref=f2e154]:
+              - cell [ref=f2e155]:
+                - link "INV-916" [ref=f2e156] [cursor=pointer]:
+                  - /url: /books/bills/INV-916
+              - cell "CFT-0282" [ref=f2e157]
+              - cell [ref=f2e158]:
+                - link "Coursera for Teams" [ref=f2e159] [cursor=pointer]:
+                  - /url: /books/vendors/V-121
+              - cell "2026-09-16" [ref=f2e160]
+              - cell "2026-10-16" [ref=f2e161]
+              - cell "INR 40,000.00" [ref=f2e162]
+              - cell "6900" [ref=f2e163]
+              - cell "Ana Pereira" [ref=f2e164]
+              - cell "approved" [ref=f2e165]
+            - row [ref=f2e166]:
+              - cell [ref=f2e167]:
+                - link "INV-915" [ref=f2e168] [cursor=pointer]:
+                  - /url: /books/bills/INV-915
+              - cell "CLO-0955" [ref=f2e169]
+              - cell [ref=f2e170]:
+                - link "Cloudflare" [ref=f2e171] [cursor=pointer]:
+                  - /url: /books/vendors/V-176
+              - cell "2026-09-13" [ref=f2e172]
+              - cell "2026-09-28" [ref=f2e173]
+              - cell "INR 1,31,100.00" [ref=f2e174]
+              - cell "6210" [ref=f2e175]
+              - cell "Vik Rao" [ref=f2e176]
+              - cell "approved" [ref=f2e177]
+            - row [ref=f2e178]:
+              - cell [ref=f2e179]:
+                - link "INV-914" [ref=f2e180] [cursor=pointer]:
+                  - /url: /books/bills/INV-914
+              - cell "LIN-0587" [ref=f2e181]
+              - cell [ref=f2e182]:
+                - link "Linear" [ref=f2e183] [cursor=pointer]:
+                  - /url: /books/vendors/V-139
+              - cell "2026-09-13" [ref=f2e184]
+              - cell "2026-09-28" [ref=f2e185]
+              - cell "INR 36,000.00" [ref=f2e186]
+              - cell "6120" [ref=f2e187]
+              - cell "Raj Mehta" [ref=f2e188]
+              - cell "approved" [ref=f2e189]
+            - row [ref=f2e190]:
+              - cell [ref=f2e191]:
+                - link "INV-913" [ref=f2e192] [cursor=pointer]:
+                  - /url: /books/bills/INV-913
+              - cell "PIT-0575" [ref=f2e193]
+              - cell [ref=f2e194]:
+                - link "Pitch" [ref=f2e195] [cursor=pointer]:
+                  - /url: /books/vendors/V-146
+              - cell "2026-09-11" [ref=f2e196]
+              - cell "2026-09-26" [ref=f2e197]
+              - cell "INR 68,200.00" [ref=f2e198]
+              - cell "6400" [ref=f2e199]
+              - cell "Raj Mehta" [ref=f2e200]
+              - cell "paid" [ref=f2e201]
+            - row [ref=f2e202]:
+              - cell [ref=f2e203]:
+                - link "INV-912" [ref=f2e204] [cursor=pointer]:
+                  - /url: /books/bills/INV-912
+              - cell "LA-0890" [ref=f2e205]
+              - cell [ref=f2e206]:
+                - link "LinkedIn Ads" [ref=f2e207] [cursor=pointer]:
+                  - /url: /books/vendors/V-164
+              - cell "2026-09-10" [ref=f2e208]
+              - cell "2026-10-10" [ref=f2e209]
+              - cell "INR 8,200.00" [ref=f2e210]
+              - cell "6500" [ref=f2e211]
+              - cell "Ana Pereira" [ref=f2e212]
+              - cell "approved" [ref=f2e213]
+            - row [ref=f2e214]:
+              - cell [ref=f2e215]:
+                - link "INV-911" [ref=f2e216] [cursor=pointer]:
+                  - /url: /books/bills/INV-911
+              - cell "BES-0608" [ref=f2e217]
+              - cell [ref=f2e218]:
+                - link "BESCOM" [ref=f2e219] [cursor=pointer]:
+                  - /url: /books/vendors/V-116
+              - cell "2026-09-10" [ref=f2e220]
+              - cell "2026-09-25" [ref=f2e221]
+              - cell "INR 30,200.00" [ref=f2e222]
+              - cell "6620" [ref=f2e223]
+              - cell "Ana Pereira" [ref=f2e224]
+              - cell "paid" [ref=f2e225]
+            - row [ref=f2e226]:
+              - cell [ref=f2e227]:
+                - link "INV-910" [ref=f2e228] [cursor=pointer]:
+                  - /url: /books/bills/INV-910
+              - cell "ZOO-0881" [ref=f2e229]
+              - cell [ref=f2e230]:
+                - link "Zoom" [ref=f2e231] [cursor=pointer]:
+                  - /url: /books/vendors/V-154
+              - cell "2026-09-05" [ref=f2e232]
+              - cell "2026-10-05" [ref=f2e233]
+              - cell "INR 5,200.00" [ref=f2e234]
+              - cell "6120" [ref=f2e235]
+              - cell "Vik Rao" [ref=f2e236]
+              - cell "approved" [ref=f2e237]
+            - row [ref=f2e238]:
+              - cell [ref=f2e239]:
+                - link "INV-909" [ref=f2e240] [cursor=pointer]:
+                  - /url: /books/bills/INV-909
+              - cell "DA-0632" [ref=f2e241]
+              - cell [ref=f2e242]:
+                - link "Deloitte Advisory" [ref=f2e243] [cursor=pointer]:
+                  - /url: /books/vendors/V-172
+              - cell "2026-09-05" [ref=f2e244]
+              - cell "2026-09-20" [ref=f2e245]
+              - cell "INR 22,900.00" [ref=f2e246]
+              - cell "6810" [ref=f2e247]
+              - cell "Ana Pereira" [ref=f2e248]
+              - cell "paid" [ref=f2e249]
+            - row [ref=f2e250]:
+              - cell [ref=f2e251]:
+                - link "INV-908" [ref=f2e252] [cursor=pointer]:
+                  - /url: /books/bills/INV-908
+              - cell "CAL-0588" [ref=f2e253]
+              - cell [ref=f2e254]:
+                - link "Calendly" [ref=f2e255] [cursor=pointer]:
+                  - /url: /books/vendors/V-152
+              - cell "2026-09-04" [ref=f2e256]
+              - cell "2026-10-04" [ref=f2e257]
+              - cell "INR 9,700.00" [ref=f2e258]
+              - cell "6120" [ref=f2e259]
+              - cell "Vik Rao" [ref=f2e260]
+              - cell "approved" [ref=f2e261]
+            - row [ref=f2e262]:
+              - cell [ref=f2e263]:
+                - link "INV-907" [ref=f2e264] [cursor=pointer]:
+                  - /url: /books/bills/INV-907
+              - cell "ENV-0659" [ref=f2e265]
+              - cell [ref=f2e266]:
+                - link "Envato" [ref=f2e267] [cursor=pointer]:
+                  - /url: /books/vendors/V-124
+              - cell "2026-09-02" [ref=f2e268]
+              - cell "2026-10-02" [ref=f2e269]
+              - cell "INR 76,800.00" [ref=f2e270]
+              - cell "6400" [ref=f2e271]
+              - cell "Ana Pereira" [ref=f2e272]
+              - cell "approved" [ref=f2e273]
+            - row [ref=f2e274]:
+              - cell [ref=f2e275]:
+                - link "INV-906" [ref=f2e276] [cursor=pointer]:
+                  - /url: /books/bills/INV-906
+              - cell "KL-0832" [ref=f2e277]
+              - cell [ref=f2e278]:
+                - link "Khaitan Legal" [ref=f2e279] [cursor=pointer]:
+                  - /url: /books/vendors/V-111
+              - cell "2026-09-01" [ref=f2e280]
+              - cell "2026-09-16" [ref=f2e281]
+              - cell "INR 37,100.00" [ref=f2e282]
+              - cell "6820" [ref=f2e283]
+              - cell "Ana Pereira" [ref=f2e284]
+              - cell "paid" [ref=f2e285]
+            - row [ref=f2e286]:
+              - cell [ref=f2e287]:
+                - link "INV-905" [ref=f2e288] [cursor=pointer]:
+                  - /url: /books/bills/INV-905
+              - cell "AS-0624" [ref=f2e289]
+              - cell [ref=f2e290]:
+                - link "Adobe Stock" [ref=f2e291] [cursor=pointer]:
+                  - /url: /books/vendors/V-126
+              - cell "2026-08-30" [ref=f2e292]
+              - cell "2026-09-14" [ref=f2e293]
+              - cell "INR 83,100.00" [ref=f2e294]
+              - cell "6400" [ref=f2e295]
+              - cell "Ana Pereira" [ref=f2e296]
+              - cell "paid" [ref=f2e297]
+            - row [ref=f2e298]:
+              - cell [ref=f2e299]:
+                - link "INV-904" [ref=f2e300] [cursor=pointer]:
+                  - /url: /books/bills/INV-904
+              - cell "SHU-0336" [ref=f2e301]
+              - cell [ref=f2e302]:
+                - link "Shutterstock" [ref=f2e303] [cursor=pointer]:
+                  - /url: /books/vendors/V-118
+              - cell "2026-08-27" [ref=f2e304]
+              - cell "2026-09-26" [ref=f2e305]
+              - cell "INR 69,500.00" [ref=f2e306]
+              - cell "6400" [ref=f2e307]
+              - cell "Ana Pereira" [ref=f2e308]
+              - cell "paid" [ref=f2e309]
+            - row [ref=f2e310]:
+              - cell [ref=f2e311]:
+                - link "INV-903" [ref=f2e312] [cursor=pointer]:
+                  - /url: /books/bills/INV-903
+              - cell "GT-0819" [ref=f2e313]
+              - cell [ref=f2e314]:
+                - link "Grant Thornton" [ref=f2e315] [cursor=pointer]:
+                  - /url: /books/vendors/V-143
+              - cell "2026-08-26" [ref=f2e316]
+              - cell "2026-09-25" [ref=f2e317]
+              - cell "INR 46,800.00" [ref=f2e318]
+              - cell "6810" [ref=f2e319]
+              - cell "Ana Pereira" [ref=f2e320]
+              - cell "paid" [ref=f2e321]
+            - row [ref=f2e322]:
+              - cell [ref=f2e323]:
+                - link "INV-901" [ref=f2e324] [cursor=pointer]:
+                  - /url: /books/bills/INV-901
+              - cell "RE-1076" [ref=f2e325]
+              - cell [ref=f2e326]:
+                - link "Residency Estates" [ref=f2e327] [cursor=pointer]:
+                  - /url: /books/vendors/V-136
+              - cell "2026-08-25" [ref=f2e328]
+              - cell "2026-09-24" [ref=f2e329]
+              - cell "INR 4,20,000.00" [ref=f2e330]
+              - cell "6610" [ref=f2e331]
+              - cell "Ana Pereira" [ref=f2e332]
+              - cell "paid" [ref=f2e333]
+            - row [ref=f2e334]:
+              - cell [ref=f2e335]:
+                - link "INV-902" [ref=f2e336] [cursor=pointer]:
+                  - /url: /books/bills/INV-902
+              - cell "UFB-0594" [ref=f2e337]
+              - cell [ref=f2e338]:
+                - link "Uber for Business" [ref=f2e339] [cursor=pointer]:
+                  - /url: /books/vendors/V-129
+              - cell "2026-08-24" [ref=f2e340]
+              - cell "2026-09-08" [ref=f2e341]
+              - cell "INR 3,200.00" [ref=f2e342]
+              - cell "6700" [ref=f2e343]
+              - cell "Ana Pereira" [ref=f2e344]
+              - cell "paid" [ref=f2e345]
+            - row [ref=f2e346]:
+              - cell [ref=f2e347]:
+                - link "INV-900" [ref=f2e348] [cursor=pointer]:
+                  - /url: /books/bills/INV-900
+              - cell "FRE-0751" [ref=f2e349]
+              - cell [ref=f2e350]:
+                - link "Freepik" [ref=f2e351] [cursor=pointer]:
+                  - /url: /books/vendors/V-150
+              - cell "2026-08-19" [ref=f2e352]
+              - cell "2026-09-18" [ref=f2e353]
+              - cell "INR 57,200.00" [ref=f2e354]
+              - cell "6400" [ref=f2e355]
+              - cell "Ana Pereira" [ref=f2e356]
+              - cell "paid" [ref=f2e357]
+            - row [ref=f2e358]:
+              - cell [ref=f2e359]:
+                - link "INV-899" [ref=f2e360] [cursor=pointer]:
+                  - /url: /books/bills/INV-899
+              - cell "LINX-1274" [ref=f2e361]
+              - cell [ref=f2e362]:
+                - link "Linode" [ref=f2e363] [cursor=pointer]:
+                  - /url: /books/vendors/V-151
+              - cell "2026-08-19" [ref=f2e364]
+              - cell "2026-09-03" [ref=f2e365]
+              - cell "INR 1,05,200.00" [ref=f2e366]
+              - cell "6210" [ref=f2e367]
+              - cell "Vik Rao" [ref=f2e368]
+              - cell "paid" [ref=f2e369]
+            - row [ref=f2e370]:
+              - cell [ref=f2e371]:
+                - link "INV-898" [ref=f2e372] [cursor=pointer]:
+                  - /url: /books/bills/INV-898
+              - cell "AB-0877" [ref=f2e373]
+              - cell [ref=f2e374]:
+                - link "Airtel Business" [ref=f2e375] [cursor=pointer]:
+                  - /url: /books/vendors/V-167
+              - cell "2026-08-19" [ref=f2e376]
+              - cell "2026-09-18" [ref=f2e377]
+              - cell "INR 14,300.00" [ref=f2e378]
+              - cell "6620" [ref=f2e379]
+              - cell "Ana Pereira" [ref=f2e380]
+              - cell "paid" [ref=f2e381]
+            - row [ref=f2e382]:
+              - cell [ref=f2e383]:
+                - link "INV-897" [ref=f2e384] [cursor=pointer]:
+                  - /url: /books/bills/INV-897
+              - cell "ENV-0651" [ref=f2e385]
+              - cell [ref=f2e386]:
+                - link "Envato" [ref=f2e387] [cursor=pointer]:
+                  - /url: /books/vendors/V-124
+              - cell "2026-08-18" [ref=f2e388]
+              - cell "2026-09-17" [ref=f2e389]
+              - cell "INR 51,000.00" [ref=f2e390]
+              - cell "6400" [ref=f2e391]
+              - cell "Ana Pereira" [ref=f2e392]
+              - cell "paid" [ref=f2e393]
+        - navigation "Pages" [ref=f2e394]:
+          - generic [ref=f2e395]: Page 1
+          - link "Next page" [ref=f2e396] [cursor=pointer]:
+            - /url: "?page=2"

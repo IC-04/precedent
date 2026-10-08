@@ -1,117 +1,166 @@
-### Page
-- Page URL: http://localhost:8100/books/bills/new
-- Page Title: New bill · Books
-### Snapshot
-```yaml
-- generic [active] [ref=f1e1]:
-  - banner [ref=f1e2]:
-    - generic [ref=f1e3]: Books
-    - navigation "Books" [ref=f1e4]:
-      - link "Bills" [ref=f1e5] [cursor=pointer]:
-        - /url: /books/bills
-      - link "New bill" [ref=f1e6] [cursor=pointer]:
-        - /url: /books/bills/new
-      - link "Vendors" [ref=f1e7] [cursor=pointer]:
-        - /url: /books/vendors
-      - link "History report" [ref=f1e8] [cursor=pointer]:
-        - /url: /books/history
-    - generic [ref=f1e9]: Signed in as Ava (AP)
-  - main [ref=f1e10]:
-    - heading "New bill" [level=1] [ref=f1e11]
-    - generic [ref=f1e12]:
-      - generic [ref=f1e13]:
-        - generic [ref=f1e14]: Vendor
-        - combobox "Vendor" [ref=f1e15]:
-          - option "Choose a vendor" [selected]
-          - option "Adobe Stock (V-126)"
-          - option "Airtel Business (V-167)"
-          - option "BESCOM (V-116)"
-          - option "Calendly (V-152)"
-          - option "Canva (V-109)"
-          - option "Cleartrip (V-140)"
-          - option "Clockify (V-169)"
-          - option "Cloudflare (V-176)"
-          - option "Coursera for Teams (V-121)"
-          - option "Datadog (V-174)"
-          - option "Deloitte Advisory (V-172)"
-          - option "Envato (V-124)"
-          - option "Eventbrite (V-162)"
-          - option "Figma (V-112)"
-          - option "Frame.io (V-159)"
-          - option "Freepik (V-150)"
-          - option "GitHub (V-144)"
-          - option "Google Ads (V-133)"
-          - option "Grant Thornton (V-143)"
-          - option "Khaitan Legal (V-111)"
-          - option "Linear (V-139)"
-          - option "LinkedIn Ads (V-164)"
-          - option "Linode (V-151)"
-          - option "Miro (V-132)"
-          - option "Pitch (V-146)"
-          - option "Printland (V-128)"
-          - option "Residency Estates (V-136)"
-          - option "Shutterstock (V-118)"
-          - option "Staples India (V-161)"
-          - option "Swiggy Corporate (V-137)"
-          - option "Tata Teleservices (V-135)"
-          - option "Toggl (V-103)"
-          - option "Trilegal Associates (V-148)"
-          - option "Uber for Business (V-129)"
-          - option "Udemy Business (V-156)"
-          - option "Unsplash Plus (V-123)"
-          - option "Urban Company (V-106)"
-          - option "WeWork Labs (V-113)"
-          - option "Zenith Labs (V-219)"
-          - option "Zenith Labs Pvt (V-224), draft"
-          - option "Zoom (V-154)"
-      - generic [ref=f1e16]:
-        - generic [ref=f1e17]: Invoice number
-        - textbox "Invoice number" [ref=f1e18]
-      - generic [ref=f1e19]:
-        - generic [ref=f1e20]: Amount
-        - textbox "Amount" [ref=f1e21]
-        - generic [ref=f1e22]: For example 1,12,000 or 112000.50
-      - generic [ref=f1e23]:
-        - generic [ref=f1e24]: Currency
-        - textbox "Currency" [ref=f1e25]: INR
-      - generic [ref=f1e26]:
-        - generic [ref=f1e27]: Invoice date
-        - textbox "Invoice date" [ref=f1e28]
-      - generic [ref=f1e29]:
-        - generic [ref=f1e30]: Due date
-        - textbox "Due date" [ref=f1e31]
-      - generic [ref=f1e32]:
-        - generic [ref=f1e33]: Account
-        - combobox "Account" [ref=f1e34]:
-          - option "Choose an account" [selected]
-          - option "1400 Prepaid expenses"
-          - option "2100 Accounts payable"
-          - option "6120 Software subscriptions"
-          - option "6210 Cloud hosting"
-          - option "6340 Contractor tools"
-          - option "6400 Design services"
-          - option "6500 Marketing"
-          - option "6610 Office rent"
-          - option "6620 Utilities"
-          - option "6700 Travel"
-          - option "6810 Professional fees"
-          - option "6820 Legal fees"
-          - option "6900 Training"
-      - generic [ref=f1e35]:
-        - generic [ref=f1e36]: Attachment
-        - combobox "Attachment" [ref=f1e37]:
-          - option "No attachment" [selected]
-          - option "FIG-1842.pdf (Mail attachments)"
-          - option "AP-Policy-2025.pdf (Policies)"
-          - option "AP-SOP-v3.pdf (Policies)"
-          - option "Chart-of-accounts.csv (Policies)"
-          - option "zenith_GST_certificate.pdf (Vendors/Zenith Labs)"
-          - option "zenith_invoice_ZL-0077.pdf (Vendors/Zenith Labs)"
-      - generic [ref=f1e38]:
-        - generic [ref=f1e39]: Notes
-        - textbox "Notes" [ref=f1e40]
-      - generic [ref=f1e41]:
-        - button "Save draft" [ref=f1e42] [cursor=pointer]
-        - link "Cancel" [ref=f1e43] [cursor=pointer]:
+- generic [active] [ref=e1]:
+  - link "Skip to content" [ref=e2] [cursor=pointer]:
+    - /url: "#main"
+  - generic [ref=e3]:
+    - complementary [ref=e4]:
+      - link "Precedent" [ref=e5] [cursor=pointer]:
+        - /url: /
+        - generic [aria-hidden] [ref=e6]: p
+      - generic [ref=e8]:
+        - generic [aria-hidden] [ref=e9]: "N"
+        - generic [ref=e10]:
+          - generic [ref=e11]: Northwind Ltd
+          - text: Company workspace
+      - navigation "Company applications" [ref=e12]:
+        - generic [ref=e13]: Workspace
+        - link "Overview" [ref=e14] [cursor=pointer]:
+          - /url: /
+        - link "Mail" [ref=e18] [cursor=pointer]:
+          - /url: /mail/
+        - link "Books" [ref=e22] [cursor=pointer]:
           - /url: /books/bills
-```
+        - link "Drive" [ref=e26] [cursor=pointer]:
+          - /url: /drive/
+        - link "Chat" [ref=e30] [cursor=pointer]:
+          - /url: /chat/
+        - generic [ref=e34]: Agent
+        - link "Ava’s tasks ↗" [ref=e35] [cursor=pointer]:
+          - /url: http://localhost:8000
+          - generic [ref=e38]:
+            - text: Ava’s tasks
+            - generic [ref=e39]: ↗
+      - generic [ref=e40]:
+        - generic [aria-hidden] [ref=e41]: A
+        - generic [ref=e42]:
+          - strong [ref=e43]:
+            - text: Ava
+            - generic [ref=e44]: AI
+          - generic [ref=e45]: Accounts payable
+          - generic [ref=e46]: Signed in as Ava (AP)
+    - generic [ref=e47]:
+      - banner [ref=e48]:
+        - generic [ref=e49]:
+          - generic [ref=e50]: Northwind Ltd
+          - generic [ref=e51]: /
+          - strong [ref=e52]: Books
+        - group [ref=e53]:
+          - generic "Company apps" [ref=e54] [cursor=pointer]
+      - main [ref=e55]:
+        - navigation "Books" [ref=e56]:
+          - link "Bills" [ref=e57] [cursor=pointer]:
+            - /url: /books/bills
+          - link "New bill" [ref=e58] [cursor=pointer]:
+            - /url: /books/bills/new
+          - link "Vendors" [ref=e59] [cursor=pointer]:
+            - /url: /books/vendors
+          - link "History report" [ref=e60] [cursor=pointer]:
+            - /url: /books/history
+        - heading "New bill" [level=1] [ref=e61]
+        - generic [ref=e62]:
+          - generic [ref=e63]:
+            - group "Supporting document" [ref=e64]:
+              - generic [ref=e66]:
+                - generic [ref=e67]: Attachment
+                - combobox "Attachment" [ref=e68]:
+                  - option "No attachment" [selected]
+                  - option "FIG-1842.pdf (Mail attachments)"
+                  - option "AP-Policy-2025.pdf (Policies)"
+                  - option "AP-SOP-v3.pdf (Policies)"
+                  - option "Chart-of-accounts.csv (Policies)"
+                  - option "zenith_GST_certificate.pdf (Vendors/Zenith Labs)"
+                  - option "zenith_invoice_ZL-0077.pdf (Vendors/Zenith Labs)"
+            - group "Vendor" [ref=e69]:
+              - generic [ref=e71]:
+                - generic [ref=e72]: Vendor
+                - combobox "Vendor" [ref=e73]:
+                  - option "Choose a vendor" [selected]
+                  - option "Adobe Stock (V-126)"
+                  - option "Airtel Business (V-167)"
+                  - option "BESCOM (V-116)"
+                  - option "Calendly (V-152)"
+                  - option "Canva (V-109)"
+                  - option "Cleartrip (V-140)"
+                  - option "Clockify (V-169)"
+                  - option "Cloudflare (V-176)"
+                  - option "Coursera for Teams (V-121)"
+                  - option "Datadog (V-174)"
+                  - option "Deloitte Advisory (V-172)"
+                  - option "Envato (V-124)"
+                  - option "Eventbrite (V-162)"
+                  - option "Figma (V-112)"
+                  - option "Frame.io (V-159)"
+                  - option "Freepik (V-150)"
+                  - option "GitHub (V-144)"
+                  - option "Google Ads (V-133)"
+                  - option "Grant Thornton (V-143)"
+                  - option "Khaitan Legal (V-111)"
+                  - option "Linear (V-139)"
+                  - option "LinkedIn Ads (V-164)"
+                  - option "Linode (V-151)"
+                  - option "Miro (V-132)"
+                  - option "Pitch (V-146)"
+                  - option "Printland (V-128)"
+                  - option "Residency Estates (V-136)"
+                  - option "Shutterstock (V-118)"
+                  - option "Staples India (V-161)"
+                  - option "Swiggy Corporate (V-137)"
+                  - option "Tata Teleservices (V-135)"
+                  - option "Toggl (V-103)"
+                  - option "Trilegal Associates (V-148)"
+                  - option "Uber for Business (V-129)"
+                  - option "Udemy Business (V-156)"
+                  - option "Unsplash Plus (V-123)"
+                  - option "Urban Company (V-106)"
+                  - option "WeWork Labs (V-113)"
+                  - option "Zenith Labs (V-219)"
+                  - option "Zenith Labs Pvt (V-224), draft"
+                  - option "Zoom (V-154)"
+            - group "Invoice details" [ref=e74]:
+              - generic [ref=e76]:
+                - generic [ref=e77]:
+                  - generic [ref=e78]: Invoice number
+                  - textbox "Invoice number" [ref=e79]
+                - generic [ref=e80]:
+                  - generic [ref=e81]: Amount
+                  - textbox "Amount" [ref=e82]
+                  - generic [ref=e83]: For example 1,12,000 or 112000.50
+                - generic [ref=e84]:
+                  - generic [ref=e85]: Currency
+                  - textbox "Currency" [ref=e86]: INR
+                - generic [ref=e87]:
+                  - generic [ref=e88]: Invoice date
+                  - textbox "Invoice date" [ref=e89]
+                - generic [ref=e90]:
+                  - generic [ref=e91]: Due date
+                  - textbox "Due date" [ref=e92]
+            - group "Accounting" [ref=e93]:
+              - generic [ref=e95]:
+                - generic [ref=e96]: Account
+                - combobox "Account" [ref=e97]:
+                  - option "Choose an account" [selected]
+                  - option "1400 Prepaid expenses"
+                  - option "2100 Accounts payable"
+                  - option "6120 Software subscriptions"
+                  - option "6210 Cloud hosting"
+                  - option "6340 Contractor tools"
+                  - option "6400 Design services"
+                  - option "6500 Marketing"
+                  - option "6610 Office rent"
+                  - option "6620 Utilities"
+                  - option "6700 Travel"
+                  - option "6810 Professional fees"
+                  - option "6820 Legal fees"
+                  - option "6900 Training"
+            - group "Notes" [ref=e98]:
+              - generic [ref=e100]:
+                - generic [ref=e101]: Notes
+                - textbox "Notes" [ref=e102]
+            - generic [ref=e103]:
+              - button "Save draft" [ref=e104] [cursor=pointer]
+              - link "Cancel" [ref=e105] [cursor=pointer]:
+                - /url: /books/bills
+          - complementary "Invoice preview" [ref=e106]:
+            - generic [ref=e108]:
+              - heading "Source document" [level=2] [ref=e109]
+              - paragraph [ref=e110]: Choose an attachment to review.
+            - generic [ref=e111]: Select an attachment to review its invoicealongside the bill details.

@@ -1,17 +1,1 @@
-{% extends "mail/base.html" %}
-{% block content %}
-{% if missing %}<p class="error" role="alert">Message {{ missing }} was not found.</p>{% endif %}
-<h1>{% if q %}Results for "{{ q }}"{% else %}Inbox{% endif %}</h1>
-<ul class="list">
-{% for r in rows %}
-  <li><a href="/mail/m/{{ r.id }}">
-    <span class="from">{{ r.from_name }}</span>
-    <span>{{ r.subject }}{% if r.n_files %} <span class="clip">(attachment)</span>{% endif %}</span>
-    <span class="date">{{ r.sent_at[:10] }}</span>
-  </a></li>
-{% else %}
-  <li>No messages.</li>
-{% endfor %}
-</ul>
-{{ m.pager(page, has_next) }}
-{% endblock %}
+{% extends "mail/base.html" %}{% block content %}{% if missing %}<p class="error" role="alert">Message {{ missing }} was not found.</p>{% endif %}<div class="page-heading"><div><h1>{% if q %}Results for “{{ q }}”{% else %}Inbox{% endif %}</h1><p class="muted">Accounts payable · Invoices and company instructions</p></div></div><ul class="mail-list">{% for r in rows %}<li><a href="/mail/m/{{ r.id }}"><span class="from">{{ r.from_name }}</span><span class="mail-content"><span class="subject">{{ r.subject }} {% if r.n_files %}<span class="clip">{{ r.n_files }} attachment{{ 's' if r.n_files != 1 else '' }}</span>{% endif %}</span><span class="body-preview">{{ r.body[:160] | replace('\n',' ') }}</span></span><time class="date" datetime="{{ r.sent_at }}" title="{{ r.sent_at }}">{{ r.sent_at | date_short }}</time></a></li>{% else %}<li class="empty">{% if q %}No messages match this search. <a href="/mail/">Clear search</a>{% else %}No messages in this inbox.{% endif %}</li>{% endfor %}</ul>{{ m.pager(page, has_next) }}{% endblock %}

@@ -39,17 +39,4 @@
 </nav>
 {%- endmacro %}
 
-{% macro activity(events) -%}
-<section class="activity">
-  <h2>Activity</h2>
-  {% if not events %}<p>No activity recorded.</p>{% endif %}
-  <table>
-    <thead><tr><th>When</th><th>Who</th><th>Action</th><th>Changes</th></tr></thead>
-    <tbody>
-    {% for e in events %}
-      <tr><td>{{ e.ts }}</td><td>{{ e.actor }}</td><td>{{ e.action }}</td><td>{{ e.changed | join("; ") }}</td></tr>
-    {% endfor %}
-    </tbody>
-  </table>
-</section>
-{%- endmacro %}
+{% macro activity(events) -%}<section class="activity"><h2>Activity</h2>{% if not events %}<p class="muted">No activity recorded.</p>{% endif %}<ol class="activity-list">{% for e in events %}<li><time title="{{ e.ts }}">{{ e.ts | human_date }}</time><div><strong>{{ e.action | action_name }}</strong> · {{ e.actor }}<details><summary>Exact details</summary><span class="mono">{{ e.action }} · {{ e.ts }}</span>{% if e.changed %}<p>{{ e.changed | join('; ') }}</p>{% endif %}</details></div></li>{% endfor %}</ol></section>{%- endmacro %}

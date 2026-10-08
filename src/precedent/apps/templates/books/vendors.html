@@ -11,7 +11,7 @@
   <button type="submit">Search vendors</button>
   <a href="/books/vendors/new">New vendor</a>
 </form>
-<table>
+<div class="table-wrap"><table>
   <thead><tr><th>Vendor</th><th>Name</th><th>Legal name</th><th>Tax ID (GSTIN)</th><th>Email</th><th>Status</th></tr></thead>
   <tbody>
   {% for v in rows %}
@@ -20,6 +20,6 @@
     <tr><td colspan="6">No vendors match.</td></tr>
   {% endfor %}
   </tbody>
-</table>
+</table></div>
 {{ m.pager(page, has_next) }}
 {% endblock %}

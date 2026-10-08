@@ -1,85 +1,147 @@
-### Page
-- Page URL: http://localhost:8100/books/bills/INV-900
-- Page Title: INV-900 · Books
-### Snapshot
-```yaml
-- generic [active] [ref=f2e1]:
-  - banner [ref=f2e2]:
-    - generic [ref=f2e3]: Books
-    - navigation "Books" [ref=f2e4]:
-      - link "Bills" [ref=f2e5] [cursor=pointer]:
-        - /url: /books/bills
-      - link "New bill" [ref=f2e6] [cursor=pointer]:
-        - /url: /books/bills/new
-      - link "Vendors" [ref=f2e7] [cursor=pointer]:
-        - /url: /books/vendors
-      - link "History report" [ref=f2e8] [cursor=pointer]:
-        - /url: /books/history
-    - generic [ref=f2e9]: Signed in as Ava (AP)
-  - main [ref=f2e10]:
-    - heading "Bill INV-900" [level=1] [ref=f2e11]
-    - generic [ref=f2e12]:
-      - term [ref=f2e13]: Status
-      - definition [ref=f2e14]: paid
-      - term [ref=f2e15]: Vendor
-      - definition [ref=f2e16]:
-        - link "Freepik (V-150)" [ref=f2e17] [cursor=pointer]:
-          - /url: /books/vendors/V-150
-      - term [ref=f2e18]: Invoice number
-      - definition [ref=f2e19]: FRE-0751
-      - term [ref=f2e20]: Amount
-      - definition [ref=f2e21]: INR 57,200.00
-      - term [ref=f2e22]: Invoice date
-      - definition [ref=f2e23]: 2026-08-19
-      - term [ref=f2e24]: Due date
-      - definition [ref=f2e25]: 2026-09-18
-      - term [ref=f2e26]: Account
-      - definition [ref=f2e27]: 6400 Design services
-      - term [ref=f2e28]: Approver
-      - definition [ref=f2e29]: Ana Pereira
-      - term [ref=f2e30]: Attachment
-      - definition [ref=f2e31]: None
-      - term [ref=f2e32]: Notes
-      - definition [ref=f2e33]
-      - term [ref=f2e34]: Created
-      - definition [ref=f2e35]: 2026-08-21T17:16:00 by Priya Nair
-    - heading "Approvals" [level=2] [ref=f2e36]
-    - table [ref=f2e37]:
-      - rowgroup [ref=f2e38]:
-        - row [ref=f2e39]:
-          - columnheader "Approver" [ref=f2e40]
-          - columnheader "Status" [ref=f2e41]
-          - columnheader "Requested" [ref=f2e42]
-          - columnheader "Decided" [ref=f2e43]
-      - rowgroup [ref=f2e44]:
-        - row [ref=f2e45]:
-          - cell "Ana Pereira" [ref=f2e46]
-          - cell "approved" [ref=f2e47]
-          - cell "2026-08-21T17:28:00 by Priya Nair" [ref=f2e48]
-          - cell "2026-08-22T01:28:00" [ref=f2e49]
-    - generic [ref=f2e50]:
-      - heading "Activity" [level=2] [ref=f2e51]
-      - table [ref=f2e52]:
-        - rowgroup [ref=f2e53]:
-          - row [ref=f2e54]:
-            - columnheader "When" [ref=f2e55]
-            - columnheader "Who" [ref=f2e56]
-            - columnheader "Action" [ref=f2e57]
-            - columnheader "Changes" [ref=f2e58]
-        - rowgroup [ref=f2e59]:
-          - row [ref=f2e60]:
-            - cell "2026-08-21T17:16:00" [ref=f2e61]
-            - cell "Priya Nair" [ref=f2e62]
-            - cell "bill.create" [ref=f2e63]
-            - cell [ref=f2e64]
-          - row [ref=f2e65]:
-            - cell "2026-08-21T17:28:00" [ref=f2e66]
-            - cell "Priya Nair" [ref=f2e67]
-            - cell "approval.request" [ref=f2e68]
-            - cell [ref=f2e69]
-          - row [ref=f2e70]:
-            - cell "2026-08-22T01:28:00" [ref=f2e71]
-            - cell "Ana Pereira" [ref=f2e72]
-            - cell "approval.approve" [ref=f2e73]
-            - 'cell "decided_at: (empty) -> 2026-08-22T01:28:00; status: pending -> approved" [ref=f2e74]'
-```
+- generic [active] [ref=f3e1]:
+  - link "Skip to content" [ref=f3e2] [cursor=pointer]:
+    - /url: "#main"
+  - generic [ref=f3e3]:
+    - complementary [ref=f3e4]:
+      - link "Precedent" [ref=f3e5] [cursor=pointer]:
+        - /url: /
+        - generic [aria-hidden] [ref=f3e6]: p
+      - generic [ref=f3e8]:
+        - generic [aria-hidden] [ref=f3e9]: "N"
+        - generic [ref=f3e10]:
+          - generic [ref=f3e11]: Northwind Ltd
+          - text: Company workspace
+      - navigation "Company applications" [ref=f3e12]:
+        - generic [ref=f3e13]: Workspace
+        - link "Overview" [ref=f3e14] [cursor=pointer]:
+          - /url: /
+        - link "Mail" [ref=f3e18] [cursor=pointer]:
+          - /url: /mail/
+        - link "Books" [ref=f3e22] [cursor=pointer]:
+          - /url: /books/bills
+        - link "Drive" [ref=f3e26] [cursor=pointer]:
+          - /url: /drive/
+        - link "Chat" [ref=f3e30] [cursor=pointer]:
+          - /url: /chat/
+        - generic [ref=f3e34]: Agent
+        - link "Ava’s tasks ↗" [ref=f3e35] [cursor=pointer]:
+          - /url: http://localhost:8000
+          - generic [ref=f3e38]:
+            - text: Ava’s tasks
+            - generic [ref=f3e39]: ↗
+      - generic [ref=f3e40]:
+        - generic [aria-hidden] [ref=f3e41]: A
+        - generic [ref=f3e42]:
+          - strong [ref=f3e43]:
+            - text: Ava
+            - generic [ref=f3e44]: AI
+          - generic [ref=f3e45]: Accounts payable
+          - generic [ref=f3e46]: Signed in as Ava (AP)
+    - generic [ref=f3e47]:
+      - banner [ref=f3e48]:
+        - generic [ref=f3e49]:
+          - generic [ref=f3e50]: Northwind Ltd
+          - generic [ref=f3e51]: /
+          - strong [ref=f3e52]: Books
+        - group [ref=f3e53]:
+          - generic "Company apps" [ref=f3e54] [cursor=pointer]
+      - main [ref=f3e55]:
+        - navigation "Books" [ref=f3e56]:
+          - link "Bills" [ref=f3e57] [cursor=pointer]:
+            - /url: /books/bills
+          - link "New bill" [ref=f3e58] [cursor=pointer]:
+            - /url: /books/bills/new
+          - link "Vendors" [ref=f3e59] [cursor=pointer]:
+            - /url: /books/vendors
+          - link "History report" [ref=f3e60] [cursor=pointer]:
+            - /url: /books/history
+        - generic [ref=f3e61]:
+          - link "Bills" [ref=f3e62] [cursor=pointer]:
+            - /url: /books/bills
+          - text: / INV-921
+        - generic [ref=f3e63]:
+          - generic [ref=f3e64]:
+            - generic [ref=f3e65]: Bill INV-921
+            - heading "Figma · FIG-1842" [level=1] [ref=f3e66]
+            - text: Pending approval
+          - generic [ref=f3e67]: INR 1,12,000.00
+        - generic "Bill lifecycle" [ref=f3e68]:
+          - generic [ref=f3e69]: Draft
+          - generic [ref=f3e70]: ›Pending approval
+          - generic [ref=f3e71]: ›Approved
+          - generic [ref=f3e72]: ›Paid
+        - generic [ref=f3e73]:
+          - generic [ref=f3e74]:
+            - generic [ref=f3e75]:
+              - term [ref=f3e76]: Status
+              - definition [ref=f3e77]: pending approval
+              - term [ref=f3e78]: Vendor
+              - definition [ref=f3e79]:
+                - link "Figma (V-112)" [ref=f3e80] [cursor=pointer]:
+                  - /url: /books/vendors/V-112
+              - term [ref=f3e81]: Invoice number
+              - definition [ref=f3e82]: FIG-1842
+              - term [ref=f3e83]: Amount
+              - definition [ref=f3e84]: INR 1,12,000.00
+              - term [ref=f3e85]: Invoice date
+              - definition [ref=f3e86]: 2026-09-28
+              - term [ref=f3e87]: Due date
+              - definition [ref=f3e88]: 2026-10-21
+              - term [ref=f3e89]: Account
+              - definition [ref=f3e90]: 1400 Prepaid expenses
+              - term [ref=f3e91]: Approver
+              - definition [ref=f3e92]: Ana Pereira
+              - term [ref=f3e93]: Attachment
+              - definition [ref=f3e94]:
+                - link "FIG-1842.pdf" [ref=f3e95] [cursor=pointer]:
+                  - /url: /drive/f/f-0004
+              - term [ref=f3e96]: Notes
+              - definition [ref=f3e97]: Scripted validation in a disposable world. Fixture values; no model decisions.
+              - term [ref=f3e98]: Created
+              - definition [ref=f3e99]: 2026-10-07T21:30:36+00:00 by Ava
+            - heading "Approvals" [level=2] [ref=f3e100]
+            - table [ref=f3e102]:
+              - rowgroup [ref=f3e103]:
+                - row [ref=f3e104]:
+                  - columnheader "Approver" [ref=f3e105]
+                  - columnheader "Status" [ref=f3e106]
+                  - columnheader "Requested" [ref=f3e107]
+                  - columnheader "Decided" [ref=f3e108]
+              - rowgroup [ref=f3e109]:
+                - row [ref=f3e110]:
+                  - cell "Ana Pereira" [ref=f3e111]
+                  - cell "pending" [ref=f3e112]
+                  - cell "2026-10-07T21:30:37+00:00 by Ava" [ref=f3e113]
+                  - cell [ref=f3e114]
+          - complementary [ref=f3e115]:
+            - heading "Attached invoice" [level=2] [ref=f3e116]
+            - link [ref=f3e117] [cursor=pointer]:
+              - /url: /drive/f/f-0004
+              - img "First page of FIG-1842.pdf" [ref=f3e118]
+            - paragraph [ref=f3e119]:
+              - link "Open FIG-1842.pdf and extracted text →" [ref=f3e120] [cursor=pointer]:
+                - /url: /drive/f/f-0004
+        - generic [ref=f3e121]:
+          - heading "Activity" [level=2] [ref=f3e122]
+          - list [ref=f3e123]:
+            - listitem [ref=f3e124]:
+              - time [ref=f3e125]: 07 Oct 2026, 21:30
+              - generic [ref=f3e126]:
+                - strong [ref=f3e127]: Draft bill created
+                - text: · Ava
+                - group [ref=f3e128]:
+                  - generic "Exact details" [ref=f3e129] [cursor=pointer]
+            - listitem [ref=f3e130]:
+              - time [ref=f3e131]: 07 Oct 2026, 21:30
+              - generic [ref=f3e132]:
+                - strong [ref=f3e133]: Bill routed for approval
+                - text: · Ava
+                - group [ref=f3e134]:
+                  - generic "Exact details" [ref=f3e135] [cursor=pointer]
+            - listitem [ref=f3e136]:
+              - time [ref=f3e137]: 07 Oct 2026, 21:30
+              - generic [ref=f3e138]:
+                - strong [ref=f3e139]: Approval requested
+                - text: · Ava
+                - group [ref=f3e140]:
+                  - generic "Exact details" [ref=f3e141] [cursor=pointer]

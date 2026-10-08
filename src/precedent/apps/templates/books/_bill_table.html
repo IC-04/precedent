@@ -1,20 +1,20 @@
-<table>
+<div class="table-wrap"><table>
   <thead><tr><th>Bill</th><th>Invoice no.</th><th>Vendor</th><th>Invoice date</th><th>Due</th><th class="num">Amount</th><th>Account</th><th>Approver</th><th>Status</th>{% if show_notes %}<th>Notes</th>{% endif %}</tr></thead>
   <tbody>
   {% for b in rows %}
     <tr>
       <td><a href="/books/bills/{{ b.id }}">{{ b.id }}</a></td>
-      <td>{{ b.invoice_no }}</td>
+      <td class="nowrap">{{ b.invoice_no }}</td>
       <td><a href="/books/vendors/{{ b.vendor_id }}">{{ b.vendor_name }}</a></td>
-      <td>{{ b.issue_date }}</td><td>{{ b.due_date }}</td>
+      <td class="nowrap">{{ b.issue_date }}</td><td class="nowrap">{{ b.due_date }}</td>
       <td class="num">{{ b.currency }} {{ b.amount_minor | money }}</td>
       <td>{{ b.account_code or "" }}</td>
       <td>{{ names.get(b.approver_id, "") }}</td>
       <td class="status">{{ b.status | replace("_", " ") }}</td>
-      {% if show_notes %}<td>{{ b.notes or "" }}</td>{% endif %}
+      {% if show_notes %}<td class="notes">{% if b.notes %}<details><summary>{{ b.notes[:60] }}</summary><p>{{ b.notes }}</p></details>{% endif %}</td>{% endif %}
     </tr>
   {% else %}
     <tr><td colspan="10">No bills match.</td></tr>
   {% endfor %}
   </tbody>
-</table>
+</table></div>

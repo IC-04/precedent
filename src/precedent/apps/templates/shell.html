@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>{% block title %}Workspace{% endblock %} · {{ app_name }} · Precedent</title><link rel="stylesheet" href="/static/workspace.css">{% block head %}{% endblock %}</head>
+<body class="app-{{ app_name | lower }}">
+<a class="skip" href="#main">Skip to content</a>
+{% import "_macros.html" as m with context %}
+<div class="app-shell">
+  <aside class="sidebar">
+    <a class="product" href="/"><span class="mark" aria-hidden="true">p</span><span class="brand-name">Precedent</span></a>
+    <div class="company-context"><span class="company-avatar" aria-hidden="true">{{ company.name[0] }}</span><div><div class="company-name">{{ company.name }}</div><small>Company workspace</small></div></div>
+    <nav aria-label="Company applications">
+      <div class="nav-caption">Workspace</div>
+      {% for name,path,icon in [('Overview','/','overview'),('Mail','/mail/','mail'),('Books','/books/bills','books'),('Drive','/drive/','drive'),('Chat','/chat/','chat')] %}
+      <a href="{{ path }}" title="{{ name }}"{% if name == app_name %} class="on" aria-current="page"{% endif %}><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#{{ icon }}"/></svg><span class="nav-text">{{ name }}</span></a>
+      {% endfor %}
+      <div class="nav-caption separated">Agent</div><a href="{{ console_url }}" title="Ava's tasks"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#tasks"/></svg><span class="nav-text">Ava’s tasks <span class="nav-external">↗</span></span></a>
+    </nav>
+    <div class="identity"><span class="initial" aria-hidden="true">A</span><div class="identity-copy"><strong>Ava <span class="ai-tag">AI</span></strong><small>Accounts payable</small><small>Signed in as Ava (AP)</small></div></div>
+  </aside>
+  <div class="work-area">
+    <header class="topbar"><div class="breadcrumb"><span class="muted">{{ company.name }}</span><span class="crumb-divider">/</span><strong>{{ app_name }}</strong></div><details class="switcher"><summary>Company apps</summary><nav aria-label="App switcher"><a href="/">Workspace overview</a><a href="/mail/">Mail</a><a href="/books/bills">Books</a><a href="/drive/">Drive</a><a href="/chat/">Chat</a></nav></details></header>
+    <main class="content" id="main">{% if banner %}<p class="banner" role="status">{{ banner }}</p>{% endif %}{% block before_content %}{% endblock %}{% block content %}{% endblock %}</main>
+  </div>
+</div>
+</body></html>

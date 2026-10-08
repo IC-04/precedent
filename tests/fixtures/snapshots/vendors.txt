@@ -1,274 +1,311 @@
-### Page
-- Page URL: http://localhost:8100/books/vendors
-- Page Title: Vendors · Books
-### Snapshot
-```yaml
-- generic [active] [ref=f5e1]:
-  - banner [ref=f5e2]:
-    - generic [ref=f5e3]: Books
-    - navigation "Books" [ref=f5e4]:
-      - link "Bills" [ref=f5e5] [cursor=pointer]:
-        - /url: /books/bills
-      - link "New bill" [ref=f5e6] [cursor=pointer]:
-        - /url: /books/bills/new
-      - link "Vendors" [ref=f5e7] [cursor=pointer]:
-        - /url: /books/vendors
-      - link "History report" [ref=f5e8] [cursor=pointer]:
-        - /url: /books/history
-    - generic [ref=f5e9]: Signed in as Ava (AP)
-  - main [ref=f5e10]:
-    - heading "Vendors" [level=1] [ref=f5e11]
-    - search [ref=f5e12]:
-      - generic [ref=f5e13]:
-        - generic [ref=f5e14]: Search vendors
-        - textbox "Search vendors" [ref=f5e15]
-      - generic [ref=f5e16]:
-        - generic [ref=f5e17]: Status
-        - combobox "Status" [ref=f5e18]:
-          - option "Any status" [selected]
-          - option "active"
-          - option "draft"
-          - option "retired"
-      - button "Search vendors" [ref=f5e19] [cursor=pointer]
-      - link "New vendor" [ref=f5e20] [cursor=pointer]:
-        - /url: /books/vendors/new
-    - table [ref=f5e21]:
-      - rowgroup [ref=f5e22]:
-        - row [ref=f5e23]:
-          - columnheader "Vendor" [ref=f5e24]
-          - columnheader "Name" [ref=f5e25]
-          - columnheader "Legal name" [ref=f5e26]
-          - columnheader "Tax ID (GSTIN)" [ref=f5e27]
-          - columnheader "Email" [ref=f5e28]
-          - columnheader "Status" [ref=f5e29]
-      - rowgroup [ref=f5e30]:
-        - row [ref=f5e31]:
-          - cell [ref=f5e32]:
-            - link "V-126" [ref=f5e33] [cursor=pointer]:
-              - /url: /books/vendors/V-126
-          - cell "Adobe Stock" [ref=f5e34]
-          - cell "Adobe Stock Inc." [ref=f5e35]
-          - cell "17TRDTB4134J1ZC" [ref=f5e36]
-          - cell "billing@adobestock.example" [ref=f5e37]
-          - cell "active" [ref=f5e38]
-        - row [ref=f5e39]:
-          - cell [ref=f5e40]:
-            - link "V-167" [ref=f5e41] [cursor=pointer]:
-              - /url: /books/vendors/V-167
-          - cell "Airtel Business" [ref=f5e42]
-          - cell "Airtel Business Private Limited" [ref=f5e43]
-          - cell "29CMSFQ5258X1ZA" [ref=f5e44]
-          - cell "billing@airtelbusiness.example" [ref=f5e45]
-          - cell "active" [ref=f5e46]
-        - row [ref=f5e47]:
-          - cell [ref=f5e48]:
-            - link "V-116" [ref=f5e49] [cursor=pointer]:
-              - /url: /books/vendors/V-116
-          - cell "BESCOM" [ref=f5e50]
-          - cell "BESCOM Private Limited" [ref=f5e51]
-          - cell "18KQCSQ7338G1ZP" [ref=f5e52]
-          - cell "billing@bescom.example" [ref=f5e53]
-          - cell "active" [ref=f5e54]
-        - row [ref=f5e55]:
-          - cell [ref=f5e56]:
-            - link "V-152" [ref=f5e57] [cursor=pointer]:
-              - /url: /books/vendors/V-152
-          - cell "Calendly" [ref=f5e58]
-          - cell "Calendly Inc." [ref=f5e59]
-          - cell "30HTTSL4654V1ZN" [ref=f5e60]
-          - cell "billing@calendly.example" [ref=f5e61]
-          - cell "active" [ref=f5e62]
-        - row [ref=f5e63]:
-          - cell [ref=f5e64]:
-            - link "V-109" [ref=f5e65] [cursor=pointer]:
-              - /url: /books/vendors/V-109
-          - cell "Canva" [ref=f5e66]
-          - cell "Canva LLP" [ref=f5e67]
-          - cell "36ZMQXU9466P1Z8" [ref=f5e68]
-          - cell "billing@canva.example" [ref=f5e69]
-          - cell "active" [ref=f5e70]
-        - row [ref=f5e71]:
-          - cell [ref=f5e72]:
-            - link "V-140" [ref=f5e73] [cursor=pointer]:
-              - /url: /books/vendors/V-140
-          - cell "Cleartrip" [ref=f5e74]
-          - cell "Cleartrip Inc." [ref=f5e75]
-          - cell "10RSHTH7747Y1ZV" [ref=f5e76]
-          - cell "billing@cleartrip.example" [ref=f5e77]
-          - cell "active" [ref=f5e78]
-        - row [ref=f5e79]:
-          - cell [ref=f5e80]:
-            - link "V-169" [ref=f5e81] [cursor=pointer]:
-              - /url: /books/vendors/V-169
-          - cell "Clockify" [ref=f5e82]
-          - cell "Clockify India Pvt Ltd" [ref=f5e83]
-          - cell "14XQNKZ7818M1Z0" [ref=f5e84]
-          - cell "billing@clockify.example" [ref=f5e85]
-          - cell "active" [ref=f5e86]
-        - row [ref=f5e87]:
-          - cell [ref=f5e88]:
-            - link "V-176" [ref=f5e89] [cursor=pointer]:
-              - /url: /books/vendors/V-176
-          - cell "Cloudflare" [ref=f5e90]
-          - cell "Cloudflare India Pvt Ltd" [ref=f5e91]
-          - cell "29ZREKZ3371B1Z8" [ref=f5e92]
-          - cell "billing@cloudflare.example" [ref=f5e93]
-          - cell "active" [ref=f5e94]
-        - row [ref=f5e95]:
-          - cell [ref=f5e96]:
-            - link "V-121" [ref=f5e97] [cursor=pointer]:
-              - /url: /books/vendors/V-121
-          - cell "Coursera for Teams" [ref=f5e98]
-          - cell "Coursera for Teams Private Limited" [ref=f5e99]
-          - cell "21GZCVL5461L1ZC" [ref=f5e100]
-          - cell "billing@courseraforteams.example" [ref=f5e101]
-          - cell "active" [ref=f5e102]
-        - row [ref=f5e103]:
-          - cell [ref=f5e104]:
-            - link "V-174" [ref=f5e105] [cursor=pointer]:
-              - /url: /books/vendors/V-174
-          - cell "Datadog" [ref=f5e106]
-          - cell "Datadog India Pvt Ltd" [ref=f5e107]
-          - cell "14VVRXM9989T1ZJ" [ref=f5e108]
-          - cell "billing@datadog.example" [ref=f5e109]
-          - cell "active" [ref=f5e110]
-        - row [ref=f5e111]:
-          - cell [ref=f5e112]:
-            - link "V-172" [ref=f5e113] [cursor=pointer]:
-              - /url: /books/vendors/V-172
-          - cell "Deloitte Advisory" [ref=f5e114]
-          - cell "Deloitte Advisory India Pvt Ltd" [ref=f5e115]
-          - cell "36NRGKE1712R1ZW" [ref=f5e116]
-          - cell "billing@deloitteadvisory.example" [ref=f5e117]
-          - cell "active" [ref=f5e118]
-        - row [ref=f5e119]:
-          - cell [ref=f5e120]:
-            - link "V-124" [ref=f5e121] [cursor=pointer]:
-              - /url: /books/vendors/V-124
-          - cell "Envato" [ref=f5e122]
-          - cell "Envato Inc." [ref=f5e123]
-          - cell "27BAAZS4104S1Z6" [ref=f5e124]
-          - cell "billing@envato.example" [ref=f5e125]
-          - cell "active" [ref=f5e126]
-        - row [ref=f5e127]:
-          - cell [ref=f5e128]:
-            - link "V-162" [ref=f5e129] [cursor=pointer]:
-              - /url: /books/vendors/V-162
-          - cell "Eventbrite" [ref=f5e130]
-          - cell "Eventbrite Inc." [ref=f5e131]
-          - cell "20TEFRP5616K1ZS" [ref=f5e132]
-          - cell "billing@eventbrite.example" [ref=f5e133]
-          - cell "active" [ref=f5e134]
-        - row [ref=f5e135]:
-          - cell [ref=f5e136]:
-            - link "V-112" [ref=f5e137] [cursor=pointer]:
-              - /url: /books/vendors/V-112
-          - cell "Figma" [ref=f5e138]
-          - cell "Figma LLP" [ref=f5e139]
-          - cell "17CFEHX1197R1ZM" [ref=f5e140]
-          - cell "billing@figma.example" [ref=f5e141]
-          - cell "active" [ref=f5e142]
-        - row [ref=f5e143]:
-          - cell [ref=f5e144]:
-            - link "V-159" [ref=f5e145] [cursor=pointer]:
-              - /url: /books/vendors/V-159
-          - cell "Frame.io" [ref=f5e146]
-          - cell "Frame.io India Pvt Ltd" [ref=f5e147]
-          - cell "32RFXHF8070S1Z1" [ref=f5e148]
-          - cell "billing@frameio.example" [ref=f5e149]
-          - cell "active" [ref=f5e150]
-        - row [ref=f5e151]:
-          - cell [ref=f5e152]:
-            - link "V-150" [ref=f5e153] [cursor=pointer]:
-              - /url: /books/vendors/V-150
-          - cell "Freepik" [ref=f5e154]
-          - cell "Freepik Private Limited" [ref=f5e155]
-          - cell "15CWZJP1907C1Z0" [ref=f5e156]
-          - cell "billing@freepik.example" [ref=f5e157]
-          - cell "active" [ref=f5e158]
-        - row [ref=f5e159]:
-          - cell [ref=f5e160]:
-            - link "V-144" [ref=f5e161] [cursor=pointer]:
-              - /url: /books/vendors/V-144
-          - cell "GitHub" [ref=f5e162]
-          - cell "GitHub Private Limited" [ref=f5e163]
-          - cell "25HRGLG1031R1ZY" [ref=f5e164]
-          - cell "billing@github.example" [ref=f5e165]
-          - cell "active" [ref=f5e166]
-        - row [ref=f5e167]:
-          - cell [ref=f5e168]:
-            - link "V-133" [ref=f5e169] [cursor=pointer]:
-              - /url: /books/vendors/V-133
-          - cell "Google Ads" [ref=f5e170]
-          - cell "Google Ads Private Limited" [ref=f5e171]
-          - cell "34CGRGK4177H1Z5" [ref=f5e172]
-          - cell "billing@googleads.example" [ref=f5e173]
-          - cell "active" [ref=f5e174]
-        - row [ref=f5e175]:
-          - cell [ref=f5e176]:
-            - link "V-143" [ref=f5e177] [cursor=pointer]:
-              - /url: /books/vendors/V-143
-          - cell "Grant Thornton" [ref=f5e178]
-          - cell "Grant Thornton Private Limited" [ref=f5e179]
-          - cell "35HQVQF8753N1ZG" [ref=f5e180]
-          - cell "billing@grantthornton.example" [ref=f5e181]
-          - cell "active" [ref=f5e182]
-        - row [ref=f5e183]:
-          - cell [ref=f5e184]:
-            - link "V-111" [ref=f5e185] [cursor=pointer]:
-              - /url: /books/vendors/V-111
-          - cell "Khaitan Legal" [ref=f5e186]
-          - cell "Khaitan Legal LLP" [ref=f5e187]
-          - cell "20TGHCF2492L1ZR" [ref=f5e188]
-          - cell "billing@khaitanlegal.example" [ref=f5e189]
-          - cell "active" [ref=f5e190]
-        - row [ref=f5e191]:
-          - cell [ref=f5e192]:
-            - link "V-139" [ref=f5e193] [cursor=pointer]:
-              - /url: /books/vendors/V-139
-          - cell "Linear" [ref=f5e194]
-          - cell "Linear LLP" [ref=f5e195]
-          - cell "12RWNBG4420Q1ZL" [ref=f5e196]
-          - cell "billing@linear.example" [ref=f5e197]
-          - cell "active" [ref=f5e198]
-        - row [ref=f5e199]:
-          - cell [ref=f5e200]:
-            - link "V-164" [ref=f5e201] [cursor=pointer]:
-              - /url: /books/vendors/V-164
-          - cell "LinkedIn Ads" [ref=f5e202]
-          - cell "LinkedIn Ads Private Limited" [ref=f5e203]
-          - cell "24GDPRY3837H1ZJ" [ref=f5e204]
-          - cell "billing@linkedinads.example" [ref=f5e205]
-          - cell "active" [ref=f5e206]
-        - row [ref=f5e207]:
-          - cell [ref=f5e208]:
-            - link "V-151" [ref=f5e209] [cursor=pointer]:
-              - /url: /books/vendors/V-151
-          - cell "Linode" [ref=f5e210]
-          - cell "Linode Private Limited" [ref=f5e211]
-          - cell "33RJAQC9240T1ZF" [ref=f5e212]
-          - cell "billing@linode.example" [ref=f5e213]
-          - cell "active" [ref=f5e214]
-        - row [ref=f5e215]:
-          - cell [ref=f5e216]:
-            - link "V-132" [ref=f5e217] [cursor=pointer]:
-              - /url: /books/vendors/V-132
-          - cell "Miro" [ref=f5e218]
-          - cell "Miro Inc." [ref=f5e219]
-          - cell "20CJDQA7844J1ZJ" [ref=f5e220]
-          - cell "billing@miro.example" [ref=f5e221]
-          - cell "active" [ref=f5e222]
-        - row [ref=f5e223]:
-          - cell [ref=f5e224]:
-            - link "V-146" [ref=f5e225] [cursor=pointer]:
-              - /url: /books/vendors/V-146
-          - cell "Pitch" [ref=f5e226]
-          - cell "Pitch Private Limited" [ref=f5e227]
-          - cell "34DCJJB3974J1ZJ" [ref=f5e228]
-          - cell "billing@pitch.example" [ref=f5e229]
-          - cell "active" [ref=f5e230]
-    - navigation "Pages" [ref=f5e231]:
-      - generic [ref=f5e232]: Page 1
-      - link "Next page" [ref=f5e233] [cursor=pointer]:
-        - /url: "?page=2"
-```
+- generic [active] [ref=f1e1]:
+  - link "Skip to content" [ref=f1e2] [cursor=pointer]:
+    - /url: "#main"
+  - generic [ref=f1e3]:
+    - complementary [ref=f1e4]:
+      - link "Precedent" [ref=f1e5] [cursor=pointer]:
+        - /url: /
+        - generic [aria-hidden] [ref=f1e6]: p
+      - generic [ref=f1e8]:
+        - generic [aria-hidden] [ref=f1e9]: "N"
+        - generic [ref=f1e10]:
+          - generic [ref=f1e11]: Northwind Ltd
+          - text: Company workspace
+      - navigation "Company applications" [ref=f1e12]:
+        - generic [ref=f1e13]: Workspace
+        - link "Overview" [ref=f1e14] [cursor=pointer]:
+          - /url: /
+        - link "Mail" [ref=f1e18] [cursor=pointer]:
+          - /url: /mail/
+        - link "Books" [ref=f1e22] [cursor=pointer]:
+          - /url: /books/bills
+        - link "Drive" [ref=f1e26] [cursor=pointer]:
+          - /url: /drive/
+        - link "Chat" [ref=f1e30] [cursor=pointer]:
+          - /url: /chat/
+        - generic [ref=f1e34]: Agent
+        - link "Ava’s tasks ↗" [ref=f1e35] [cursor=pointer]:
+          - /url: http://localhost:8000
+          - generic [ref=f1e38]:
+            - text: Ava’s tasks
+            - generic [ref=f1e39]: ↗
+      - generic [ref=f1e40]:
+        - generic [aria-hidden] [ref=f1e41]: A
+        - generic [ref=f1e42]:
+          - strong [ref=f1e43]:
+            - text: Ava
+            - generic [ref=f1e44]: AI
+          - generic [ref=f1e45]: Accounts payable
+          - generic [ref=f1e46]: Signed in as Ava (AP)
+    - generic [ref=f1e47]:
+      - banner [ref=f1e48]:
+        - generic [ref=f1e49]:
+          - generic [ref=f1e50]: Northwind Ltd
+          - generic [ref=f1e51]: /
+          - strong [ref=f1e52]: Books
+        - group [ref=f1e53]:
+          - generic "Company apps" [ref=f1e54] [cursor=pointer]
+      - main [ref=f1e55]:
+        - navigation "Books" [ref=f1e56]:
+          - link "Bills" [ref=f1e57] [cursor=pointer]:
+            - /url: /books/bills
+          - link "New bill" [ref=f1e58] [cursor=pointer]:
+            - /url: /books/bills/new
+          - link "Vendors" [ref=f1e59] [cursor=pointer]:
+            - /url: /books/vendors
+          - link "History report" [ref=f1e60] [cursor=pointer]:
+            - /url: /books/history
+        - heading "Vendors" [level=1] [ref=f1e61]
+        - search [ref=f1e62]:
+          - generic [ref=f1e63]:
+            - generic [ref=f1e64]: Search vendors
+            - textbox "Search vendors" [ref=f1e65]
+          - generic [ref=f1e66]:
+            - generic [ref=f1e67]: Status
+            - combobox "Status" [ref=f1e68]:
+              - option "Any status" [selected]
+              - option "active"
+              - option "draft"
+              - option "retired"
+          - button "Search vendors" [ref=f1e69] [cursor=pointer]
+          - link "New vendor" [ref=f1e70] [cursor=pointer]:
+            - /url: /books/vendors/new
+        - table [ref=f1e72]:
+          - rowgroup [ref=f1e73]:
+            - row [ref=f1e74]:
+              - columnheader "Vendor" [ref=f1e75]
+              - columnheader "Name" [ref=f1e76]
+              - columnheader "Legal name" [ref=f1e77]
+              - columnheader "Tax ID (GSTIN)" [ref=f1e78]
+              - columnheader "Email" [ref=f1e79]
+              - columnheader "Status" [ref=f1e80]
+          - rowgroup [ref=f1e81]:
+            - row [ref=f1e82]:
+              - cell [ref=f1e83]:
+                - link "V-126" [ref=f1e84] [cursor=pointer]:
+                  - /url: /books/vendors/V-126
+              - cell "Adobe Stock" [ref=f1e85]
+              - cell "Adobe Stock Inc." [ref=f1e86]
+              - cell "17TRDTB4134J1ZC" [ref=f1e87]
+              - cell "billing@adobestock.example" [ref=f1e88]
+              - cell "active" [ref=f1e89]
+            - row [ref=f1e90]:
+              - cell [ref=f1e91]:
+                - link "V-167" [ref=f1e92] [cursor=pointer]:
+                  - /url: /books/vendors/V-167
+              - cell "Airtel Business" [ref=f1e93]
+              - cell "Airtel Business Private Limited" [ref=f1e94]
+              - cell "29CMSFQ5258X1ZA" [ref=f1e95]
+              - cell "billing@airtelbusiness.example" [ref=f1e96]
+              - cell "active" [ref=f1e97]
+            - row [ref=f1e98]:
+              - cell [ref=f1e99]:
+                - link "V-116" [ref=f1e100] [cursor=pointer]:
+                  - /url: /books/vendors/V-116
+              - cell "BESCOM" [ref=f1e101]
+              - cell "BESCOM Private Limited" [ref=f1e102]
+              - cell "18KQCSQ7338G1ZP" [ref=f1e103]
+              - cell "billing@bescom.example" [ref=f1e104]
+              - cell "active" [ref=f1e105]
+            - row [ref=f1e106]:
+              - cell [ref=f1e107]:
+                - link "V-152" [ref=f1e108] [cursor=pointer]:
+                  - /url: /books/vendors/V-152
+              - cell "Calendly" [ref=f1e109]
+              - cell "Calendly Inc." [ref=f1e110]
+              - cell "30HTTSL4654V1ZN" [ref=f1e111]
+              - cell "billing@calendly.example" [ref=f1e112]
+              - cell "active" [ref=f1e113]
+            - row [ref=f1e114]:
+              - cell [ref=f1e115]:
+                - link "V-109" [ref=f1e116] [cursor=pointer]:
+                  - /url: /books/vendors/V-109
+              - cell "Canva" [ref=f1e117]
+              - cell "Canva LLP" [ref=f1e118]
+              - cell "36ZMQXU9466P1Z8" [ref=f1e119]
+              - cell "billing@canva.example" [ref=f1e120]
+              - cell "active" [ref=f1e121]
+            - row [ref=f1e122]:
+              - cell [ref=f1e123]:
+                - link "V-140" [ref=f1e124] [cursor=pointer]:
+                  - /url: /books/vendors/V-140
+              - cell "Cleartrip" [ref=f1e125]
+              - cell "Cleartrip Inc." [ref=f1e126]
+              - cell "10RSHTH7747Y1ZV" [ref=f1e127]
+              - cell "billing@cleartrip.example" [ref=f1e128]
+              - cell "active" [ref=f1e129]
+            - row [ref=f1e130]:
+              - cell [ref=f1e131]:
+                - link "V-169" [ref=f1e132] [cursor=pointer]:
+                  - /url: /books/vendors/V-169
+              - cell "Clockify" [ref=f1e133]
+              - cell "Clockify India Pvt Ltd" [ref=f1e134]
+              - cell "14XQNKZ7818M1Z0" [ref=f1e135]
+              - cell "billing@clockify.example" [ref=f1e136]
+              - cell "active" [ref=f1e137]
+            - row [ref=f1e138]:
+              - cell [ref=f1e139]:
+                - link "V-176" [ref=f1e140] [cursor=pointer]:
+                  - /url: /books/vendors/V-176
+              - cell "Cloudflare" [ref=f1e141]
+              - cell "Cloudflare India Pvt Ltd" [ref=f1e142]
+              - cell "29ZREKZ3371B1Z8" [ref=f1e143]
+              - cell "billing@cloudflare.example" [ref=f1e144]
+              - cell "active" [ref=f1e145]
+            - row [ref=f1e146]:
+              - cell [ref=f1e147]:
+                - link "V-121" [ref=f1e148] [cursor=pointer]:
+                  - /url: /books/vendors/V-121
+              - cell "Coursera for Teams" [ref=f1e149]
+              - cell "Coursera for Teams Private Limited" [ref=f1e150]
+              - cell "21GZCVL5461L1ZC" [ref=f1e151]
+              - cell "billing@courseraforteams.example" [ref=f1e152]
+              - cell "active" [ref=f1e153]
+            - row [ref=f1e154]:
+              - cell [ref=f1e155]:
+                - link "V-174" [ref=f1e156] [cursor=pointer]:
+                  - /url: /books/vendors/V-174
+              - cell "Datadog" [ref=f1e157]
+              - cell "Datadog India Pvt Ltd" [ref=f1e158]
+              - cell "14VVRXM9989T1ZJ" [ref=f1e159]
+              - cell "billing@datadog.example" [ref=f1e160]
+              - cell "active" [ref=f1e161]
+            - row [ref=f1e162]:
+              - cell [ref=f1e163]:
+                - link "V-172" [ref=f1e164] [cursor=pointer]:
+                  - /url: /books/vendors/V-172
+              - cell "Deloitte Advisory" [ref=f1e165]
+              - cell "Deloitte Advisory India Pvt Ltd" [ref=f1e166]
+              - cell "36NRGKE1712R1ZW" [ref=f1e167]
+              - cell "billing@deloitteadvisory.example" [ref=f1e168]
+              - cell "active" [ref=f1e169]
+            - row [ref=f1e170]:
+              - cell [ref=f1e171]:
+                - link "V-124" [ref=f1e172] [cursor=pointer]:
+                  - /url: /books/vendors/V-124
+              - cell "Envato" [ref=f1e173]
+              - cell "Envato Inc." [ref=f1e174]
+              - cell "27BAAZS4104S1Z6" [ref=f1e175]
+              - cell "billing@envato.example" [ref=f1e176]
+              - cell "active" [ref=f1e177]
+            - row [ref=f1e178]:
+              - cell [ref=f1e179]:
+                - link "V-162" [ref=f1e180] [cursor=pointer]:
+                  - /url: /books/vendors/V-162
+              - cell "Eventbrite" [ref=f1e181]
+              - cell "Eventbrite Inc." [ref=f1e182]
+              - cell "20TEFRP5616K1ZS" [ref=f1e183]
+              - cell "billing@eventbrite.example" [ref=f1e184]
+              - cell "active" [ref=f1e185]
+            - row [ref=f1e186]:
+              - cell [ref=f1e187]:
+                - link "V-112" [ref=f1e188] [cursor=pointer]:
+                  - /url: /books/vendors/V-112
+              - cell "Figma" [ref=f1e189]
+              - cell "Figma LLP" [ref=f1e190]
+              - cell "17CFEHX1197R1ZM" [ref=f1e191]
+              - cell "billing@figma.example" [ref=f1e192]
+              - cell "active" [ref=f1e193]
+            - row [ref=f1e194]:
+              - cell [ref=f1e195]:
+                - link "V-159" [ref=f1e196] [cursor=pointer]:
+                  - /url: /books/vendors/V-159
+              - cell "Frame.io" [ref=f1e197]
+              - cell "Frame.io India Pvt Ltd" [ref=f1e198]
+              - cell "32RFXHF8070S1Z1" [ref=f1e199]
+              - cell "billing@frameio.example" [ref=f1e200]
+              - cell "active" [ref=f1e201]
+            - row [ref=f1e202]:
+              - cell [ref=f1e203]:
+                - link "V-150" [ref=f1e204] [cursor=pointer]:
+                  - /url: /books/vendors/V-150
+              - cell "Freepik" [ref=f1e205]
+              - cell "Freepik Private Limited" [ref=f1e206]
+              - cell "15CWZJP1907C1Z0" [ref=f1e207]
+              - cell "billing@freepik.example" [ref=f1e208]
+              - cell "active" [ref=f1e209]
+            - row [ref=f1e210]:
+              - cell [ref=f1e211]:
+                - link "V-144" [ref=f1e212] [cursor=pointer]:
+                  - /url: /books/vendors/V-144
+              - cell "GitHub" [ref=f1e213]
+              - cell "GitHub Private Limited" [ref=f1e214]
+              - cell "25HRGLG1031R1ZY" [ref=f1e215]
+              - cell "billing@github.example" [ref=f1e216]
+              - cell "active" [ref=f1e217]
+            - row [ref=f1e218]:
+              - cell [ref=f1e219]:
+                - link "V-133" [ref=f1e220] [cursor=pointer]:
+                  - /url: /books/vendors/V-133
+              - cell "Google Ads" [ref=f1e221]
+              - cell "Google Ads Private Limited" [ref=f1e222]
+              - cell "34CGRGK4177H1Z5" [ref=f1e223]
+              - cell "billing@googleads.example" [ref=f1e224]
+              - cell "active" [ref=f1e225]
+            - row [ref=f1e226]:
+              - cell [ref=f1e227]:
+                - link "V-143" [ref=f1e228] [cursor=pointer]:
+                  - /url: /books/vendors/V-143
+              - cell "Grant Thornton" [ref=f1e229]
+              - cell "Grant Thornton Private Limited" [ref=f1e230]
+              - cell "35HQVQF8753N1ZG" [ref=f1e231]
+              - cell "billing@grantthornton.example" [ref=f1e232]
+              - cell "active" [ref=f1e233]
+            - row [ref=f1e234]:
+              - cell [ref=f1e235]:
+                - link "V-111" [ref=f1e236] [cursor=pointer]:
+                  - /url: /books/vendors/V-111
+              - cell "Khaitan Legal" [ref=f1e237]
+              - cell "Khaitan Legal LLP" [ref=f1e238]
+              - cell "20TGHCF2492L1ZR" [ref=f1e239]
+              - cell "billing@khaitanlegal.example" [ref=f1e240]
+              - cell "active" [ref=f1e241]
+            - row [ref=f1e242]:
+              - cell [ref=f1e243]:
+                - link "V-139" [ref=f1e244] [cursor=pointer]:
+                  - /url: /books/vendors/V-139
+              - cell "Linear" [ref=f1e245]
+              - cell "Linear LLP" [ref=f1e246]
+              - cell "12RWNBG4420Q1ZL" [ref=f1e247]
+              - cell "billing@linear.example" [ref=f1e248]
+              - cell "active" [ref=f1e249]
+            - row [ref=f1e250]:
+              - cell [ref=f1e251]:
+                - link "V-164" [ref=f1e252] [cursor=pointer]:
+                  - /url: /books/vendors/V-164
+              - cell "LinkedIn Ads" [ref=f1e253]
+              - cell "LinkedIn Ads Private Limited" [ref=f1e254]
+              - cell "24GDPRY3837H1ZJ" [ref=f1e255]
+              - cell "billing@linkedinads.example" [ref=f1e256]
+              - cell "active" [ref=f1e257]
+            - row [ref=f1e258]:
+              - cell [ref=f1e259]:
+                - link "V-151" [ref=f1e260] [cursor=pointer]:
+                  - /url: /books/vendors/V-151
+              - cell "Linode" [ref=f1e261]
+              - cell "Linode Private Limited" [ref=f1e262]
+              - cell "33RJAQC9240T1ZF" [ref=f1e263]
+              - cell "billing@linode.example" [ref=f1e264]
+              - cell "active" [ref=f1e265]
+            - row [ref=f1e266]:
+              - cell [ref=f1e267]:
+                - link "V-132" [ref=f1e268] [cursor=pointer]:
+                  - /url: /books/vendors/V-132
+              - cell "Miro" [ref=f1e269]
+              - cell "Miro Inc." [ref=f1e270]
+              - cell "20CJDQA7844J1ZJ" [ref=f1e271]
+              - cell "billing@miro.example" [ref=f1e272]
+              - cell "active" [ref=f1e273]
+            - row [ref=f1e274]:
+              - cell [ref=f1e275]:
+                - link "V-146" [ref=f1e276] [cursor=pointer]:
+                  - /url: /books/vendors/V-146
+              - cell "Pitch" [ref=f1e277]
+              - cell "Pitch Private Limited" [ref=f1e278]
+              - cell "34DCJJB3974J1ZJ" [ref=f1e279]
+              - cell "billing@pitch.example" [ref=f1e280]
+              - cell "active" [ref=f1e281]
+        - navigation "Pages" [ref=f1e282]:
+          - generic [ref=f1e283]: Page 1
+          - link "Next page" [ref=f1e284] [cursor=pointer]:
+            - /url: "?page=2"

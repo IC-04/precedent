@@ -6,6 +6,7 @@ import json
 import re
 import sqlite3
 from collections.abc import Iterator
+from datetime import datetime
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import Any
@@ -53,6 +54,36 @@ templates.env.filters["money"] = money
 templates.env.filters["pairs"] = lambda xs: [(x, x) for x in xs]
 
 
+def date_format(value: str, pattern: str) -> str:
+    try:
+        return datetime.fromisoformat(str(value).replace("Z", "+00:00")).strftime(pattern)
+    except ValueError:
+        return str(value)
+
+
+for key, pattern in {
+    "date_short": "%d %b %Y",
+    "date_long": "%d %B %Y",
+    "human_date": "%d %b %Y, %H:%M",
+    "time_short": "%H:%M",
+}.items():
+    templates.env.filters[key] = lambda value, p=pattern: date_format(value, p)
+templates.env.filters["initials"] = lambda value: "".join(
+    part[0] for part in str(value).split()[:2] if part
+).upper()
+templates.env.filters["action_name"] = lambda value: {
+    "bill.create": "Draft bill created",
+    "bill.update": "Bill updated",
+    "bill.route": "Bill routed for approval",
+    "approval.request": "Approval requested",
+    "approval.approve": "Approval granted",
+    "vendor.create": "Vendor created",
+    "vendor.update": "Vendor details updated",
+    "vendor.retire": "Vendor retired",
+    "message.post": "Message posted",
+}.get(value, value.replace(".", " ").replace("_", " ").capitalize())
+
+
 def render(request: Request, name: str, code: int = 200, **ctx: Any):
     labels = request.app.state.labels
 
@@ -65,6 +96,7 @@ def render(request: Request, name: str, code: int = 200, **ctx: Any):
         params.update({k: str(v) for k, v in changes.items()})
         return urlencode(params)
 
+    ctx.update(company=request.app.state.company, console_url=request.app.state.console_url)
     ctx.update(banner=DONE.get(request.query_params.get("done", "")), label=label, query=query)
     return templates.TemplateResponse(request, name, ctx, status_code=code)
 

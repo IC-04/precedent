@@ -23,14 +23,14 @@
   <button type="submit">Run report</button>
 </form>
 <h2>Summary: {{ total }} bills</h2>
-<table>
+<div class="table-wrap"><table>
   <thead><tr><th>Account</th><th>Approver</th><th class="num">Bills</th><th class="num">Total</th></tr></thead>
   <tbody>
   {% for s in summary %}
     <tr><td>{{ s.account_code }}</td><td>{{ names.get(s.approver_id, "Not set") }}</td><td class="num">{{ s.n }}</td><td class="num">{{ s.total | money }}</td></tr>
   {% endfor %}
   </tbody>
-</table>
+</table></div>
 <h2>Bills</h2>
 {% set show_notes = true %}
 {% include "books/_bill_table.html" %}

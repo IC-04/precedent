@@ -26,6 +26,7 @@ class Manifest(BaseModel):
     template: str
     seed: int
     generated_at: str  # the world clock, so the manifest is deterministic too
+    company: dict[str, str] = {}
     counts: dict[str, int]
     db_sha256: str
     files: dict[str, str]  # relative path -> sha256
@@ -534,6 +535,7 @@ class Builder:
             template=self.template,
             seed=self.seed,
             generated_at=iso(self.today),
+            company={k: str(v) for k, v in self.company.items()},
             counts=counts,
             db_sha256=db.dump_sha(self.conn),
             files=files,

@@ -3,12 +3,12 @@
 {% block content %}
 <div class="crumbs"><a href="/drive/">My drive</a> / {{ folder }}</div>
 <h1>{{ folder }}</h1>
-<table>
+<div class="table-wrap"><table>
   <thead><tr><th>Name</th><th>Uploaded by</th><th>Uploaded</th><th>Download</th></tr></thead>
   <tbody>
   {% for f in files %}
-    <tr><td><a href="/drive/f/{{ f.id }}">{{ f.name }}</a></td><td>{{ names.get(f.uploaded_by, f.uploaded_by or "Mail") }}</td><td>{{ f.uploaded_at.replace("T", " ") }}</td><td><a href="/drive/f/{{ f.id }}/download">Download {{ f.name }}</a></td></tr>
+    <tr><td><a href="/drive/f/{{ f.id }}">{{ f.name }}</a></td><td>{{ names.get(f.uploaded_by, f.uploaded_by or "Mail") }}</td><td><time title="{{ f.uploaded_at }}">{{ f.uploaded_at | human_date }}</time></td><td><a href="/drive/f/{{ f.id }}/download">Download {{ f.name }}</a></td></tr>
   {% endfor %}
   </tbody>
-</table>
+</table></div>
 {% endblock %}

@@ -1,10 +1,1 @@
-{% extends "drive/base.html" %}
-{% block content %}
-{% if missing %}<p class="error" role="alert">Nothing found at "{{ missing }}".</p>{% endif %}
-<h1>Folders</h1>
-<div class="grid">
-{% for f in folders %}
-  <div class="card"><a href="/drive/{{ f.folder }}">{{ f.folder }}</a><small>{{ f.n }} files, last change {{ f.latest[:10] }}</small></div>
-{% endfor %}
-</div>
-{% endblock %}
+{% extends "drive/base.html" %}{% block content %}{% if missing %}<p class="error" role="alert">Nothing found at “{{ missing }}”.</p>{% endif %}<div class="page-heading"><div><h1>Company drive</h1><p class="muted">Policies, supporting documents and invoice attachments</p></div></div><div class="folder-list">{% for f in folders %}<div class="folder-row"><span class="folder-icon" aria-hidden="true"></span><a href="/drive/{{ f.folder }}">{{ f.folder }}</a><small>{{ f.n }} file{{ 's' if f.n != 1 else '' }} · Updated {{ f.latest | date_short }}</small></div>{% else %}<div class="empty">No folders available.</div>{% endfor %}</div>{% endblock %}

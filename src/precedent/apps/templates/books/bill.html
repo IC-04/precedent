@@ -1,7 +1,7 @@
 {% extends "books/base.html" %}
 {% block title %}{{ bill.id }}{% endblock %}
 {% block content %}
-<h1>Bill {{ bill.id }}</h1>
+<div class="crumbs"><a href="/books/bills">Bills</a> / {{ bill.id }}</div><div class="record-heading"><div><div class="eyebrow">Bill {{ bill.id }}</div><h1>{{ vendor.name }} · {{ bill.invoice_no }}</h1><span class="status">{{ bill.status | replace('_',' ') | capitalize }}</span></div><div class="total">{{ bill.currency }} {{ bill.amount_minor | money }}</div></div><div class="lifecycle" aria-label="Bill lifecycle">{% for state in ['draft','pending_approval','approved','paid'] %}<span{% if state == bill.status %} class="current" aria-current="step"{% endif %}>{{ state | replace('_',' ') | capitalize }}</span>{% endfor %}</div><div class="review-layout"><div>
 <dl class="record">
   <dt>Status</dt><dd class="status">{{ bill.status | replace("_", " ") }}</dd>
   <dt>Vendor</dt><dd><a href="/books/vendors/{{ bill.vendor_id }}">{{ vendor.name }} ({{ bill.vendor_id }})</a></dd>
@@ -31,7 +31,7 @@
 {% endif %}
 
 <h2>Approvals</h2>
-<table>
+<div class="table-wrap"><table>
   <thead><tr><th>Approver</th><th>Status</th><th>Requested</th><th>Decided</th></tr></thead>
   <tbody>
   {% for a in approvals %}
@@ -40,6 +40,6 @@
     <tr><td colspan="4">No approval requested.</td></tr>
   {% endfor %}
   </tbody>
-</table>
-{{ m.activity(events) }}
+</table></div>
+</div><aside class="document-side"><h2>Attached invoice</h2>{% if file %}<a href="/drive/f/{{ file.id }}"><img src="/drive/f/{{ file.id }}/preview/1.png" alt="First page of {{ file.name }}" onerror="this.hidden=true"></a><p><a href="/drive/f/{{ file.id }}">Open {{ file.name }} and extracted text →</a></p>{% else %}<div class="document-placeholder">No invoice attached.</div>{% endif %}</aside></div>{{ m.activity(events) }}
 {% endblock %}

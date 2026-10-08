@@ -2,18 +2,15 @@
 {% block title %}{{ msg.subject }}{% endblock %}
 {% block content %}
 <p><a href="/mail/">Back to inbox</a></p>
-<h1>{{ msg.subject }}</h1>
-<div class="meta">From {{ msg.from_name }} &lt;{{ msg.from_addr }}&gt; to {{ msg.to_addr }}, {{ msg.sent_at.replace("T", " ") }}</div>
-<div class="body">{{ msg.body }}</div>
-{% if files %}
+<article class="message-reading"><h1>{{ msg.subject }}</h1><div class="sender"><span class="initial" aria-hidden="true">{{ msg.from_name | initials }}</span><div><strong>{{ msg.from_name }}</strong><small>{{ msg.from_addr }}<br>To {{ msg.to_addr }}</small></div><time datetime="{{ msg.sent_at }}" title="{{ msg.sent_at }}">{{ msg.sent_at | human_date }}</time></div><div class="message-body">{{ msg.body }}</div>{% if files %}
 <section class="files" aria-label="Attachments">
   {% for f in files %}
-  <div>{{ f.name }}<br><a href="/drive/f/{{ f.id }}">Open {{ f.name }} in Drive</a> · <a href="/drive/f/{{ f.id }}/download">Download {{ f.name }}</a></div>
+  <div class="attachment"><strong>{{ f.name }}</strong><a href="/drive/f/{{ f.id }}">Open {{ f.name }} in Drive</a> · <a href="/drive/f/{{ f.id }}/download">Download {{ f.name }}</a></div>
   {% endfor %}
 </section>
 {% endif %}
-{% if thread %}
+</article>{% if thread %}
 <h2 style="font-size:15px;font-weight:500;margin-top:28px">Other messages in this conversation</h2>
-<ul class="list">{% for t in thread %}<li><a href="/mail/m/{{ t.id }}"><span class="from">{{ t.from_name }}</span><span>{{ t.subject }}</span><span class="date">{{ t.sent_at[:10] }}</span></a></li>{% endfor %}</ul>
+<ul class="mail-list">{% for t in thread %}<li><a href="/mail/m/{{ t.id }}"><span class="from">{{ t.from_name }}</span><span>{{ t.subject }}</span><span class="date">{{ t.sent_at[:10] }}</span></a></li>{% endfor %}</ul>
 {% endif %}
 {% endblock %}

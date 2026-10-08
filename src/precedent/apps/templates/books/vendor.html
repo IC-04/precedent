@@ -1,7 +1,7 @@
 {% extends "books/base.html" %}
 {% block title %}{{ vendor.name }}{% endblock %}
 {% block content %}
-<h1>Vendor {{ vendor.id }}: {{ vendor.name }}</h1>
+<div class="crumbs"><a href="/books/vendors">Vendors</a> / {{ vendor.id }}</div><div class="record-heading"><div><div class="eyebrow">Vendor {{ vendor.id }}</div><h1>{{ vendor.name }}</h1><span class="status">{{ vendor.status | capitalize }}</span></div></div>
 <dl class="record">
   <dt>Status</dt><dd class="status">{{ vendor.status }}</dd>
   <dt>Name</dt><dd>{{ vendor.name }}</dd>
@@ -22,15 +22,15 @@
 </div>
 <h2>Recent bills</h2>
 {% set rows = recent %}{% set show_notes = true %}
-<table>
+<div class="table-wrap"><table>
   <thead><tr><th>Bill</th><th>Invoice no.</th><th>Invoice date</th><th class="num">Amount</th><th>Account</th><th>Approver</th><th>Status</th><th>Notes</th></tr></thead>
   <tbody>
   {% for b in recent %}
-    <tr><td><a href="/books/bills/{{ b.id }}">{{ b.id }}</a></td><td>{{ b.invoice_no }}</td><td>{{ b.issue_date }}</td><td class="num">{{ b.currency }} {{ b.amount_minor | money }}</td><td>{{ b.account_code or "" }}</td><td>{{ names.get(b.approver_id, "") }}</td><td class="status">{{ b.status | replace("_", " ") }}</td><td>{{ b.notes or "" }}</td></tr>
+    <tr><td><a href="/books/bills/{{ b.id }}">{{ b.id }}</a></td><td class="nowrap">{{ b.invoice_no }}</td><td class="nowrap">{{ b.issue_date }}</td><td class="num">{{ b.currency }} {{ b.amount_minor | money }}</td><td>{{ b.account_code or "" }}</td><td>{{ names.get(b.approver_id, "") }}</td><td class="status">{{ b.status | replace("_", " ") }}</td><td class="notes">{% if b.notes %}<details><summary>{{ b.notes[:60] }}</summary><p>{{ b.notes }}</p></details>{% endif %}</td></tr>
   {% else %}
     <tr><td colspan="8">No bills for this vendor.</td></tr>
   {% endfor %}
   </tbody>
-</table>
+</table></div>
 {{ m.activity(events) }}
 {% endblock %}

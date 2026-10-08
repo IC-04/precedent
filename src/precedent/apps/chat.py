@@ -38,6 +38,7 @@ def _channel_page(
             channels=_channels(conn),
             messages=[],
             names={},
+            roles={},
             error=None,
         )
     messages = conn.execute(
@@ -52,6 +53,7 @@ def _channel_page(
         channels=_channels(conn),
         messages=messages,
         names=people(conn),
+        roles={r["id"]: r["role"] for r in conn.execute("SELECT id, role FROM employees")},
         error=error,
     )
 
