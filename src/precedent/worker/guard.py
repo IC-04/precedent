@@ -316,22 +316,18 @@ class Guard:
     def thinking_level(self) -> tuple[str, str]:
         """How hard the next turn should think, from what just happened (code, not the model).
 
-        HIGH (about 3x slower per turn, measured): writing the plan, or right after a save
-        whose result is unknown. MEDIUM (about the cost of LOW, measured): a form is on the
-        page, a decision, form fill or question just happened, or after a refusal, a failure
-        or a stall nudge. LOW: reading and moving between pages."""
+        Measured on Act 1 (3 runs each): thinking more on forms and decisions bought no accuracy
+        and cost 25-100 s, so extra thinking goes only to recovery. HIGH after a save whose
+        result is unknown; MEDIUM to write the plan and after a refusal, a failure or a stall
+        nudge; LOW otherwise, forms and decisions included."""
         attention, self.attention = self.attention, None
         if not self.plan_sent:
-            return "HIGH", "writing the plan"
+            return "MEDIUM", "writing the plan"
         if attention and attention.startswith("high:"):
             return "HIGH", attention.removeprefix("high:")
         if attention:
             return "MEDIUM", attention
-        if self.last_tool in ("record_decision", "browser_fill_form", "ask_human"):
-            return "MEDIUM", f"after {self.last_tool}"
-        if has_form(self.last_snapshot):
-            return "MEDIUM", "a form is on the page"
-        return "LOW", "reading and navigating"
+        return "LOW", "reading, filling and saving"
 
     def run_state(self) -> str:
         """What the model is reminded of every turn, written by code from what happened."""
@@ -458,12 +454,3 @@ def normalize_targets(args: dict) -> None:
     for field in args.get("fields") or []:
         if isinstance(field, dict) and "target" in field:
             field["target"] = fix(field["target"])
-
-
-SAVE_WORDS = re.compile(r'button "[^"]*(save|submit|create|request|post|send|approve)', re.I)
-
-
-def has_form(snapshot: str) -> bool:
-    """A page where the next action may be a write: editable fields and a save-like button."""
-    editable = "textbox" in snapshot or "combobox" in snapshot
-    return editable and bool(SAVE_WORDS.search(snapshot)) and "role=search" not in snapshot

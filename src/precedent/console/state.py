@@ -57,6 +57,8 @@ def reconstruct(events: list[Event], active: bool = False) -> dict[str, Any]:
         "seed": None,
         "worker": "precedent",
         "wait": None,
+        "screen": None,
+        "thinking": None,
     }
     questions: dict[str, dict] = {}
     for event in events:
@@ -89,6 +91,8 @@ def reconstruct(events: list[Event], active: bool = False) -> dict[str, Any]:
                 if step["id"] == d.get("step_id"):
                     step["status"] = "doing"
             state["activity"] = d.get("intent", "Plan step started")
+        elif event.type == "action" and d.get("caption"):
+            state["activity"] = d["caption"]
         elif event.type == "action":
             tool = d.get("tool", "browser action")
             state["activity"] = {
@@ -143,6 +147,7 @@ def reconstruct(events: list[Event], active: bool = False) -> dict[str, Any]:
                 if c.get("result") == "unknown" and c.get("condition_id") not in checked
             )
         elif event.type == "run_finished":
+            state["screen"] = None  # the live stream ends with the run; captures remain
             state["finished"] = d
             error = d.get("error") or ""
             capacity = any(term in error.lower() for term in ("429", "quota", "capacity", "503"))
@@ -165,6 +170,10 @@ def reconstruct(events: list[Event], active: bool = False) -> dict[str, Any]:
                 }
             if d.get("kind") == "company":
                 state["company"] = d.get("company")
+            if d.get("kind") == "screen":
+                state["screen"] = d.get("url")
+            if d.get("kind") == "thinking":
+                state["thinking"] = {"level": d.get("level"), "reason": d.get("reason")}
             if d.get("kind") == "app_effect":
                 state["effects"].append(d)
             if d.get("kind") in ("phase", "model_wait", "stopped", "error"):

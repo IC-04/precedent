@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import asyncio
 import base64
+import re
 import shutil
 import socket
 import subprocess
@@ -64,7 +65,9 @@ def _mjpeg_server(frames: Frames, port: int) -> ThreadingHTTPServer:
                     self.wfile.write(jpeg)
                 return
             self.send_response(200)
-            self.send_header("Content-Type", f"multipart/x-mixed-replace; boundary={BOUNDARY.decode()}")
+            self.send_header(
+                "Content-Type", f"multipart/x-mixed-replace; boundary={BOUNDARY.decode()}"
+            )
             self.send_header("Cache-Control", "no-store")
             self.send_header("Access-Control-Allow-Origin", "*")
             self.end_headers()
@@ -74,9 +77,14 @@ def _mjpeg_server(frames: Frames, port: int) -> ThreadingHTTPServer:
                     jpeg, seen = frames.wait(seen, 1.0)  # repeat the last frame at least 1/s
                     if jpeg is None:
                         continue
-                    self.wfile.write(b"--" + BOUNDARY + b"\r\nContent-Type: image/jpeg\r\n"
-                                     + f"Content-Length: {len(jpeg)}\r\n\r\n".encode()
-                                     + jpeg + b"\r\n")
+                    self.wfile.write(
+                        b"--"
+                        + BOUNDARY
+                        + b"\r\nContent-Type: image/jpeg\r\n"
+                        + f"Content-Length: {len(jpeg)}\r\n\r\n".encode()
+                        + jpeg
+                        + b"\r\n"
+                    )
                     self.wfile.flush()
             except (BrokenPipeError, ConnectionResetError):
                 return
@@ -93,9 +101,15 @@ class AvaBrowser:
     def __init__(self, executable: str, headed: bool = False, size: tuple[int, int] = (1280, 860)):
         self.port = free_port()
         self.profile = tempfile.mkdtemp(prefix="ava-profile-")
-        args = [executable, f"--remote-debugging-port={self.port}", f"--user-data-dir={self.profile}",
-                "--no-first-run", "--no-default-browser-check", f"--window-size={size[0]},{size[1]}",
-                "about:blank"]
+        args = [
+            executable,
+            f"--remote-debugging-port={self.port}",
+            f"--user-data-dir={self.profile}",
+            "--no-first-run",
+            "--no-default-browser-check",
+            f"--window-size={size[0]},{size[1]}",
+            "about:blank",
+        ]
         if not headed:
             args.insert(1, "--headless=new")
         self.process = subprocess.Popen(args, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
@@ -164,8 +178,10 @@ class Screen:
                 pass
 
         cdp.on("Page.screencastFrame", lambda p: asyncio.ensure_future(on_frame(p)))
-        await cdp.send("Page.startScreencast", {"format": "jpeg", "quality": 70,
-                                                "maxWidth": 1280, "maxHeight": 860})
+        await cdp.send(
+            "Page.startScreencast",
+            {"format": "jpeg", "quality": 70, "maxWidth": 1280, "maxHeight": 860},
+        )
         try:  # the init script covers new documents; draw on the current one too
             await page.evaluate(OVERLAY.read_text())
         except Exception:  # noqa: BLE001
@@ -199,12 +215,13 @@ class Screen:
 
 def caption_for(tool: str, args: dict) -> str:
     """Plain-language caption for a browser action, from its own arguments."""
-    element = str(args.get("element") or "").strip().strip('"')
-    element = element.split('"')[1] if element.count('"') >= 2 else element
+    raw = str(args.get("element") or "").strip()
+    quoted = re.search(r'"([^"]+)"', raw)
+    element = quoted.group(1) if quoted else raw.strip('"')
     if tool == "browser_navigate":
-        path = str(args.get("url", "")).split("//", 1)[-1].split("/", 1)[-1].strip("/")
-        app = path.split("/")[0] if path else "the company apps"
-        return f"Opening {app.capitalize() if app else 'the company apps'}"
+        path = str(args.get("url", "")).split("//", 1)[-1].partition("/")[2].strip("/")
+        app = path.split("/")[0]
+        return f"Opening {app.capitalize()}" if app else "Opening the company apps"
     if tool == "browser_click":
         return f"Clicking {element}" if element else "Clicking"
     if tool == "browser_type":
