@@ -108,6 +108,7 @@ class RunConfig:
     budgets: Budgets = field(
         default_factory=lambda: Budgets(steps=int(os.getenv("PRECEDENT_MAX_STEPS", "60")))
     )
+    thinking: str = field(default_factory=lambda: os.getenv("PRECEDENT_THINKING", "low"))
     headed: bool = False
     resume: bool = False
     runs_root: Path = field(
@@ -369,9 +370,14 @@ def _intentions(previous: Path) -> str:
 
 
 def _build_agent(
-    cfg: RunConfig, guard: Guard, toolset: McpToolset, base: str, goal, fallback: Fallback
+    cfg: RunConfig,
+    guard: Guard,
+    toolset: McpToolset,
+    base: str,
+    goal,
+    fallback: Fallback,
+    context: str,
 ) -> LlmAgent:
-    context = "Not built yet (WS4). Read the company's policies and history yourself."
 
     action_lock = asyncio.Lock()
     held_contexts: set[int] = set()
@@ -421,11 +427,12 @@ def _build_agent(
         after_model_callback=guard.after_model,
         on_model_error_callback=fallback,
         generate_content_config=types.GenerateContentConfig(
+            thinking_config=_thinking(cfg.thinking),
             tool_config=types.ToolConfig(
                 function_calling_config=types.FunctionCallingConfig(
                     mode=types.FunctionCallingConfigMode.ANY
                 )
-            )
+            ),
         ),
     )
     fallback.agent = agent
@@ -452,11 +459,15 @@ async def _act(
     base = gateway.start()
     (log.dir / "mcp").mkdir(exist_ok=True)
     holder["toolset"] = toolset = browser_toolset(base, log.dir / "mcp", cfg.headed)
-    goal = await _prepare_goal(cfg, guard, log)
+    # The goal contract and the company context do not depend on each other: in parallel.
+    goal, context = await asyncio.gather(
+        _prepare_goal(cfg, guard, log), _prepare_context(cfg, guard, log, base)
+    )
     log.emit("goal_contract", **goal.model_dump())
     guard.condition_ids = {condition.id for condition in goal.conditions}
-    log.emit("note", kind="context", text=f"context stage not built yet; worker={cfg.worker}")
-    agent = _build_agent(cfg, guard, toolset, base, goal, Fallback(cfg.model, cfg.fallbacks, log))
+    agent = _build_agent(
+        cfg, guard, toolset, base, goal, Fallback(cfg.model, cfg.fallbacks, log), context
+    )
     try:
         await asyncio.wait_for(
             _drive(agent, guard, cfg, previous), timeout=cfg.budgets.seconds + 60
@@ -468,6 +479,48 @@ async def _act(
         else:
             reason = f"a model or browser call timed out ({e or 'no detail'})"
         guard.stop_reason = guard.stop_reason or reason
+
+
+def _thinking(level: str) -> types.ThinkingConfig | None:
+    """LOW thinking: about 3x faster per turn than the default on Flash, same action quality
+    in our measurements (docs/decisions_log.md). 'default' leaves the model's own setting."""
+    if level.lower() in ("", "default"):
+        return None
+    return types.ThinkingConfig(thinking_level=level.upper())
+
+
+async def _prepare_context(cfg: RunConfig, guard: Guard, log: EventLog, base: str) -> str:
+    """Stage 2: gather through the gateway, reason once, validate in code (WS4)."""
+    from precedent.worker import context as ctx
+    from precedent.worker.goal import structured
+
+    try:
+        evidence = await asyncio.to_thread(ctx.gather, base, log.dir / "evidence")
+        log.emit(
+            "note",
+            kind="context_gathered",
+            items=[e.ref for e in evidence],
+            rows=sum(len(e.rows) for e in evidence),
+        )
+        if cfg.worker == "baseline":
+            log.emit("note", kind="context", text="baseline: policy and SOP text only")
+            return ctx.baseline_prompt(evidence)
+        candidates = await structured(
+            "You find how this company actually decides accounts and approvers.",
+            ctx.reasoning_prompt(evidence),
+            ctx.Candidates,
+            make_model(cfg.strong),
+            on_model_error=Fallback(cfg.strong, cfg.fallbacks, log),
+            after_model=guard.after_model,
+            name="context",
+        )
+        precedents = ctx.validate(candidates.precedents, evidence)
+        for p in precedents:
+            log.emit("precedent", **p.model_dump(mode="json"))
+        return ctx.as_prompt(precedents)
+    except Exception as e:  # noqa: BLE001 - no context is a weaker run, not a crashed one
+        log.emit("note", kind="error", text=f"context stage failed: {e}"[:500])
+        return "Company context could not be built. Read the policies before deciding."
 
 
 async def _prepare_goal(cfg: RunConfig, guard: Guard, log: EventLog):

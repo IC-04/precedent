@@ -24,6 +24,34 @@ List assumptions you are making and what is out of scope (for example approving 
 Do not invent company-specific facts you have not been given."""
 
 
+async def structured(
+    instruction: str,
+    prompt: str,
+    schema,
+    model,
+    on_model_error=None,
+    after_model=None,
+    name: str = "structured",
+):
+    """One model call that must return `schema` (a Pydantic model) as JSON."""
+    agent = LlmAgent(
+        name=name,
+        model=model,
+        instruction=instruction,
+        output_schema=schema,
+        on_model_error_callback=on_model_error,
+        after_model_callback=after_model,
+    )
+    runner = InMemoryRunner(agent=agent, app_name=name)
+    session = await runner.session_service.create_session(app_name=name, user_id="ava")
+    text = ""
+    message = types.Content(role="user", parts=[types.Part(text=prompt)])
+    async for event in runner.run_async(user_id="ava", session_id=session.id, new_message=message):
+        if event.content and event.content.parts:
+            text = "".join(p.text or "" for p in event.content.parts) or text
+    return schema.model_validate(json.loads(text))
+
+
 async def write_goal(request: str, model, on_model_error=None, after_model=None) -> GoalContract:
     """One structured call; re-asks once if the contract has no must_not_happen condition."""
     agent = LlmAgent(
