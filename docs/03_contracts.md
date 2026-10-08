@@ -81,3 +81,68 @@ See `Event` in `contracts.py`. The required `data` keys by type:
 | check | CheckResult |
 | receipt | Receipt |
 | run_finished | outcome, tokens_in, tokens_out, usd, seconds |
+
+## 6. Implemented workspace/console extensions (8 October 2026)
+
+The worker still exposes installed Playwright MCP `browser_*` tools, rather than the
+conceptual `goto/fill` aliases above. Viewer capture calls are internal, bounded and
+not model/business actions. `finish` currently records a claim and an **unknown**
+receipt; a fresh WS5 browser verifier is not implemented.
+
+- `GET /workspace.json`: public company `name`, `seed`, `template`, `world_id`
+  (manifest SHA-256) and document `{id, name}` catalogue. No hidden truth.
+- `GET /work-status`: bounded, read-only company entry lookup of the console's
+  `GET /workspace-status?seed=`. Scripted validations are excluded from real assignments.
+- `GET /drive/f/{id}/preview/{page}.png`: actual PDF raster, pages 1–20 at most;
+  cache outside the world, keyed by source bytes; 503 falls back to extracted text.
+- Console `POST /runs` accepts `request` and the connected `seed`, validates company
+  identity and supports one managed run. Its subprocess receives `PRECEDENT_APPS_URL`,
+  `PRECEDENT_RUN_ID`, `PRECEDENT_RUNS_ROOT`, `PRECEDENT_HUMAN_CHANNEL=console`.
+- Run state is reconstructed at `/runs/{id}/state` and sent as complete SSE `state`
+  events at `/runs/{id}/events`. A reconnect gets a full reconstruction. Discrete
+  captures are served only if referenced by that run's own observation.
+- `observation` may add `captured_at`, `action_step`, `url_current`, and a relative
+  `shots/*.png` screenshot. Missing/failed captures remain nullable. Captures are
+  serialized with their associated browser action, never placed in model prompts.
+- `question`/`answer` add `question_id`. `POST /runs/{id}/answer` accepts this ID and
+  either `choice` or `answer`. Run-specific exclusive files are consumed by an
+  asynchronous `FileHuman`; timeouts/system unavailability cannot masquerade as humans.
+- `report_plan_step(step_id, status, evidence)` records progress against existing
+  plan IDs (`doing/done/skipped`). `report_goal_progress(condition_id, status,
+  evidence)` accepts existing goal IDs and only `inferred/written`. Written progress
+  requires a recorded application acknowledgement; neither tool verifies a goal.
+- `note` kinds include `company`, `app_effect` (HTTP method/path/status),
+  `goal_progress`, capture failures and runtime phases. App acknowledgement,
+  `check`, completion claim and independently saved `grade.json` remain separate.
+- `run_started.validation` labels scripted/model-free fixtures. No canned fixture
+  decision is presented as AI learning. Unknown cost is `null`/unavailable.
+
+Automatic static/font/preview/download/status requests do not count as searches
+that reconcile an uncertain write. Native business reads and audited writes retain
+existing gateway/stale-edit behavior. Console shutdown terminates/reaps its managed
+process group and preserves logs; an incomplete run reopens as interrupted replay.
+
+### Replay and model-wait additions
+
+`GET /runs/{id}/state?at=<observation_seq>` reconstructs evidence through a valid
+recorded observation, retaining the capture catalogue for navigation. Historical
+views cannot accept human answers and do not expose future receipts or independent
+grades. Invalid observation selections return 400. Playback uses these states at
+2.5-second intervals; this is recorded capture playback, not a live video feed.
+
+`note` also records `model_wait`, immediate model failures and fallback attempts.
+Goal preparation is bounded by `PRECEDENT_GOAL_TIMEOUT_SECONDS` (default 120) and
+the remaining run budget. Its model usage is included through the existing ADK
+callback. Timeout produces a terminal error/unknown receipt; it never fabricates
+a goal or browser action. Existing configured fallback models remain unchanged.
+
+### Gemini authentication boundary
+
+`VertexSettings.from_env()` requires `GOOGLE_CLOUD_PROJECT` and defaults
+`GOOGLE_CLOUD_LOCATION` to `global`, supported by the configured models.
+`make_model` discovers ADC with the Cloud Platform scope and configured quota
+project, then supplies explicit credentials to the Gen AI SDK in Vertex mode.
+Goal, action and fallback models share this factory. Model API keys are not part
+of the contract. Missing configuration/ADC is reported with setup guidance;
+Google inference errors retain their original details. `precedent check-model`
+uses the same factory for one explicit small inference, without company actions.

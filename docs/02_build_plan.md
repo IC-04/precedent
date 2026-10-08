@@ -4,7 +4,7 @@ Each day ends with something that runs. If a day slips, cut from the bottom of t
 
 ## Start here: the first hour today
 
-1. Open a terminal in the repo: `make setup`, then put a Gemini API key (free from Google AI Studio) in `.env`. `make test` should pass.
+1. Open a terminal in the repo: `make setup`, then configure the billed Cloud project and ADC as described in [Google Cloud authentication](google_cloud_auth.md). `make test` should pass without Cloud credentials; model runs require ADC.
 2. Start Claude Code in the repo root (`claude`). It reads `CLAUDE.md` automatically.
 3. Session A: `/ws WS1` (world generator). When `contracts.py` needs no change, open a second terminal.
 4. Session B: `/ws WS2` (apps). It can write against the schema before WS1 finishes.

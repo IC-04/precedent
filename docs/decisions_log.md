@@ -18,3 +18,18 @@ One line per decision. The README's design-decisions section is built from this 
 - 2026-10-07: the WS3 spike passed (ADK drove our apps through Playwright MCP; a POST without a decision was refused at the gateway; fallback switched models), so the SDK route is adopted; gemini-3.8-flash was too overloaded to finish the spike, so development runs use gemini-3.6-flash via PRECEDENT_MODEL.
 - 2026-10-07: the worker's browser is pointed at its gateway with Playwright MCP's --allowed-origins; that keeps it on the gateway in practice but is not a security boundary (the apps on :8100 are still reachable from the machine), so the guarantee rests on the worker only being given the gateway URL.
 - 2026-10-07: requests the browser makes by itself (favicon, static files) bypass the write gate's bookkeeping, so they cannot count as Ava's "search" after an uncertain write.
+- 2026-10-08: retain the ADK + Playwright MCP runtime and existing model configuration; the older no-framework decision was superseded by the proven WS3 spike, not reopened for UI work.
+- 2026-10-08: use shared Jinja shell/CSS and local Source Sans 3, with restrained app accents and actual PDF beside grouped Books fields; preserve native controls, business routes and audit/stale-value semantics.
+- 2026-10-08: capture the worker's isolated browser using MCP's public screenshot tool and serialize action/capture callbacks; hide that tool from model requests, bound storage/time and authorize serving only from matching run observations.
+- 2026-10-08: exclude fonts, PDF previews, downloads and status polling from gateway reconciliation bookkeeping; viewer traffic cannot satisfy an uncertain write's required search.
+- 2026-10-08: validate company identity before launching a single console-managed worker; answers are asynchronous, exclusive and run/question-specific. Preserve incomplete logs when the console stops.
+- 2026-10-08: keep application acknowledgements, self-reported plan/goal progress, fresh checks and independent grades distinct; missing WS4 context induction and WS5 verifier/eval remain exposed rather than replaced with canned behavior.
+- 2026-10-08: use temporary companies and explicitly labelled scripted ADK/MCP runs for local validation, preserving the active company and prior runs; no paid model calls were needed. Updated invoice generation never overwrites existing PDFs.
+
+- 2026-10-08: refine the shared shell to neutral surfaces, system typography, compact navigation and table-led task/app views; replace the always-visible task composer with a focused native dialog.
+- 2026-10-08: replay real saved captures with evidence reconstructed at each observation; hide future outcomes, grades and answer controls while inspecting history.
+- 2026-10-08: bound goal preparation to 120 seconds by default and log fallback attempts immediately; distinguish external model unavailability from browser work without changing provider configuration.
+
+- 2026-10-08: use the Vertex AI endpoint for the supplied billed Cloud API key after the Developer API returned API_KEY_SERVICE_BLOCKED; a live structured goal succeeded with the same configured model.
+
+- 2026-10-08: supersede model API-key authentication with Vertex AI + ADC at the existing make_model boundary; centralize project/location, explicitly pass discovered credentials and bind quota to the configured project. Preserve ADK prompts, model IDs, fallbacks, retries and timeouts.
