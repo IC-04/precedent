@@ -27,6 +27,7 @@ MAIL_QUERIES = ["approval", "approve", "route", "SOP", "policy", "threshold", "f
 POLICY_WORDS = ("policy", "procedure", "sop", "chart")
 MAX_MESSAGES = 12
 MAX_HISTORY_PAGES = 30
+MOSTLY_FOLLOWED = 0.75  # an authoritative rule followed this often is usable, exceptions listed
 
 # --------------------------------------------------------------------------- HTML reading
 
@@ -379,6 +380,9 @@ def validate_with_report(
                     exceptions = [f"{b} does not follow it" for b in others[:5]]
                 if governing is None and total and agree * 2 <= total + 1 and agree < total:
                     status = PrecedentStatus.unresolved  # split history, nothing governs
+                elif governing is not None and total and agree / total >= MOSTLY_FOLLOWED:
+                    status = PrecedentStatus.usable  # authority, followed in practice;
+                    # its exceptions stay listed rather than turning it into a conflict
             else:
                 flags.append("support not counted: the claim names no account, vendor or amount")
         if governing is None and not supporting and c.claim is None:
@@ -417,8 +421,8 @@ def _resolve_supersession(kept: list[tuple[Precedent, Candidate]]) -> None:
     older one is kept visible as a conflict (for example a stale procedure)."""
     groups: dict[tuple, list[tuple[Precedent, Candidate]]] = {}
     for p, c in kept:
-        if c.claim is None or p.governing is None:
-            continue
+        if c.claim is None or p.governing is None or not _scoped(c.claim):
+            continue  # unscoped claims say different things; they cannot supersede each other
         key = (c.claim.field, c.claim.account, (c.claim.vendor or "").lower(), c.claim.min_amount)
         groups.setdefault(key, []).append((p, c))
     for members in groups.values():

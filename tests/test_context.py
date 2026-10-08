@@ -108,3 +108,27 @@ def test_bracketed_refs_stale_rules_and_unscoped_claims(live_apps, tmp_path):
     assert prepaid.support is None and "support not counted" in prepaid.flags[0]
     text = as_prompt(precedents)
     assert "[usable] Design spend" in text and "[conflict] Route design spend" in text
+
+
+def test_followed_authority_is_usable_and_unscoped_rules_do_not_supersede(live_apps, tmp_path):
+    """Regression for run 20261008-134556-a673."""
+    from precedent.worker.context import validate_with_report
+
+    ev = _evidence(live_apps, tmp_path)
+    cfo = next(e for e in ev if e.app == "mail" and "approvals" in e.title.lower())
+    policy = next(e for e in ev if e.title == "AP-Policy-2025.pdf")
+    sop = next(e for e in ev if e.title == "AP-SOP-v3.pdf")
+    precedents, _ = validate_with_report([
+        Candidate(rule="Design spend above INR 50,000 routes to Ana Pereira", governing_ref=cfo.ref,
+                  claim=Claim(field="approver", value="Ana Pereira", account="6400",
+                              min_amount=50000, from_date="2026-07-14"),
+                  status=PrecedentStatus.conflict),
+        Candidate(rule="Multi-period payments go to 1400", governing_ref=policy.ref,
+                  claim=Claim(field="account", value="1400"), status=PrecedentStatus.usable),
+        Candidate(rule="SaaS goes to 6120", governing_ref=sop.ref,
+                  claim=Claim(field="account", value="6120"), status=PrecedentStatus.usable),
+    ], ev)  # fmt: skip
+    design, prepaid, saas = precedents
+    assert design.status == PrecedentStatus.usable and design.exceptions  # 8 of 9, INV-913 kept
+    assert prepaid.status == saas.status == PrecedentStatus.usable
+    assert not any("superseded" in f for f in saas.flags)
