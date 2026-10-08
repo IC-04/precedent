@@ -2,6 +2,14 @@
 __pycache__/
 *.pyc
 .env
+.env.*
+!.env.example
+# Local ADC / federation files must stay outside version control.
+application_default_credentials.json
+service-account*.json
+credentials.json
+gha-creds-*.json
+.gcloud/
 worlds/
 runs/
 eval/results/
@@ -9,6 +17,7 @@ eval/results/
 .ruff_cache/
 .DS_Store
 node_modules/
+output/
 
 # Local AI-assistant instructions
 CLAUDE.md
