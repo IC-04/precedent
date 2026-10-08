@@ -92,19 +92,27 @@ def _number(value: str | None) -> float | None:
         return None
 
 
+class UnreadablePage(Exception):
+    """A page loaded but did not contain what a check needs: the check is unknown."""
+
+
 class Reader:
     """Fresh GET reads through the gateway, with the URL kept as evidence."""
 
     def __init__(self, client: httpx.Client, first_seen: dict[str, str]):
         self.client, self.first_seen = client, first_seen
 
-    def html(self, path: str) -> str:
-        response = self.client.get(path)
+    def html(self, path: str, params: dict | None = None) -> str:
+        response = self.client.get(path, params=params)
         response.raise_for_status()
         return response.text
 
     def bills_for(self, invoice_no: str) -> list[str]:
-        page = read_page(self.html(f"/books/bills?q={invoice_no}"))
+        """Bill ids with exactly this invoice number. A page without the bills table raises,
+        so an unreadable page is unknown rather than 'no bills'."""
+        page = read_page(self.html("/books/bills", params={"q": invoice_no}))
+        if not any(r[:2] == ["Bill", "Invoice no."] for r in page.rows):
+            raise UnreadablePage("the bills table was not found on the search page")
         return [r[0] for r in page.rows if len(r) > 1 and r[1].strip() == invoice_no]
 
     def bill_id(self, spec: CheckSpec) -> str | None:
@@ -171,8 +179,8 @@ def run_check(reader: Reader, spec: CheckSpec, text: str) -> CheckResult:
             before = record_fields(before_html).get(spec.field or "")
             spec = spec.model_copy(update={"expect": before})
             return _result(spec, text, actual, None if before is None else before == actual, path)
-    except httpx.HTTPError as e:
-        return _result(spec, text, None, None, f"read failed ({type(e).__name__})")
+    except (httpx.HTTPError, UnreadablePage) as e:
+        return _result(spec, text, None, None, f"read failed ({e})"[:200])
     return _result(spec, text, None, None, "no check primitive for this condition")
 
 

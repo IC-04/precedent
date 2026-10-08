@@ -111,6 +111,7 @@ class Evidence:
     text: str
     dated: str | None = None
     rows: list[dict[str, str]] = field(default_factory=list)
+    internal: bool | None = None  # mail only: sent from inside the company (same domain)
 
 
 def _get(client: httpx.Client, url: str) -> str:
@@ -166,6 +167,9 @@ def gather_instructions(client: httpx.Client) -> list[Evidence]:
         subject = page.title.split("·")[0].strip()
         if not re.search(r"approv|route|SOP|policy|threshold|account", body, re.I):
             continue
+        # sender then recipient are the first two addresses on a message page
+        addresses = re.findall(r"[\w.+-]+@([\w.-]+\.[a-z]+)", body)
+        internal = len(addresses) >= 2 and addresses[0].lower() == addresses[1].lower()
         out.append(
             Evidence(
                 ref=f"mail:{href.rsplit('/', 1)[1]}",
@@ -174,6 +178,7 @@ def gather_instructions(client: httpx.Client) -> list[Evidence]:
                 title=subject,
                 text=body[:2500],
                 dated=(page.times[0][:10] if page.times else None),
+                internal=internal,
             )
         )
         if len(out) >= MAX_MESSAGES:
@@ -342,52 +347,28 @@ def validate(candidates: list[Candidate], evidence: list[Evidence]) -> list[Prec
 def validate_with_report(
     candidates: list[Candidate], evidence: list[Evidence]
 ) -> tuple[list[Precedent], dict]:
-    """Keep only cited, checkable precedents; counts come from rows, never from model text;
-    when two precedents claim the same scope, the later authoritative source wins."""
+    """Keep only cited, checkable precedents. Code, not the model, decides the authority of a
+    source, whether a quote is real, the support count and the status."""
     seen = {e.ref: e for e in evidence}
     rows = next((e.rows for e in evidence if e.rows), [])
     kept: list[tuple[Precedent, Candidate]] = []
     dropped: list[dict] = []
     for i, c in enumerate(candidates, 1):
         governing_ref = _ref(c.governing_ref)
-        governing = None
-        if governing_ref:
-            if governing_ref not in seen:
-                dropped.append({"rule": c.rule, "reason": f"cites {governing_ref}, not gathered"})
-                continue
-            src = seen[governing_ref]
-            governing = SourceRef(
-                app=src.app,
-                ref=governing_ref,
-                quote=c.governing_quote,
-                authority=c.governing_authority or Authority.policy,
-                dated=c.governing_dated or src.dated,
-            )
+        if governing_ref and governing_ref not in seen:
+            dropped.append({"rule": c.rule, "reason": f"cites {governing_ref}, not gathered"})
+            continue
+        if not governing_ref and c.claim is None:
+            dropped.append({"rule": c.rule, "reason": "no source and no checkable claim"})
+            continue
+        flags = list(c.flags)
+        governing = _governing(seen[governing_ref], c, flags) if governing_ref else None
         supporting = [
             SourceRef(app=seen[r].app, ref=r, authority=Authority.precedent)
             for r in (_ref(x) for x in c.supporting_refs)
             if r in seen
         ]
-        support_text, exceptions, flags = None, list(c.exceptions), list(c.flags)
-        status = c.status
-        if c.claim is not None and c.claim.field in ("approver", "account"):
-            if _scoped(c.claim):
-                agree, total, others = support(rows, c.claim)
-                support_text = f"{agree} of {total} bills" + (
-                    f" since {c.claim.from_date}" if c.claim.from_date else ""
-                )
-                if total and others and governing is not None:
-                    exceptions = [f"{b} does not follow it" for b in others[:5]]
-                if governing is None and total and agree * 2 <= total + 1 and agree < total:
-                    status = PrecedentStatus.unresolved  # split history, nothing governs
-                elif governing is not None and total and agree / total >= MOSTLY_FOLLOWED:
-                    status = PrecedentStatus.usable  # authority, followed in practice;
-                    # its exceptions stay listed rather than turning it into a conflict
-            else:
-                flags.append("support not counted: the claim names no account, vendor or amount")
-        if governing is None and not supporting and c.claim is None:
-            dropped.append({"rule": c.rule, "reason": "no source and no checkable claim"})
-            continue
+        support_text, exceptions, status = _settle(c, governing, rows, flags)
         kept.append(
             (
                 Precedent(
@@ -397,7 +378,7 @@ def validate_with_report(
                     governing=governing,
                     supporting=supporting,
                     support=support_text,
-                    exceptions=exceptions,
+                    exceptions=exceptions or list(c.exceptions),
                     flags=flags,
                     status=status,
                 ),
@@ -407,6 +388,66 @@ def validate_with_report(
     _resolve_supersession(kept)
     report = {"candidates": len(candidates), "kept": len(kept), "dropped": dropped}
     return [p for p, _ in kept], report
+
+
+def authority_of(source: Evidence) -> Authority:
+    """Authority comes from where a source lives, not from what the model says about it."""
+    if source.app == "drive":
+        return Authority.policy
+    if source.app == "mail":
+        return Authority.instruction if source.internal else Authority.external
+    return Authority.current_state if source.rows else Authority.precedent
+
+
+def _norm_text(text: str) -> str:
+    return " ".join(re.sub(r"[^\w₹]+", " ", text.lower()).split())
+
+
+def _governing(source: Evidence, c: Candidate, flags: list[str]) -> SourceRef:
+    quote = c.governing_quote
+    if quote and _norm_text(quote) not in _norm_text(source.text):
+        flags.append("the quoted words are not in the source; quote removed")
+        quote = None
+    return SourceRef(
+        app=source.app,
+        ref=source.ref,
+        quote=quote,
+        authority=authority_of(source),
+        dated=source.dated or c.governing_dated,
+    )
+
+
+def _settle(
+    c: Candidate, governing: SourceRef | None, rows: list[dict[str, str]], flags: list[str]
+) -> tuple[str | None, list[str], PrecedentStatus]:
+    """Support count, exceptions and status from the history rows.
+
+    With an authoritative source: usable if followed in at least 75% of matching bills (or if
+    there is no history yet: a new instruction has none), otherwise a conflict to report.
+    Without one: usable only if consistent history (3+ bills, 75%+) shows it, else unresolved.
+    """
+    authoritative = governing is not None and governing.authority in (
+        Authority.policy,
+        Authority.instruction,
+    )
+    if c.claim is None or c.claim.field not in ("approver", "account"):
+        return None, [], c.status if authoritative else PrecedentStatus.unresolved
+    if not _scoped(c.claim):
+        flags.append("support not counted: the claim names no account, vendor or amount")
+        return None, [], PrecedentStatus.usable if authoritative else PrecedentStatus.unresolved
+    agree, total, others = support(rows, c.claim)
+    since = f" since {c.claim.from_date}" if c.claim.from_date else ""
+    support_text = f"{agree} of {total} bills{since}"
+    share = agree / total if total else None
+    if authoritative:
+        exceptions = [f"{b} does not follow it" for b in others[:5]]
+        if share is None or share >= MOSTLY_FOLLOWED:
+            return support_text, exceptions, PrecedentStatus.usable
+        flags.append(f"practice follows it in only {agree} of {total} bills")
+        return support_text, exceptions, PrecedentStatus.conflict
+    if total >= 3 and share is not None and share >= MOSTLY_FOLLOWED:
+        return support_text, [], PrecedentStatus.usable
+    return support_text, [], PrecedentStatus.unresolved
 
 
 def _when(p: Precedent, c: Candidate) -> str:

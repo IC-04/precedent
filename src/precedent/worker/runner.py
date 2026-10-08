@@ -381,6 +381,77 @@ def _intentions(previous: Path) -> str:
     )
 
 
+class Callbacks:
+    """ADK callbacks around Ava's tool and model calls: one browser action at a time,
+    captions and viewing pace for people watching, and the per-turn thinking level."""
+
+    def __init__(self, cfg: RunConfig, guard: Guard, toolset: McpToolset, screen=None):
+        from precedent.worker.screen import caption_for
+
+        self.cfg, self.guard, self.toolset, self.screen = cfg, guard, toolset, screen
+        self.caption_for = caption_for
+        self.lock = asyncio.Lock()
+        self.held: set[int] = set()
+        self.known = {*BROWSER_TOOLS, *(t.__name__ for t in guard.tools())}
+
+    async def before_tool(self, tool, args, tool_context):
+        if tool.name not in self.known:
+            # ADK skips after_tool for unknown tools; no lock may be held for those calls.
+            return self.guard.before_tool(tool, args, tool_context)
+        await self.lock.acquire()
+        self.held.add(id(tool_context))
+        try:
+            browser = tool.name.startswith("browser_")
+            caption = self.caption_for(tool.name, args) if browser else None
+            self.guard.next_caption = caption
+            result = self.guard.before_tool(tool, args, tool_context)
+            if self.screen is not None and caption and result is None:
+                await self.screen.say(caption)
+            return result
+        except BaseException:
+            self._release(tool_context)
+            raise
+
+    async def after_tool(self, tool, args, tool_context, tool_response):
+        try:
+            guard, capture = self.guard, None
+            refused = isinstance(tool_response, dict) and "error" in tool_response
+            browser = tool.name.startswith("browser_")
+            if browser and not refused and hasattr(self.toolset, "capture"):
+                capture = await self.toolset.capture(guard.log, tool_context)
+            result = guard.after_tool(tool, args, tool_context, tool_response, capture=capture)
+            if self.screen is not None and guard.refused_now:
+                guard.refused_now = False
+                await self.screen.say("Save refused · recording a decision first")
+            if self.cfg.watch and browser and not refused:
+                await asyncio.sleep(VIEWING_PACE)  # people are watching; reported separately
+                guard.pace_seconds += VIEWING_PACE
+            return result
+        finally:
+            self._release(tool_context)
+
+    def _release(self, tool_context) -> None:
+        if id(tool_context) in self.held:
+            self.held.discard(id(tool_context))
+            self.lock.release()
+
+    async def on_tool_error(self, tool, args, tool_context, error):
+        # ADK invokes after_tool after a handled error; it releases this invocation's lock.
+        return self.guard.on_tool_error(tool, args, tool_context, error)
+
+    def before_model(self, callback_context, llm_request):
+        guard = self.guard
+        guard.before_model(callback_context, llm_request)
+        if self.cfg.thinking.lower() != "adaptive":
+            return None
+        level, reason = guard.thinking_level()
+        llm_request.config.thinking_config = types.ThinkingConfig(thinking_level=level)
+        if guard.thinking_note != level:
+            guard.thinking_note = level
+            guard.log.emit("note", kind="thinking", level=level.lower(), reason=reason)
+        return None
+
+
 def _build_agent(
     cfg: RunConfig,
     guard: Guard,
@@ -391,64 +462,7 @@ def _build_agent(
     context: str,
     screen=None,
 ) -> LlmAgent:
-    from precedent.worker.screen import caption_for
-
-    action_lock = asyncio.Lock()
-    held_contexts: set[int] = set()
-
-    known_tools = {*BROWSER_TOOLS, *(t.__name__ for t in guard.tools())}
-
-    async def before_tool(tool, args, tool_context):
-        if tool.name not in known_tools:
-            # ADK skips after_tool for unknown tools; no lock may be held for those calls.
-            return guard.before_tool(tool, args, tool_context)
-        await action_lock.acquire()
-        held_contexts.add(id(tool_context))
-        try:
-            caption = caption_for(tool.name, args) if tool.name.startswith("browser_") else None
-            guard.next_caption = caption
-            result = guard.before_tool(tool, args, tool_context)
-            if screen is not None and caption and result is None:
-                await screen.say(caption)
-            return result
-        except BaseException:
-            held_contexts.discard(id(tool_context))
-            action_lock.release()
-            raise
-
-    async def after_browser(tool, args, tool_context, tool_response):
-        try:
-            capture = None
-            refused = isinstance(tool_response, dict) and "error" in tool_response
-            if tool.name.startswith("browser_") and not refused and hasattr(toolset, "capture"):
-                capture = await toolset.capture(guard.log, tool_context)
-            result = guard.after_tool(tool, args, tool_context, tool_response, capture=capture)
-            if screen is not None and guard.attention == "a save was refused":
-                await screen.say("Save refused · recording a decision first")
-            if cfg.watch and tool.name.startswith("browser_") and not refused:
-                await asyncio.sleep(VIEWING_PACE)  # people are watching; reported separately
-                guard.pace_seconds += VIEWING_PACE
-            return result
-        finally:
-            if id(tool_context) in held_contexts:
-                held_contexts.discard(id(tool_context))
-                action_lock.release()
-
-    async def on_tool_error(tool, args, tool_context, error):
-        # ADK invokes after_tool after a handled error; it releases this invocation's lock.
-        return guard.on_tool_error(tool, args, tool_context, error)
-
-    def adaptive_before_model(callback_context, llm_request):
-        guard.before_model(callback_context, llm_request)
-        if cfg.thinking.lower() != "adaptive":
-            return None
-        level, reason = guard.thinking_level()
-        llm_request.config.thinking_config = types.ThinkingConfig(thinking_level=level)
-        if guard.thinking_note != level:
-            guard.thinking_note = level
-            guard.log.emit("note", kind="thinking", level=level.lower(), reason=reason)
-        return None
-
+    calls = Callbacks(cfg, guard, toolset, screen)
     agent = LlmAgent(
         name="ava",
         model=make_model(cfg.model),
@@ -456,10 +470,10 @@ def _build_agent(
             base=base, goal=goal.model_dump_json(indent=1), context=context
         ),
         tools=[toolset, *guard.tools()],
-        before_tool_callback=before_tool,
-        after_tool_callback=after_browser,
-        on_tool_error_callback=on_tool_error,
-        before_model_callback=adaptive_before_model,
+        before_tool_callback=calls.before_tool,
+        after_tool_callback=calls.after_tool,
+        on_tool_error_callback=calls.on_tool_error,
+        before_model_callback=calls.before_model,
         after_model_callback=guard.after_model,
         on_model_error_callback=fallback,
         generate_content_config=types.GenerateContentConfig(

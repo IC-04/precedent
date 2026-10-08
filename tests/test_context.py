@@ -104,7 +104,7 @@ def test_bracketed_refs_stale_rules_and_unscoped_claims(live_apps, tmp_path):
     ana, raj, prepaid = precedents
     assert ana.status == PrecedentStatus.usable and ana.support == "8 of 9 bills since 2026-07-14"
     assert raj.status == PrecedentStatus.conflict
-    assert raj.flags == [f"superseded by {cfo.ref} from 2026-07-14"]
+    assert f"superseded by {cfo.ref} from 2026-07-14" in raj.flags
     assert prepaid.support is None and "support not counted" in prepaid.flags[0]
     text = as_prompt(precedents)
     assert "[usable] Design spend" in text and "[conflict] Route design spend" in text
@@ -132,3 +132,33 @@ def test_followed_authority_is_usable_and_unscoped_rules_do_not_supersede(live_a
     assert design.status == PrecedentStatus.usable and design.exceptions  # 8 of 9, INV-913 kept
     assert prepaid.status == saas.status == PrecedentStatus.usable
     assert not any("superseded" in f for f in saas.flags)
+
+
+def test_authority_and_quotes_come_from_the_source_not_the_model(live_apps, tmp_path):
+    from precedent.worker.context import authority_of, validate_with_report
+
+    ev = _evidence(live_apps, tmp_path)
+    cfo = next(e for e in ev if e.app == "mail" and "approvals" in e.title.lower())
+    policy = next(e for e in ev if e.title == "AP-Policy-2025.pdf")
+    assert authority_of(cfo) == Authority.instruction and cfo.internal is True
+    assert authority_of(policy) == Authority.policy
+    precedents, _ = validate_with_report([
+        Candidate(rule="Invented approver", governing_ref=policy.ref,
+                  governing_quote="All bills go to the intern",
+                  governing_authority=Authority.instruction,
+                  claim=Claim(field="approver", value="Tara Bose", account="6400",
+                              min_amount=50000, from_date="2026-07-14"),
+                  status=PrecedentStatus.usable),
+        Candidate(rule="History only, split",
+                  claim=Claim(field="account", value="6120", vendor="Linear"),
+                  status=PrecedentStatus.usable),
+        Candidate(rule="History only, consistent",
+                  claim=Claim(field="approver", value="Meera Iyer", account="6340"),
+                  status=PrecedentStatus.unresolved),
+    ], ev)  # fmt: skip
+    invented, split, consistent = precedents
+    assert invented.governing.quote is None and "not in the source" in invented.flags[0]
+    assert invented.governing.authority == Authority.policy  # not the model's label
+    assert invented.status == PrecedentStatus.conflict  # 0 of 9 follow it
+    assert split.status == PrecedentStatus.unresolved
+    assert consistent.status == PrecedentStatus.usable

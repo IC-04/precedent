@@ -38,7 +38,13 @@ class Frames:
     def __init__(self) -> None:
         self.jpeg: bytes | None = None
         self.count = 0
+        self.closed = False
         self.changed = threading.Condition()
+
+    def close(self) -> None:
+        with self.changed:
+            self.closed = True
+            self.changed.notify_all()
 
     def put(self, jpeg: bytes) -> None:
         with self.changed:
@@ -59,7 +65,6 @@ def _mjpeg_server(frames: Frames, port: int) -> ThreadingHTTPServer:
                 jpeg, _ = frames.wait(-1, 0)
                 self.send_response(200 if jpeg else 204)
                 self.send_header("Content-Type", "image/jpeg")
-                self.send_header("Access-Control-Allow-Origin", "*")
                 self.end_headers()
                 if jpeg:
                     self.wfile.write(jpeg)
@@ -69,11 +74,10 @@ def _mjpeg_server(frames: Frames, port: int) -> ThreadingHTTPServer:
                 "Content-Type", f"multipart/x-mixed-replace; boundary={BOUNDARY.decode()}"
             )
             self.send_header("Cache-Control", "no-store")
-            self.send_header("Access-Control-Allow-Origin", "*")
             self.end_headers()
             seen = 0
             try:
-                while True:
+                while not frames.closed:
                     jpeg, seen = frames.wait(seen, 1.0)  # repeat the last frame at least 1/s
                     if jpeg is None:
                         continue
@@ -101,6 +105,7 @@ class AvaBrowser:
     def __init__(self, executable: str, headed: bool = False, size: tuple[int, int] = (1280, 860)):
         self.port = free_port()
         self.profile = tempfile.mkdtemp(prefix="ava-profile-")
+        self.process: subprocess.Popen | None = None
         args = [
             executable,
             f"--remote-debugging-port={self.port}",
@@ -112,7 +117,13 @@ class AvaBrowser:
         ]
         if not headed:
             args.insert(1, "--headless=new")
-        self.process = subprocess.Popen(args, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        try:
+            self.process = subprocess.Popen(
+                args, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+            )
+        except OSError:
+            shutil.rmtree(self.profile, ignore_errors=True)
+            raise
         self.endpoint = f"http://127.0.0.1:{self.port}"
         deadline = time.time() + 15
         while time.time() < deadline:
@@ -125,7 +136,7 @@ class AvaBrowser:
         raise RuntimeError("Ava's browser did not start")
 
     def close(self) -> None:
-        if self.process.poll() is None:
+        if self.process is not None and self.process.poll() is None:
             self.process.terminate()
             try:
                 self.process.wait(timeout=5)
@@ -147,12 +158,13 @@ class Screen:
         self._browser: Any = None
         self._cdp: Any = None
         self._page: Any = None
-        self.caption = ""
+        self._serving = False
 
     async def start(self) -> None:
         from playwright.async_api import async_playwright
 
         threading.Thread(target=self._server.serve_forever, daemon=True).start()
+        self._serving = True
         self._pw = await async_playwright().start()
         self._browser = await self._pw.chromium.connect_over_cdp(self.endpoint)
         context = self._browser.contexts[0]
@@ -189,7 +201,6 @@ class Screen:
 
     async def say(self, caption: str) -> None:
         """Show a caption in Ava's browser (and remember it across page loads)."""
-        self.caption = caption
         if self._page is None:
             return
         try:
@@ -209,7 +220,9 @@ class Screen:
             if self._pw is not None:
                 await self._pw.stop()
         finally:
-            self._server.shutdown()
+            self.frames.close()  # ends every open MJPEG stream
+            if self._serving:  # shutdown() waits forever on a server that never started
+                self._server.shutdown()
             self._server.server_close()
 
 

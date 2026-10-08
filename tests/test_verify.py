@@ -83,3 +83,16 @@ def test_unmapped_conditions_are_unknown_and_outcome_needs_every_pass(live_apps)
     assert outcome(results[:1], None, False) == "pass"
     assert outcome(results[:1], "budget used", False) == "unknown"
     assert outcome([], None, True) == "blocked"
+
+
+def test_an_unreadable_search_page_is_unknown_not_zero(live_apps):
+    base, _ = live_apps
+
+    class Broken(Reader):
+        def html(self, path, params=None):
+            return "<html><body>Maintenance</body></html>"
+
+    spec = CheckSpec(condition_id="c", primitive="count_bills", invoice_no="FIG-1842", expect="0")
+    assert run_check(Broken(httpx.Client(base_url=base), {}), spec, "t").result == "unknown"
+    odd = CheckSpec(condition_id="c", primitive="count_bills", invoice_no="A&B #1", expect="0")
+    assert run_check(_reader(live_apps), odd, "t").result == "pass"  # encoded, searched, none

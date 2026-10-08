@@ -46,3 +46,15 @@ def test_frames_hand_over_the_latest_picture():
     frames.put(b"a")
     frames.put(b"b")
     assert frames.wait(0, 0.01) == (b"b", 2)
+
+
+def test_stopping_a_screen_that_never_started_does_not_hang():
+    import asyncio
+    import time
+
+    from precedent.worker.screen import Screen
+
+    screen = Screen("http://127.0.0.1:9")
+    started = time.monotonic()
+    asyncio.run(asyncio.wait_for(screen.stop(), timeout=5))
+    assert time.monotonic() - started < 2 and screen.frames.closed

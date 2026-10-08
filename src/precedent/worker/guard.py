@@ -92,7 +92,7 @@ class Guard:
         self.attention: str | None = None  # why the next turn deserves more thought
         self.next_caption: str | None = None  # plain-language label for the next action
         self.pace_seconds = 0.0  # viewing pace added for people watching, reported apart
-        self.last_tool: str | None = None
+        self.refused_now = False  # a save was refused during the last browser action
         self.thinking_note: str | None = None
 
     # ------------------------------------------------------------------ Ava's tools
@@ -235,8 +235,6 @@ class Guard:
         return None
 
     def before_tool(self, tool, args: dict, tool_context) -> dict | None:
-        if not tool.name.startswith("browser_"):
-            self.last_tool = tool.name
         if tool.name == "finish":
             return None
         self.steps += 1
@@ -259,7 +257,6 @@ class Guard:
             return None  # our own refusal from before_tool: pass it to the model unchanged
         text, is_error = _text(tool_response)
         notes = []
-        self.last_tool = tool.name
         if is_error:
             self.attention = self.attention or "an action failed"
             kind = classify_tool_error(text)
@@ -371,7 +368,8 @@ class Guard:
                     "note", kind="write_refused", method=ex.method, path=ex.path, reason=ex.refused
                 )
                 notes.append(f"Your save was refused before it reached the app: {ex.refused}")
-                self.attention = "a save was refused"
+                self.attention = self.attention or "a save was refused"
+                self.refused_now = True
             elif ex.method != "GET" and ex.status and 200 <= ex.status < 400:
                 self.since_progress = 0
                 self.log.emit(
