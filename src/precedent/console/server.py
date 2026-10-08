@@ -78,6 +78,7 @@ class RunManager:
                 "PRECEDENT_RUN_ID": run_id,
                 "PRECEDENT_RUNS_ROOT": str(self.root),
                 "PRECEDENT_HUMAN_CHANNEL": "console",
+                "PRECEDENT_WATCH": "1",
             }
             try:
                 with (directory / "process.log").open("ab") as output:

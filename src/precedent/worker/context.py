@@ -286,7 +286,9 @@ def reasoning_prompt(evidence: list[Evidence]) -> str:
             parts.append(f"[{e.ref}] {e.title}{dated}:\n{e.text}")
     parts.append(
         "Write the precedents that decide how an invoice is coded (account) and who approves it "
-        "in this company. Give each one a claim that can be checked against the history rows. "
+        "in this company. Cite evidence refs exactly as written inside the brackets, without the "
+        "brackets (for example mail:m-0001). Give each one a claim that can be checked against "
+        "the history rows. "
         "Include unresolved precedents where history splits with no governing source."
     )
     return "\n\n".join(parts)
@@ -320,56 +322,116 @@ def support(rows: list[dict[str, str]], claim: Claim) -> tuple[int, int, list[st
     return len(agree), len(scope), others
 
 
+def _ref(ref: str | None) -> str | None:
+    """Models copy the evidence labels: '[mail:m-1]' and ' mail:m-1 ' both mean 'mail:m-1'."""
+    if ref is None:
+        return None
+    return ref.strip().strip("[]").strip().removeprefix("ref:").strip() or None
+
+
+def _scoped(claim: Claim) -> bool:
+    """A claim narrow enough for its support count to mean something."""
+    return bool(claim.account or claim.vendor or claim.min_amount is not None)
+
+
 def validate(candidates: list[Candidate], evidence: list[Evidence]) -> list[Precedent]:
-    """Keep only cited, checkable precedents; counts come from rows, never from model text."""
+    return validate_with_report(candidates, evidence)[0]
+
+
+def validate_with_report(
+    candidates: list[Candidate], evidence: list[Evidence]
+) -> tuple[list[Precedent], dict]:
+    """Keep only cited, checkable precedents; counts come from rows, never from model text;
+    when two precedents claim the same scope, the later authoritative source wins."""
     seen = {e.ref: e for e in evidence}
     rows = next((e.rows for e in evidence if e.rows), [])
-    out = []
+    kept: list[tuple[Precedent, Candidate]] = []
+    dropped: list[dict] = []
     for i, c in enumerate(candidates, 1):
+        governing_ref = _ref(c.governing_ref)
         governing = None
-        if c.governing_ref:
-            if c.governing_ref not in seen:
-                continue  # cites something never gathered: dropped
-            src = seen[c.governing_ref]
+        if governing_ref:
+            if governing_ref not in seen:
+                dropped.append({"rule": c.rule, "reason": f"cites {governing_ref}, not gathered"})
+                continue
+            src = seen[governing_ref]
             governing = SourceRef(
                 app=src.app,
-                ref=c.governing_ref,
+                ref=governing_ref,
                 quote=c.governing_quote,
                 authority=c.governing_authority or Authority.policy,
                 dated=c.governing_dated or src.dated,
             )
         supporting = [
             SourceRef(app=seen[r].app, ref=r, authority=Authority.precedent)
-            for r in c.supporting_refs
+            for r in (_ref(x) for x in c.supporting_refs)
             if r in seen
         ]
-        support_text, exceptions = None, list(c.exceptions)
+        support_text, exceptions, flags = None, list(c.exceptions), list(c.flags)
         status = c.status
         if c.claim is not None and c.claim.field in ("approver", "account"):
-            agree, total, others = support(rows, c.claim)
-            support_text = f"{agree} of {total} bills" + (
-                f" since {c.claim.from_date}" if c.claim.from_date else ""
-            )
-            if total and others and governing is not None:
-                exceptions = [f"{b} does not follow it" for b in others[:5]]
-            if governing is None and total and agree * 2 <= total + 1 and agree < total:
-                status = PrecedentStatus.unresolved  # split history, nothing governs
+            if _scoped(c.claim):
+                agree, total, others = support(rows, c.claim)
+                support_text = f"{agree} of {total} bills" + (
+                    f" since {c.claim.from_date}" if c.claim.from_date else ""
+                )
+                if total and others and governing is not None:
+                    exceptions = [f"{b} does not follow it" for b in others[:5]]
+                if governing is None and total and agree * 2 <= total + 1 and agree < total:
+                    status = PrecedentStatus.unresolved  # split history, nothing governs
+            else:
+                flags.append("support not counted: the claim names no account, vendor or amount")
         if governing is None and not supporting and c.claim is None:
-            continue  # nothing behind it
-        out.append(
-            Precedent(
-                id=f"p{i}",
-                task_family=c.task_family,
-                rule=c.rule,
-                governing=governing,
-                supporting=supporting,
-                support=support_text,
-                exceptions=exceptions,
-                flags=c.flags,
-                status=status,
+            dropped.append({"rule": c.rule, "reason": "no source and no checkable claim"})
+            continue
+        kept.append(
+            (
+                Precedent(
+                    id=f"p{i}",
+                    task_family=c.task_family,
+                    rule=c.rule,
+                    governing=governing,
+                    supporting=supporting,
+                    support=support_text,
+                    exceptions=exceptions,
+                    flags=flags,
+                    status=status,
+                ),
+                c,
             )
         )
-    return out
+    _resolve_supersession(kept)
+    report = {"candidates": len(candidates), "kept": len(kept), "dropped": dropped}
+    return [p for p, _ in kept], report
+
+
+def _when(p: Precedent, c: Candidate) -> str:
+    """When a precedent took effect: its claim's start date, else its source's date."""
+    return (
+        (c.claim.from_date if c.claim else None) or (p.governing.dated if p.governing else "") or ""
+    )
+
+
+def _resolve_supersession(kept: list[tuple[Precedent, Candidate]]) -> None:
+    """Same field and scope, different value: the later source governs from its date; the
+    older one is kept visible as a conflict (for example a stale procedure)."""
+    groups: dict[tuple, list[tuple[Precedent, Candidate]]] = {}
+    for p, c in kept:
+        if c.claim is None or p.governing is None:
+            continue
+        key = (c.claim.field, c.claim.account, (c.claim.vendor or "").lower(), c.claim.min_amount)
+        groups.setdefault(key, []).append((p, c))
+    for members in groups.values():
+        if len({c.claim.value.strip().lower() for _, c in members}) < 2:
+            continue
+        winner, winner_c = max(members, key=lambda m: _when(*m))
+        since = _when(winner, winner_c)
+        for p, _c in members:
+            if p is not winner:
+                p.status = PrecedentStatus.conflict
+                p.flags.append(
+                    f"superseded by {winner.governing.ref}" + (f" from {since}" if since else "")
+                )
 
 
 def as_prompt(precedents: list[Precedent]) -> str:

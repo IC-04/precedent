@@ -8,6 +8,7 @@ verifier (WS5). The browser reaches the company only through the gateway.
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import os
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
@@ -43,6 +44,8 @@ from precedent.worker.guard import Budgets, Guard
 from precedent.worker.questions import FileHuman
 
 REPO = Path(__file__).resolve().parents[3]
+VIEWING_PACE = 0.7  # seconds after each browser action when people are watching
+
 BROWSER_TOOLS = [
     "browser_navigate",
     "browser_navigate_back",
@@ -110,6 +113,10 @@ class RunConfig:
     )
     thinking: str = field(default_factory=lambda: os.getenv("PRECEDENT_THINKING", "adaptive"))
     headed: bool = False
+    # a live view of Ava's browser for people (console); never changes what Ava does
+    screen: bool = field(default_factory=lambda: os.getenv("PRECEDENT_SCREEN", "1") != "0")
+    # viewing pace: a short pause after each browser action so eyes can follow (console only)
+    watch: bool = field(default_factory=lambda: os.getenv("PRECEDENT_WATCH", "0") == "1")
     resume: bool = False
     runs_root: Path = field(
         default_factory=lambda: Path(os.getenv("PRECEDENT_RUNS_ROOT", str(RUNS)))
@@ -251,15 +258,18 @@ class ObservedBrowser(McpToolset):
             return None
 
 
-def browser_toolset(gateway_url: str, out_dir: Path, headed: bool) -> McpToolset:
+def browser_toolset(
+    gateway_url: str, out_dir: Path, headed: bool, cdp_endpoint: str | None = None
+) -> McpToolset:
+    """Playwright MCP for Ava. With cdp_endpoint it attaches to the browser we launched (so
+    people can watch it live); without, it launches its own isolated browser."""
+    launch = ["--cdp-endpoint", cdp_endpoint] if cdp_endpoint else ["--isolated"]
     args = [
-        "--isolated",
+        *launch,
         "--viewport-size",
         "1000,760",
         "--timeout-action",
         "4000",
-        "--executable-path",
-        chrome_path(),
         "--allowed-origins",
         gateway_url,
         "--output-dir",
@@ -271,8 +281,10 @@ def browser_toolset(gateway_url: str, out_dir: Path, headed: bool) -> McpToolset
         "--image-responses",
         "omit",
     ]
-    if not headed:
-        args.insert(0, "--headless")
+    if not cdp_endpoint:
+        args += ["--executable-path", chrome_path()]
+        if not headed:
+            args.insert(0, "--headless")
     server = StdioServerParameters(
         command=str(REPO / "node_modules/.bin/playwright-mcp"), args=args, cwd=str(out_dir)
     )
@@ -377,7 +389,9 @@ def _build_agent(
     goal,
     fallback: Fallback,
     context: str,
+    screen=None,
 ) -> LlmAgent:
+    from precedent.worker.screen import caption_for
 
     action_lock = asyncio.Lock()
     held_contexts: set[int] = set()
@@ -391,7 +405,12 @@ def _build_agent(
         await action_lock.acquire()
         held_contexts.add(id(tool_context))
         try:
-            return guard.before_tool(tool, args, tool_context)
+            caption = caption_for(tool.name, args) if tool.name.startswith("browser_") else None
+            guard.next_caption = caption
+            result = guard.before_tool(tool, args, tool_context)
+            if screen is not None and caption and result is None:
+                await screen.say(caption)
+            return result
         except BaseException:
             held_contexts.discard(id(tool_context))
             action_lock.release()
@@ -403,7 +422,13 @@ def _build_agent(
             refused = isinstance(tool_response, dict) and "error" in tool_response
             if tool.name.startswith("browser_") and not refused and hasattr(toolset, "capture"):
                 capture = await toolset.capture(guard.log, tool_context)
-            return guard.after_tool(tool, args, tool_context, tool_response, capture=capture)
+            result = guard.after_tool(tool, args, tool_context, tool_response, capture=capture)
+            if screen is not None and guard.attention == "a save was refused":
+                await screen.say("Save refused · recording a decision first")
+            if cfg.watch and tool.name.startswith("browser_") and not refused:
+                await asyncio.sleep(VIEWING_PACE)  # people are watching; reported separately
+                guard.pace_seconds += VIEWING_PACE
+            return result
         finally:
             if id(tool_context) in held_contexts:
                 held_contexts.discard(id(tool_context))
@@ -450,6 +475,34 @@ def _build_agent(
     return agent
 
 
+async def _open_screen(cfg: RunConfig, log: EventLog, holder: dict) -> str | None:
+    """Launch Ava's browser and its live view; on any failure Ava still works, unwatched."""
+    from precedent.worker.screen import AvaBrowser, Screen
+
+    try:
+        holder["ava_browser"] = browser = AvaBrowser(chrome_path(), headed=cfg.headed)
+        holder["screen"] = screen = Screen(browser.endpoint)
+        await screen.start()
+        log.emit("note", kind="screen", url=screen.url, text="Ava's screen is live")
+        return browser.endpoint
+    except Exception as e:  # noqa: BLE001 - viewing must never stop the work
+        log.emit("note", kind="screen_unavailable", text=f"Live view unavailable: {e}"[:300])
+        await _close_screen(holder, log)
+        return None
+
+
+async def _close_screen(holder: dict, log: EventLog) -> None:
+    screen, browser = holder.pop("screen", None), holder.pop("ava_browser", None)
+    try:
+        if screen is not None:
+            await screen.stop()
+    except Exception as e:  # noqa: BLE001
+        log.emit("note", kind="error", text=f"closing the live view failed: {e}"[:300])
+    finally:
+        if browser is not None:
+            browser.close()
+
+
 async def _act(
     cfg: RunConfig,
     guard: Guard,
@@ -469,7 +522,8 @@ async def _act(
     log.emit("note", kind="company", company=identity)
     base = gateway.start()
     (log.dir / "mcp").mkdir(exist_ok=True)
-    holder["toolset"] = toolset = browser_toolset(base, log.dir / "mcp", cfg.headed)
+    endpoint = await _open_screen(cfg, log, holder) if cfg.screen else None
+    holder["toolset"] = toolset = browser_toolset(base, log.dir / "mcp", cfg.headed, endpoint)
     # The goal contract and the company context do not depend on each other: in parallel.
     goal, context = await asyncio.gather(
         _prepare_goal(cfg, guard, log), _prepare_context(cfg, guard, log, base)
@@ -477,7 +531,14 @@ async def _act(
     log.emit("goal_contract", **goal.model_dump())
     guard.condition_ids = {condition.id for condition in goal.conditions}
     agent = _build_agent(
-        cfg, guard, toolset, base, goal, Fallback(cfg.model, cfg.fallbacks, log), context
+        cfg,
+        guard,
+        toolset,
+        base,
+        goal,
+        Fallback(cfg.model, cfg.fallbacks, log),
+        context,
+        screen=holder.get("screen"),
     )
     try:
         await asyncio.wait_for(
@@ -526,7 +587,13 @@ async def _prepare_context(cfg: RunConfig, guard: Guard, log: EventLog, base: st
             name="context",
             thinking="MEDIUM",
         )
-        precedents = ctx.validate(candidates.precedents, evidence)
+        precedents, report = ctx.validate_with_report(candidates.precedents, evidence)
+        log.emit(
+            "note",
+            kind="context",
+            text=f"{report['kept']} of {report['candidates']} candidate precedents kept",
+            dropped=report["dropped"],
+        )
         for p in precedents:
             log.emit("precedent", **p.model_dump(mode="json"))
         return ctx.as_prompt(precedents)
@@ -592,7 +659,7 @@ async def run(cfg: RunConfig) -> dict[str, Any]:
         error = f"{type(e).__name__}: {e}"
         log.emit("note", kind="error", text=error[:2000])
     finally:
-        await _close(holder.get("toolset"), gateway, log)
+        await _close(holder, gateway, log)
     summary = {
         "outcome": outcome,
         "tokens_in": guard.tokens_in,
@@ -601,6 +668,7 @@ async def run(cfg: RunConfig) -> dict[str, Any]:
         "seconds": guard.seconds(),
         "steps": guard.steps,
         "questions": guard.questions,
+        "viewing_pace_seconds": round(guard.pace_seconds, 1),
         "claimed": (guard.finished or {}).get("claimed"),
         "error": error,
     }
@@ -614,15 +682,20 @@ async def run(cfg: RunConfig) -> dict[str, Any]:
     return {**summary, "run_id": log.run_id, "claimed": guard.finished, "dir": str(log.dir)}
 
 
-async def _close(toolset: McpToolset | None, gateway: Gateway, log: EventLog) -> None:
-    """Close the browser and the gateway; a failure in one never skips the other."""
+async def _close(holder: dict, gateway: Gateway, log: EventLog) -> None:
+    """Close the browser tools, the live view and Ava's browser, and the gateway; a failure
+    in one never skips the others."""
+    toolset = holder.get("toolset")
     try:
         if toolset is not None:
             await toolset.close()
     except Exception as e:  # noqa: BLE001
         log.emit("note", kind="error", text=f"closing the browser failed: {e}"[:500])
     finally:
-        gateway.stop()
+        try:
+            await _close_screen(holder, log)
+        finally:
+            gateway.stop()
 
 
 async def _drive(agent: LlmAgent, guard: Guard, cfg: RunConfig, previous: Path | None) -> None:
@@ -633,8 +706,11 @@ async def _drive(agent: LlmAgent, guard: Guard, cfg: RunConfig, previous: Path |
         text += "\n\n" + _intentions(previous)
     message = types.Content(role="user", parts=[types.Part(text=text)])
     hard_stop = cfg.budgets.steps + 5
-    async for _event in runner.run_async(user_id="ava", session_id=session.id, new_message=message):
-        if guard.finished or guard.steps > hard_stop:
-            break
+    # aclosing: leaving early closes ADK's stream here, in this task, not later in another one
+    events = runner.run_async(user_id="ava", session_id=session.id, new_message=message)
+    async with contextlib.aclosing(events):
+        async for _event in events:
+            if guard.finished or guard.steps > hard_stop:
+                break
     if not guard.finished and not guard.stop_reason:
         guard.stop_reason = "the model stopped without calling finish"

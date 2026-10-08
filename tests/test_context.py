@@ -74,3 +74,37 @@ def test_validation_drops_uncited_rules_and_recomputes_counts(live_apps, tmp_pat
 def test_baseline_context_is_documents_only(live_apps, tmp_path):
     text = baseline_prompt(_evidence(live_apps, tmp_path))
     assert "AP-SOP-v3.pdf" in text and "routes to me" not in text and "INV-" not in text
+
+
+def test_bracketed_refs_stale_rules_and_unscoped_claims(live_apps, tmp_path):
+    """Regression for run 20261008-134000-04cd: every candidate was dropped for '[mail:m-1]'
+    refs, and the stale procedure's rule competed with the later instruction."""
+    from precedent.worker.context import validate_with_report
+
+    ev = _evidence(live_apps, tmp_path)
+    cfo = next(e for e in ev if e.app == "mail" and "approvals" in e.title.lower())
+    sop = next(e for e in ev if e.title == "AP-SOP-v3.pdf")
+    candidates = [
+        Candidate(rule="Design spend above INR 50,000 routes to Ana Pereira",
+                  governing_ref=f"[{cfo.ref}]", supporting_refs=["[books:history]"],
+                  claim=Claim(field="approver", value="Ana Pereira", account="6400",
+                              min_amount=50000, from_date="2026-07-14"),
+                  status=PrecedentStatus.usable),
+        Candidate(rule="Route design spend above INR 50,000 to Raj Mehta",
+                  governing_ref=f"[{sop.ref}]",
+                  claim=Claim(field="approver", value="Raj Mehta", account="6400",
+                              min_amount=50000),
+                  status=PrecedentStatus.usable),
+        Candidate(rule="Payments covering more than one period go to 1400",
+                  governing_ref=f" {sop.ref} ", claim=Claim(field="account", value="1400"),
+                  status=PrecedentStatus.usable),
+    ]  # fmt: skip
+    precedents, report = validate_with_report(candidates, ev)
+    assert report == {"candidates": 3, "kept": 3, "dropped": []}
+    ana, raj, prepaid = precedents
+    assert ana.status == PrecedentStatus.usable and ana.support == "8 of 9 bills since 2026-07-14"
+    assert raj.status == PrecedentStatus.conflict
+    assert raj.flags == [f"superseded by {cfo.ref} from 2026-07-14"]
+    assert prepaid.support is None and "support not counted" in prepaid.flags[0]
+    text = as_prompt(precedents)
+    assert "[usable] Design spend" in text and "[conflict] Route design spend" in text

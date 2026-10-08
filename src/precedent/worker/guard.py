@@ -90,6 +90,8 @@ class Guard:
         self.facts: list[str] = []
         self.since_progress = 0
         self.attention: str | None = None  # why the next turn deserves more thought
+        self.next_caption: str | None = None  # plain-language label for the next action
+        self.pace_seconds = 0.0  # viewing pace added for people watching, reported apart
         self.last_tool: str | None = None
         self.thinking_note: str | None = None
 
@@ -243,7 +245,9 @@ class Guard:
             return {"error": f"Stopped: {self.stop_reason}. Call finish now with outcome unknown."}
         if tool.name.startswith("browser_"):
             normalize_targets(args)
-            self.log.emit("action", tool=tool.name, args=args, step_id=f"t{self.steps}")
+            caption, self.next_caption = self.next_caption, None
+            extra = {"caption": caption} if caption else {}
+            self.log.emit("action", tool=tool.name, args=args, step_id=f"t{self.steps}", **extra)
         return None
 
     def after_tool(

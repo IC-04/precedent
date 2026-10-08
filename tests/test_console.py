@@ -207,7 +207,11 @@ def test_cleanup_always_stops_gateway_even_if_browser_close_fails(tmp_path):
         raise RuntimeError("browser close failed")
 
     asyncio.run(
-        _close(SimpleNamespace(close=close), SimpleNamespace(stop=lambda: stopped.append(1)), log)
+        _close(
+            {"toolset": SimpleNamespace(close=close)},
+            SimpleNamespace(stop=lambda: stopped.append(1)),
+            log,
+        )
     )
     assert stopped == [1]
 
