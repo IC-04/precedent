@@ -24,7 +24,7 @@ List assumptions you are making and what is out of scope (for example approving 
 Do not invent company-specific facts you have not been given."""
 
 
-async def write_goal(request: str, model, on_model_error=None) -> GoalContract:
+async def write_goal(request: str, model, on_model_error=None, after_model=None) -> GoalContract:
     """One structured call; re-asks once if the contract has no must_not_happen condition."""
     agent = LlmAgent(
         name="goal_writer",
@@ -33,6 +33,7 @@ async def write_goal(request: str, model, on_model_error=None) -> GoalContract:
         output_schema=GoalContract,
         output_key="goal",
         on_model_error_callback=on_model_error,
+        after_model_callback=after_model,
     )
     runner = InMemoryRunner(agent=agent, app_name="goal")
     session = await runner.session_service.create_session(app_name="goal", user_id="ava")

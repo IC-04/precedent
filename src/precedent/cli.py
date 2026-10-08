@@ -73,6 +73,26 @@ def run(
 
 
 @app.command()
+def check_model(model: str | None = typer.Option(None, help="Defaults to PRECEDENT_MODEL")) -> None:
+    """Check ADC and make one small Vertex AI inference; no company actions."""
+    import asyncio
+
+    from precedent.config import VertexSettings
+    from precedent.worker.runner import check_model as smoke
+
+    try:
+        settings = VertexSettings.from_env()
+        name = model or os.getenv("PRECEDENT_MODEL", "gemini-3.8-flash")
+        typer.echo(
+            f"Vertex AI · project {settings.project} · location {settings.location} · {name}"
+        )
+        typer.echo(asyncio.run(smoke(name)))
+    except Exception as exc:
+        typer.secho(f"Vertex AI check failed: {type(exc).__name__}: {exc}", fg=typer.colors.RED)
+        raise typer.Exit(code=1) from exc
+
+
+@app.command()
 def grade(seed: int = 7, task: str = "T1_figma", run: str = typer.Option(...)) -> None:
     """Grade a run against hidden truth (WS5 part A)."""
     from precedent.grader.grade import RUNS
@@ -105,7 +125,11 @@ def eval_(
 @app.command()
 def console(port: int = 8000) -> None:
     """Serve the product screen (WS6)."""
-    _todo("WS6_console")
+    import uvicorn
+
+    from precedent.console.server import create_app
+
+    uvicorn.run(create_app(), host="127.0.0.1", port=port, log_level="warning")
 
 
 if __name__ == "__main__":

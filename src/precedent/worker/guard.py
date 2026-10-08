@@ -7,6 +7,8 @@ It does not import ADK; it only receives ADK's objects.
 
 from __future__ import annotations
 
+import asyncio
+import inspect
 import sys
 import threading
 import time
@@ -33,9 +35,12 @@ class Budgets:
     seconds: int = 1200
 
 
-def stdin_human(question: str, options: list[str]) -> str:
+def stdin_human(question: str, options: list[str]) -> str | dict:
     if not sys.stdin.isatty():
-        return "No human is available right now. Finish with outcome 'blocked' and say why."
+        return {
+            "text": "No human is available right now. Finish as blocked and say why.",
+            "by": "system",
+        }
     print(f"\nAva asks: {question}")
     for i, option in enumerate(options, 1):
         print(f"  {i}. {option}")
@@ -72,6 +77,10 @@ class Guard:
         self.finished: dict[str, Any] | None = None
         self.stop_reason: str | None = None
         self.plan_sent = False
+        self.plan: list[dict] = []
+        self.condition_ids: set[str] = set()
+        self.last_url: str | None = None
+        self.last_title: str | None = None
 
     # ------------------------------------------------------------------ Ava's tools
     def record_decision(
@@ -108,18 +117,60 @@ class Guard:
                     id=f"s{i}", intent=intent.strip(), expect=expect.strip() or "not stated"
                 ).model_dump()
             )
+        self.plan = plan
         kind = "plan_changed" if self.plan_sent else "plan"
         self.plan_sent = True
         self.log.emit(kind, steps=plan, reason=reason)
         return {"result": f"Plan recorded with {len(plan)} steps."}
 
-    def ask_human(self, question: str, options: list[str]) -> dict:
+    def report_plan_step(self, step_id: str, status: str, evidence: str) -> dict:
+        """Update a real plan step: doing, done or skipped. Cite the observed evidence.
+        A done plan step is self-reported progress, not independent goal verification."""
+        step = next((s for s in self.plan if s["id"] == step_id), None)
+        if not step or status not in ("doing", "done", "skipped") or not evidence.strip():
+            return {
+                "error": "Choose an existing plan step, a supported status and observed evidence."
+            }
+        step["status"] = status
+        self.log.emit("plan_changed", steps=self.plan, reason=evidence)
+        return {"result": "Plan progress recorded; goal verification remains separate."}
+
+    def report_goal_progress(self, condition_id: str, status: str, evidence: str) -> dict:
+        """Report inferred or written progress for a goal condition; never report verified here.
+        Written requires an acknowledged app write. Evidence explains the association."""
+        if condition_id not in self.condition_ids:
+            return {"error": "Choose an existing goal condition."}
+        if status not in ("inferred", "written") or not evidence.strip():
+            return {"error": "Use inferred or written and cite evidence. This tool cannot verify."}
+        acknowledgement = next(
+            (w for w in reversed(self.gate.writes) if w[2] and 200 <= w[2] < 400), None
+        )
+        if status == "written" and not acknowledgement:
+            return {"error": "No application write acknowledgement has been observed."}
+        self.log.emit(
+            "note",
+            kind="goal_progress",
+            condition_id=condition_id,
+            status=status,
+            evidence=evidence,
+            acknowledgement=acknowledgement if status == "written" else None,
+        )
+        return {"result": "Progress recorded. A fresh goal check is still required."}
+
+    async def ask_human(self, question: str, options: list[str]) -> dict:
         """Ask one specific question when no source governs a choice. Name the options."""
         self.questions += 1
-        self.log.emit("question", text=question, options=options)
-        answer = self.human(question, options)
-        self.log.emit("answer", text=answer, by="human")
-        return {"answer": answer}
+        key = f"q{self.log.seq + 1}"
+        self.log.emit("question", text=question, options=options, question_id=key)
+        if inspect.iscoroutinefunction(self.human) or inspect.iscoroutinefunction(
+            self.human.__call__
+        ):
+            answer = await self.human(question, options)
+        else:
+            answer = await asyncio.to_thread(self.human, question, options)
+        data = answer if isinstance(answer, dict) else {"text": answer, "by": "human"}
+        self.log.emit("answer", **data, question_id=key)
+        return {"answer": data["text"]}
 
     def finish(self, outcome: str, summary: str) -> dict:
         """End the task. outcome is pass, fail, blocked or unknown; summary says what was done,
@@ -130,7 +181,14 @@ class Guard:
         return {"result": "Finished. Stop now."}
 
     def tools(self) -> list[Callable[..., dict]]:
-        return [self.record_decision, self.update_plan, self.ask_human, self.finish]
+        return [
+            self.record_decision,
+            self.update_plan,
+            self.report_plan_step,
+            self.report_goal_progress,
+            self.ask_human,
+            self.finish,
+        ]
 
     # ------------------------------------------------------------------ callbacks
     def on_exchange(self, exchange: Exchange) -> None:
@@ -158,7 +216,9 @@ class Guard:
             self.log.emit("action", tool=tool.name, args=args, step_id=f"t{self.steps}")
         return None
 
-    def after_tool(self, tool, args: dict, tool_context, tool_response) -> dict | None:
+    def after_tool(
+        self, tool, args: dict, tool_context, tool_response, capture: dict | None = None
+    ) -> dict | None:
         if not tool.name.startswith("browser_"):
             return None
         if isinstance(tool_response, dict) and "error" in tool_response:
@@ -172,12 +232,18 @@ class Guard:
         notes += self._drain_exchanges()
         text = inline_snapshot(text, self.mcp_dir)
         url, title = page_of(text)
+        url_current = url is not None
+        self.last_url = url or self.last_url
+        self.last_title = title or self.last_title
         self.log.emit(
             "observation",
-            url=url,
-            title=title,
+            url=self.last_url,
+            url_current=url_current,
+            title=self.last_title,
             summary=(notes[0] if notes else title),
-            screenshot=None,
+            screenshot=(capture or {}).get("screenshot"),
+            captured_at=(capture or {}).get("captured_at"),
+            action_step_id=f"t{self.steps}",
         )
         if notes:
             text += "\n### Notes from Ava's safety checks\n" + "\n".join(f"- {n}" for n in notes)
@@ -202,6 +268,15 @@ class Guard:
                     "note", kind="write_refused", method=ex.method, path=ex.path, reason=ex.refused
                 )
                 notes.append(f"Your save was refused before it reached the app: {ex.refused}")
+            elif ex.method != "GET" and ex.status and 200 <= ex.status < 400:
+                self.log.emit(
+                    "note",
+                    kind="app_effect",
+                    method=ex.method,
+                    path=ex.path,
+                    status=ex.status,
+                    text="Application acknowledged a change. Fresh verification is still required.",
+                )
             elif ex.kind is not None:
                 detail = f"{ex.method} {ex.path} -> {ex.status or 'no response'}"
                 self.log.emit(
@@ -214,6 +289,7 @@ class Guard:
 
     def before_model(self, callback_context, llm_request) -> None:
         """Keep the last few page snapshots in full; older ones become one line."""
+        self.log.emit("note", kind="model_wait", text="Waiting for the model’s next action")
         seen = 0
         for content in reversed(llm_request.contents or []):
             for part in content.parts or []:

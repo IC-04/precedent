@@ -47,7 +47,13 @@ STATIC = (".ico", ".png", ".jpg", ".svg", ".css", ".js", ".woff", ".woff2", ".ma
 def is_automatic(method: str, path: str) -> bool:
     """Requests the browser makes by itself, which say nothing about Ava's work."""
     bare = path.split("?", 1)[0].lower()
-    return method.upper() == "GET" and (bare.startswith(AUTOMATIC) or bare.endswith(STATIC))
+    return method.upper() == "GET" and (
+        (bare.startswith(AUTOMATIC) or bare.startswith("/static/"))
+        or bare.endswith(STATIC)
+        or "/preview/" in bare
+        or bare.endswith("/download")
+        or bare in ("/workspace.json", "/work-status")
+    )
 
 
 def _page(title: str, text: str) -> bytes:

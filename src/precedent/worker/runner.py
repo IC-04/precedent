@@ -10,18 +10,24 @@ from __future__ import annotations
 import asyncio
 import os
 from dataclasses import dataclass, field
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+import google.auth
+import httpx
 from google import genai
 from google.adk.agents import LlmAgent
 from google.adk.models.google_llm import Gemini
+from google.adk.models.llm_request import LlmRequest
 from google.adk.runners import InMemoryRunner
 from google.adk.tools.mcp_tool.mcp_session_manager import StdioConnectionParams
 from google.adk.tools.mcp_tool.mcp_toolset import McpToolset
+from google.auth.exceptions import DefaultCredentialsError
 from google.genai import types
 from mcp import StdioServerParameters
 
+from precedent.config import VertexSettings
 from precedent.worker.events import (
     RUNS,
     EventLog,
@@ -34,6 +40,7 @@ from precedent.worker.failures import WriteGate
 from precedent.worker.gateway import Gateway
 from precedent.worker.goal import write_goal
 from precedent.worker.guard import Budgets, Guard
+from precedent.worker.questions import FileHuman
 
 REPO = Path(__file__).resolve().parents[3]
 BROWSER_TOOLS = [
@@ -51,6 +58,8 @@ open that page to find them. Work only through those apps, in the browser tools.
 
 How you work:
 - First call update_plan with your steps, each as "what you will do | what you expect to see".
+- Report actual plan progress with report_plan_step. Use report_goal_progress to distinguish
+  inferred choices and app-acknowledged writes; neither is fresh verification.
 - Read before you write. Before any save: search for an existing record by its business key
   (for example invoice number and vendor), check the goal contract, and call record_decision
   citing your sources (record ids, emails, document sections). A save without a recorded
@@ -95,19 +104,72 @@ class RunConfig:
     )
     headed: bool = False
     resume: bool = False
-    runs_root: Path = RUNS
+    runs_root: Path = field(
+        default_factory=lambda: Path(os.getenv("PRECEDENT_RUNS_ROOT", str(RUNS)))
+    )
+    run_id: str | None = field(default_factory=lambda: os.getenv("PRECEDENT_RUN_ID"))
+    human_channel: str | None = field(default_factory=lambda: os.getenv("PRECEDENT_HUMAN_CHANNEL"))
+    goal_timeout: float = field(
+        default_factory=lambda: float(os.getenv("PRECEDENT_GOAL_TIMEOUT_SECONDS", "120"))
+    )
 
 
 MODEL_TIMEOUT_MS = int(os.getenv("PRECEDENT_MODEL_TIMEOUT_MS", "60000"))
 
 
 def make_model(name: str) -> Gemini:
-    """A Gemini model whose requests time out: an overloaded call fails over, never hangs."""
+    """Vertex AI + ADC for goal, action and fallback models; never API-key auth."""
+    settings = VertexSettings.from_env()
+    try:
+        credentials, _ = google.auth.default(
+            scopes=["https://www.googleapis.com/auth/cloud-platform"],
+            quota_project_id=settings.project,
+        )
+    except DefaultCredentialsError as exc:
+        raise DefaultCredentialsError(
+            "Google Cloud Application Default Credentials could not be loaded. "
+            "For local development, run gcloud auth application-default login "
+            "and configure GOOGLE_CLOUD_PROJECT. In Google Cloud, use an attached "
+            "service identity or Workload Identity. ADC discovery reported: " + str(exc)
+        ) from exc
     retry = types.HttpRetryOptions(attempts=2, initial_delay=2, max_delay=10)
     client = genai.Client(
-        http_options=types.HttpOptions(timeout=MODEL_TIMEOUT_MS, retry_options=retry)
+        vertexai=True,
+        credentials=credentials,
+        project=settings.project,
+        location=settings.location,
+        http_options=types.HttpOptions(timeout=MODEL_TIMEOUT_MS, retry_options=retry),
     )
     return Gemini(model=name, client=client)
+
+
+async def check_model(name: str) -> str:
+    """One tiny inference through the same ADK model factory as real work."""
+    model = make_model(name)
+    request = LlmRequest(
+        model=name,
+        contents=[
+            types.Content(
+                role="user", parts=[types.Part(text='Reply exactly with "Vertex ADC works".')]
+            )
+        ],
+        config=types.GenerateContentConfig(max_output_tokens=1024, temperature=0),
+    )
+    try:
+        async with asyncio.timeout(60):
+            async for response in model.generate_content_async(request):
+                if response.content:
+                    text = "".join(
+                        part.text or "" for part in response.content.parts or [] if not part.thought
+                    ).strip()
+                    if text:
+                        if text != "Vertex ADC works":
+                            raise RuntimeError(f"Unexpected smoke-test reply: {text[:200]}")
+                        return text
+        raise RuntimeError("Vertex AI returned no text for the smoke test.")
+    finally:
+        await model.client.aio.aclose()
+        model.client.close()
 
 
 def chrome_path() -> str:
@@ -128,9 +190,67 @@ def chrome_path() -> str:
     raise FileNotFoundError("Chromium not found; run make setup (or set PRECEDENT_CHROME)")
 
 
+class ObservedBrowser(McpToolset):
+    """Viewer capture through a tool in the SAME MCP session; hidden from model tools.
+
+    Public ADK get_tools/run_async APIs keep the installed session pooling semantics.
+    Calling the tool directly does not recurse through ADK's business-action callbacks.
+    """
+
+    screenshot_tool = None
+
+    async def get_tools(self, readonly_context=None):
+        tools = await super().get_tools(readonly_context)
+        self.screenshot_tool = next((t for t in tools if t.name == "browser_take_screenshot"), None)
+        return [t for t in tools if t.name != "browser_take_screenshot"]
+
+    async def capture(self, log: EventLog, tool_context=None) -> dict | None:
+        if self.screenshot_tool is None:
+            return None
+        captures = list((log.dir / "shots").glob("*.png"))
+        if len(captures) >= 200 or sum(p.stat().st_size for p in captures) > 80_000_000:
+            log.emit(
+                "note", kind="capture_unavailable", text="Viewer capture storage limit reached"
+            )
+            return None
+        name = f"view-{log.seq + 1:05d}.png"
+        source = (log.dir / "mcp" / name).resolve()
+        target = log.dir / "shots" / name
+        try:
+            result = await asyncio.wait_for(
+                self.screenshot_tool.run_async(
+                    args={
+                        "filename": str(source),
+                        "type": "png",
+                        "fullPage": False,
+                        "scale": "css",
+                    },
+                    tool_context=tool_context,
+                ),
+                timeout=6,
+            )
+            if isinstance(result, dict) and result.get("isError"):
+                raise RuntimeError("MCP capture refused")
+            if source.is_symlink() or not source.is_file() or source.stat().st_size > 12_000_000:
+                raise RuntimeError("Capture missing or too large")
+            if not source.read_bytes().startswith(b"\x89PNG\r\n\x1a\n"):
+                raise RuntimeError("Capture is not PNG")
+            source.replace(target)
+            return {"screenshot": "shots/" + name, "captured_at": datetime.now(UTC).isoformat()}
+        except Exception as exc:  # viewer failure must never stop business work
+            log.emit(
+                "note", kind="capture_unavailable", text=f"Browser capture unavailable: {exc}"[:300]
+            )
+            return None
+
+
 def browser_toolset(gateway_url: str, out_dir: Path, headed: bool) -> McpToolset:
     args = [
         "--isolated",
+        "--viewport-size",
+        "1000,760",
+        "--timeout-action",
+        "4000",
         "--executable-path",
         chrome_path(),
         "--allowed-origins",
@@ -149,9 +269,9 @@ def browser_toolset(gateway_url: str, out_dir: Path, headed: bool) -> McpToolset
     server = StdioServerParameters(
         command=str(REPO / "node_modules/.bin/playwright-mcp"), args=args, cwd=str(out_dir)
     )
-    return McpToolset(
+    return ObservedBrowser(
         connection_params=StdioConnectionParams(server_params=server, timeout=60),
-        tool_filter=BROWSER_TOOLS,
+        tool_filter=[*BROWSER_TOOLS, "browser_take_screenshot"],
     )
 
 
@@ -172,13 +292,31 @@ class Fallback:
 
     async def __call__(self, callback_context, llm_request, error) -> Any:
         failed = llm_request.model
+        self.log.emit(
+            "failure",
+            kind="tool",
+            detail=f"Model {failed}: {str(error)[:400]}",
+            response="Trying the configured fallback models within the stage time limit",
+        )
         for round_no in range(self.ROUNDS):
             if round_no:
+                self.log.emit(
+                    "note",
+                    kind="model_wait",
+                    model=llm_request.model,
+                    text=f"Model retry paused for {10 * round_no} seconds",
+                )
                 await asyncio.sleep(10 * round_no)
             for name in self.order:
                 if name == failed and round_no == 0:
                     continue  # it has just failed
                 try:
+                    self.log.emit(
+                        "note",
+                        kind="model_wait",
+                        model=name,
+                        text=f"Waiting for {name} · retry round {round_no + 1}/{self.ROUNDS}",
+                    )
                     llm_request.model = name
                     model = make_model(name)
                     async for response in model.generate_content_async(llm_request):
@@ -193,6 +331,12 @@ class Fallback:
                         return response
                 except Exception as e:  # noqa: BLE001 - try the next model
                     error = e
+                    self.log.emit(
+                        "failure",
+                        kind="tool",
+                        detail=f"Model {name}: {str(e)[:400]}",
+                        response="No response available; continuing within the stage time limit",
+                    )
         self.log.emit(
             "failure",
             kind="tool",
@@ -222,6 +366,41 @@ def _build_agent(
     cfg: RunConfig, guard: Guard, toolset: McpToolset, base: str, goal, fallback: Fallback
 ) -> LlmAgent:
     context = "Not built yet (WS4). Read the company's policies and history yourself."
+
+    action_lock = asyncio.Lock()
+    held_contexts: set[int] = set()
+
+    known_tools = {*BROWSER_TOOLS, *(t.__name__ for t in guard.tools())}
+
+    async def before_tool(tool, args, tool_context):
+        if tool.name not in known_tools:
+            # ADK skips after_tool for unknown tools; no lock may be held for those calls.
+            return guard.before_tool(tool, args, tool_context)
+        await action_lock.acquire()
+        held_contexts.add(id(tool_context))
+        try:
+            return guard.before_tool(tool, args, tool_context)
+        except BaseException:
+            held_contexts.discard(id(tool_context))
+            action_lock.release()
+            raise
+
+    async def after_browser(tool, args, tool_context, tool_response):
+        try:
+            capture = None
+            refused = isinstance(tool_response, dict) and "error" in tool_response
+            if tool.name.startswith("browser_") and not refused and hasattr(toolset, "capture"):
+                capture = await toolset.capture(guard.log, tool_context)
+            return guard.after_tool(tool, args, tool_context, tool_response, capture=capture)
+        finally:
+            if id(tool_context) in held_contexts:
+                held_contexts.discard(id(tool_context))
+                action_lock.release()
+
+    async def on_tool_error(tool, args, tool_context, error):
+        # ADK invokes after_tool after a handled error; it releases this invocation's lock.
+        return guard.on_tool_error(tool, args, tool_context, error)
+
     agent = LlmAgent(
         name="ava",
         model=make_model(cfg.model),
@@ -229,9 +408,9 @@ def _build_agent(
             base=base, goal=goal.model_dump_json(indent=1), context=context
         ),
         tools=[toolset, *guard.tools()],
-        before_tool_callback=guard.before_tool,
-        after_tool_callback=guard.after_tool,
-        on_tool_error_callback=guard.on_tool_error,
+        before_tool_callback=before_tool,
+        after_tool_callback=after_browser,
+        on_tool_error_callback=on_tool_error,
         before_model_callback=guard.before_model,
         after_model_callback=guard.after_model,
         on_model_error_callback=fallback,
@@ -256,13 +435,20 @@ async def _act(
     previous: Path | None,
 ) -> None:
     """Everything that can fail: goal, browser, agent, the loop itself."""
+    # Public company identity validates selection without access to privileged state.
+    async with httpx.AsyncClient(timeout=3) as client:
+        response = await client.get(cfg.apps_url.rstrip("/") + "/workspace.json")
+        response.raise_for_status()
+        identity = response.json()
+        if identity.get("seed") != cfg.seed:
+            raise ValueError("Selected seed does not match the connected company server")
+    log.emit("note", kind="company", company=identity)
     base = gateway.start()
     (log.dir / "mcp").mkdir(exist_ok=True)
     holder["toolset"] = toolset = browser_toolset(base, log.dir / "mcp", cfg.headed)
-    goal = await write_goal(
-        cfg.request, make_model(cfg.strong), on_model_error=Fallback(cfg.strong, cfg.fallbacks, log)
-    )
+    goal = await _prepare_goal(cfg, guard, log)
     log.emit("goal_contract", **goal.model_dump())
+    guard.condition_ids = {condition.id for condition in goal.conditions}
     log.emit("note", kind="context", text=f"context stage not built yet; worker={cfg.worker}")
     agent = _build_agent(cfg, guard, toolset, base, goal, Fallback(cfg.model, cfg.fallbacks, log))
     try:
@@ -278,10 +464,38 @@ async def _act(
         guard.stop_reason = guard.stop_reason or reason
 
 
+async def _prepare_goal(cfg: RunConfig, guard: Guard, log: EventLog):
+    limit = max(0.01, min(cfg.goal_timeout, cfg.budgets.seconds - guard.seconds()))
+    log.emit(
+        "note",
+        kind="model_wait",
+        phase="goal",
+        model=cfg.strong,
+        timeout_seconds=limit,
+        text=f"Preparing the goal · waiting for {cfg.strong} (up to {limit:g} seconds)",
+    )
+    try:
+        return await asyncio.wait_for(
+            write_goal(
+                cfg.request,
+                make_model(cfg.strong),
+                on_model_error=Fallback(cfg.strong, cfg.fallbacks, log),
+                after_model=guard.after_model,
+            ),
+            timeout=limit,
+        )
+    except TimeoutError as exc:
+        raise TimeoutError(
+            f"Goal preparation timed out after {limit:g} seconds. "
+            "The model did not return a goal. No browser work began. "
+            "Try again when model capacity is available."
+        ) from exc
+
+
 async def run(cfg: RunConfig) -> dict[str, Any]:
     task_id = task_id_for(cfg.seed, cfg.request)
     previous = unfinished_run(task_id, cfg.runs_root) if cfg.resume else None
-    log = EventLog(new_run_id(), task_id=task_id, root=cfg.runs_root)
+    log = EventLog(cfg.run_id or new_run_id(), task_id=task_id, root=cfg.runs_root)
     log.emit(
         "run_started",
         request=cfg.request,
@@ -293,6 +507,8 @@ async def run(cfg: RunConfig) -> dict[str, Any]:
     gate = WriteGate()
     gateway = Gateway(cfg.apps_url, gate)
     guard = Guard(log, gate, gateway.lock, log.dir / "mcp", cfg.budgets)
+    if cfg.human_channel == "console":
+        guard.human = FileHuman(log, timeout=min(600, cfg.budgets.seconds))
     gateway.on_exchange = guard.on_exchange
     holder: dict[str, Any] = {}
     outcome, error = "unknown", None
@@ -317,6 +533,9 @@ async def run(cfg: RunConfig) -> dict[str, Any]:
         "claimed": (guard.finished or {}).get("claimed"),
         "error": error,
     }
+    from precedent.worker.receipt import write_receipt
+
+    write_receipt(log, cfg.request, guard.finished, summary)
     log.emit("run_finished", **summary)
     return {**summary, "run_id": log.run_id, "claimed": guard.finished, "dir": str(log.dir)}
 

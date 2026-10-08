@@ -45,7 +45,17 @@ class EventLog:
 
 def read_events(path: Path) -> list[Event]:
     lines = path.read_text().splitlines() if path.exists() else []
-    return [Event.model_validate_json(line) for line in lines if line.strip()]
+    events = []
+    for index, line in enumerate(lines):
+        if not line.strip():
+            continue
+        try:
+            events.append(Event.model_validate_json(line))
+        except ValueError:
+            if index == len(lines) - 1 and not path.read_bytes().endswith(b"\n"):
+                break  # the reader caught the writer partway through its last append
+            raise
+    return events
 
 
 def unfinished_run(task_id: str, root: Path = RUNS) -> Path | None:

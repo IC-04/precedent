@@ -79,12 +79,12 @@ def test_old_snapshots_shrink_without_touching_the_session(tmp_path):
     assert again == texts[0]
 
 
-def test_run_finished_is_written_even_when_setup_fails(tmp_path, monkeypatch):
+def test_run_finished_is_written_even_when_setup_fails(tmp_path, monkeypatch, live_apps):
     def broken(*args, **kwargs):
         raise FileNotFoundError("Chromium not found")
 
     monkeypatch.setattr(runner, "browser_toolset", broken)
-    cfg = runner.RunConfig(request="x", apps_url="http://127.0.0.1:9", runs_root=tmp_path)
+    cfg = runner.RunConfig(request="x", apps_url=live_apps[0], runs_root=tmp_path)
     summary = asyncio.run(runner.run(cfg))
     events = read_events(tmp_path / summary["run_id"] / "events.jsonl")
     assert events[-1].type == "run_finished"
@@ -125,6 +125,65 @@ def test_browser_auto_requests_do_not_unlock_an_uncertain_write(live_apps):
     gw.start()
     httpx.get(f"{gw.url}/favicon.ico")
     assert not gate.searched
+    for path in (
+        "/static/fonts/SourceSans3-Regular.otf",
+        "/drive/f/f-1/preview/1.png",
+        "/drive/f/f-1/download",
+        "/work-status",
+    ):
+        httpx.get(gw.url + path)
+        assert not gate.searched
     httpx.get(f"{gw.url}/books/bills?q=FIG-1842")
     assert gate.searched
     gw.stop()
+
+
+def test_goal_preparation_timeout_cancels_model_and_records_terminal_run(
+    tmp_path, monkeypatch, live_apps
+):
+    cancelled = []
+
+    async def never_returns(*args, **kwargs):
+        try:
+            await asyncio.Event().wait()
+        finally:
+            cancelled.append(True)
+
+    monkeypatch.setattr(runner, "write_goal", never_returns)
+    monkeypatch.setattr(runner, "make_model", lambda name: object())
+    result = asyncio.run(
+        runner.run(
+            runner.RunConfig(
+                request="Do not change company data",
+                apps_url=live_apps[0],
+                runs_root=tmp_path,
+                goal_timeout=0.03,
+            )
+        )
+    )
+    events = read_events(tmp_path / result["run_id"] / "events.jsonl")
+    assert cancelled == [True]
+    assert "Goal preparation timed out" in result["error"]
+    assert events[-1].type == "run_finished"
+    assert not any(e.type in ("goal_contract", "action", "observation") for e in events)
+    assert any(e.type == "note" and e.data.get("phase") == "goal" for e in events)
+
+
+def test_fallback_records_failure_and_retry_before_waiting_for_response(tmp_path, monkeypatch):
+    log = EventLog("r1", root=tmp_path)
+
+    class InspectingModel:
+        async def generate_content_async(self, request):
+            events = read_events(log.path)
+            assert events[-1].data["kind"] == "model_wait"
+            assert events[-1].data["model"] == "backup"
+            assert "503" in events[-2].data["detail"]
+            yield "answer"
+
+    monkeypatch.setattr(runner, "make_model", lambda name: InspectingModel())
+    response = asyncio.run(
+        runner.Fallback("primary", ["backup"], log)(
+            None, SimpleNamespace(model="primary"), RuntimeError("503 high demand")
+        )
+    )
+    assert response == "answer"
