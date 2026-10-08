@@ -237,6 +237,7 @@ class Guard:
         if self.stop_reason:
             return {"error": f"Stopped: {self.stop_reason}. Call finish now with outcome unknown."}
         if tool.name.startswith("browser_"):
+            normalize_targets(args)
             self.log.emit("action", tool=tool.name, args=args, step_id=f"t{self.steps}")
         return None
 
@@ -253,6 +254,11 @@ class Guard:
             kind = classify_tool_error(text)
             self.log.emit("failure", kind=kind.value, detail=text[:300], response=ADVICE[kind])
             notes.append(ADVICE[kind])
+        if is_error and "does not match any elements" in text:
+            notes.append(
+                "A target is the element's ref from the snapshot, written as the bare "
+                "id (for example f8e73): no brackets, no 'ref=', no CSS selector."
+            )
         if is_error and tool.name == "browser_select_option":
             notes.append(exact_options(self.last_snapshot, args.get("target", "")))
         notes += self._drain_exchanges()
@@ -399,3 +405,23 @@ def exact_options(snapshot: str, target: str) -> str:
                         f"them): {m.group(1)}"
                     )
     return "Take a fresh snapshot and copy the option text exactly as the list shows it."
+
+
+REF_TARGET = re.compile(r"^\s*\[?\s*ref\s*=\s*([A-Za-z0-9_-]+)\s*\]?\s*$")
+
+
+def normalize_targets(args: dict) -> None:
+    """'[ref=f8e73]' -> 'f8e73' in place, for a target and for every form field's target.
+
+    The snapshot shows refs as [ref=...]; models copy that wrapper. ADK passes this same dict
+    to the tool, so fixing it here fixes the call."""
+
+    def fix(value):
+        m = REF_TARGET.match(value) if isinstance(value, str) else None
+        return m.group(1) if m else value
+
+    if "target" in args:
+        args["target"] = fix(args["target"])
+    for field in args.get("fields") or []:
+        if isinstance(field, dict) and "target" in field:
+            field["target"] = fix(field["target"])

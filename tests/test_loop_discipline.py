@@ -102,3 +102,23 @@ def test_budget_text_reflects_time_used(tmp_path):
     guard, _ = _guard(tmp_path)
     guard.started = time.monotonic() - 30
     assert "seconds 30/1200" in guard.run_state() or "seconds 29/1200" in guard.run_state()
+
+
+def test_ref_wrappers_are_removed_before_the_tool_runs(tmp_path):
+    guard, log = _guard(tmp_path)
+    args = {"target": "[ref=f8e73]", "text": "FIG-1842"}
+    guard.before_tool(SimpleNamespace(name="browser_type"), args, None)
+    assert args["target"] == "f8e73"
+    form = {
+        "fields": [{"target": "ref=f8e62", "value": "x"}, {"target": "#f-amount", "value": "1"}]
+    }
+    guard.before_tool(SimpleNamespace(name="browser_fill_form"), form, None)
+    assert [f["target"] for f in form["fields"]] == ["f8e62", "#f-amount"]
+
+
+def test_an_unmatched_target_gets_specific_advice(tmp_path):
+    guard, _ = _guard(tmp_path)
+    error = {"content": [{"type": "text", "text": 'Error: "#f-x" does not match any elements.'}],
+             "isError": True}  # fmt: skip
+    out = guard.after_tool(SimpleNamespace(name="browser_type"), {}, None, error)
+    assert "bare id" in out["content"][0]["text"]
