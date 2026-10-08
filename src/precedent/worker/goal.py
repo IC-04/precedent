@@ -24,6 +24,15 @@ List assumptions you are making and what is out of scope (for example approving 
 Do not invent company-specific facts you have not been given."""
 
 
+def _config(thinking: str | None) -> types.GenerateContentConfig | None:
+    """A thinking level for one stage; None keeps the model's own default."""
+    if not thinking:
+        return None
+    return types.GenerateContentConfig(
+        thinking_config=types.ThinkingConfig(thinking_level=thinking.upper())
+    )
+
+
 async def structured(
     instruction: str,
     prompt: str,
@@ -32,6 +41,7 @@ async def structured(
     on_model_error=None,
     after_model=None,
     name: str = "structured",
+    thinking: str | None = None,
 ):
     """One model call that must return `schema` (a Pydantic model) as JSON."""
     agent = LlmAgent(
@@ -41,6 +51,7 @@ async def structured(
         output_schema=schema,
         on_model_error_callback=on_model_error,
         after_model_callback=after_model,
+        generate_content_config=_config(thinking),
     )
     runner = InMemoryRunner(agent=agent, app_name=name)
     session = await runner.session_service.create_session(app_name=name, user_id="ava")
@@ -52,7 +63,9 @@ async def structured(
     return schema.model_validate(json.loads(text))
 
 
-async def write_goal(request: str, model, on_model_error=None, after_model=None) -> GoalContract:
+async def write_goal(
+    request: str, model, on_model_error=None, after_model=None, thinking: str | None = "MEDIUM"
+) -> GoalContract:
     """One structured call; re-asks once if the contract has no must_not_happen condition."""
     agent = LlmAgent(
         name="goal_writer",
@@ -62,6 +75,7 @@ async def write_goal(request: str, model, on_model_error=None, after_model=None)
         output_key="goal",
         on_model_error_callback=on_model_error,
         after_model_callback=after_model,
+        generate_content_config=_config(thinking),
     )
     runner = InMemoryRunner(agent=agent, app_name="goal")
     session = await runner.session_service.create_session(app_name="goal", user_id="ava")

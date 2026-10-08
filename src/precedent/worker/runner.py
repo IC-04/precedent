@@ -108,7 +108,7 @@ class RunConfig:
     budgets: Budgets = field(
         default_factory=lambda: Budgets(steps=int(os.getenv("PRECEDENT_MAX_STEPS", "60")))
     )
-    thinking: str = field(default_factory=lambda: os.getenv("PRECEDENT_THINKING", "low"))
+    thinking: str = field(default_factory=lambda: os.getenv("PRECEDENT_THINKING", "adaptive"))
     headed: bool = False
     resume: bool = False
     runs_root: Path = field(
@@ -413,6 +413,17 @@ def _build_agent(
         # ADK invokes after_tool after a handled error; it releases this invocation's lock.
         return guard.on_tool_error(tool, args, tool_context, error)
 
+    def adaptive_before_model(callback_context, llm_request):
+        guard.before_model(callback_context, llm_request)
+        if cfg.thinking.lower() != "adaptive":
+            return None
+        level, reason = guard.thinking_level()
+        llm_request.config.thinking_config = types.ThinkingConfig(thinking_level=level)
+        if guard.thinking_note != level:
+            guard.thinking_note = level
+            guard.log.emit("note", kind="thinking", level=level.lower(), reason=reason)
+        return None
+
     agent = LlmAgent(
         name="ava",
         model=make_model(cfg.model),
@@ -423,7 +434,7 @@ def _build_agent(
         before_tool_callback=before_tool,
         after_tool_callback=after_browser,
         on_tool_error_callback=on_tool_error,
-        before_model_callback=guard.before_model,
+        before_model_callback=adaptive_before_model,
         after_model_callback=guard.after_model,
         on_model_error_callback=fallback,
         generate_content_config=types.GenerateContentConfig(
@@ -484,7 +495,7 @@ async def _act(
 def _thinking(level: str) -> types.ThinkingConfig | None:
     """LOW thinking: about 3x faster per turn than the default on Flash, same action quality
     in our measurements (docs/decisions_log.md). 'default' leaves the model's own setting."""
-    if level.lower() in ("", "default"):
+    if level.lower() in ("", "default", "adaptive"):
         return None
     return types.ThinkingConfig(thinking_level=level.upper())
 
@@ -513,6 +524,7 @@ async def _prepare_context(cfg: RunConfig, guard: Guard, log: EventLog, base: st
             on_model_error=Fallback(cfg.strong, cfg.fallbacks, log),
             after_model=guard.after_model,
             name="context",
+            thinking="HIGH",
         )
         precedents = ctx.validate(candidates.precedents, evidence)
         for p in precedents:

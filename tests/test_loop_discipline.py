@@ -122,3 +122,20 @@ def test_an_unmatched_target_gets_specific_advice(tmp_path):
              "isError": True}  # fmt: skip
     out = guard.after_tool(SimpleNamespace(name="browser_type"), {}, None, error)
     assert "bare id" in out["content"][0]["text"]
+
+
+def test_thinking_follows_the_situation(tmp_path):
+    guard, _ = _guard(tmp_path)
+    assert guard.thinking_level() == ("HIGH", "writing the plan")
+    guard.update_plan(["Read the invoice and its PDF | the facts", "Enter the bill | a draft"])
+    assert guard.thinking_level()[0] == "LOW"
+    guard.last_snapshot = compact_snapshot((FIX / "bill_new.txt").read_text())
+    assert guard.thinking_level() == ("MEDIUM", "a form is on the page")
+    guard.last_snapshot = ""
+    guard.record_decision("o", "m", "d", ["s"])
+    guard.before_tool(SimpleNamespace(name="record_decision"), {}, None)
+    assert guard.thinking_level()[0] == "MEDIUM"
+    guard.last_tool = "browser_navigate"
+    guard.attention = "high:a save had an unknown result"
+    assert guard.thinking_level() == ("HIGH", "a save had an unknown result")
+    assert guard.thinking_level()[0] == "LOW"  # attention is used once

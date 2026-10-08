@@ -89,6 +89,9 @@ class Guard:
         self.visits: Counter[str] = Counter()
         self.facts: list[str] = []
         self.since_progress = 0
+        self.attention: str | None = None  # why the next turn deserves more thought
+        self.last_tool: str | None = None
+        self.thinking_note: str | None = None
 
     # ------------------------------------------------------------------ Ava's tools
     def record_decision(
@@ -230,6 +233,8 @@ class Guard:
         return None
 
     def before_tool(self, tool, args: dict, tool_context) -> dict | None:
+        if not tool.name.startswith("browser_"):
+            self.last_tool = tool.name
         if tool.name == "finish":
             return None
         self.steps += 1
@@ -250,7 +255,9 @@ class Guard:
             return None  # our own refusal from before_tool: pass it to the model unchanged
         text, is_error = _text(tool_response)
         notes = []
+        self.last_tool = tool.name
         if is_error:
+            self.attention = self.attention or "an action failed"
             kind = classify_tool_error(text)
             self.log.emit("failure", kind=kind.value, detail=text[:300], response=ADVICE[kind])
             notes.append(ADVICE[kind])
@@ -295,13 +302,36 @@ class Guard:
                     "You have opened this page three times. Use what you read (or "
                     "remember it) and move to the next step of your plan."
                 )
+        if notes:
+            self.attention = self.attention or "a stall nudge was given"
         if self.since_progress == READS_WITHOUT_PROGRESS:
+            self.attention = self.attention or "a stall nudge was given"
             notes.append(
                 f"{READS_WITHOUT_PROGRESS} browser steps without a decision or save. "
                 "If you have the facts, record a decision and fill the form; if "
                 "something is missing, say what and finish."
             )
         return notes
+
+    def thinking_level(self) -> tuple[str, str]:
+        """How hard the next turn should think, from what just happened (code, not the model).
+
+        HIGH (about 3x slower per turn, measured): writing the plan, or right after a save
+        whose result is unknown. MEDIUM (about the cost of LOW, measured): a form is on the
+        page, a decision, form fill or question just happened, or after a refusal, a failure
+        or a stall nudge. LOW: reading and moving between pages."""
+        attention, self.attention = self.attention, None
+        if not self.plan_sent:
+            return "HIGH", "writing the plan"
+        if attention and attention.startswith("high:"):
+            return "HIGH", attention.removeprefix("high:")
+        if attention:
+            return "MEDIUM", attention
+        if self.last_tool in ("record_decision", "browser_fill_form", "ask_human"):
+            return "MEDIUM", f"after {self.last_tool}"
+        if has_form(self.last_snapshot):
+            return "MEDIUM", "a form is on the page"
+        return "LOW", "reading and navigating"
 
     def run_state(self) -> str:
         """What the model is reminded of every turn, written by code from what happened."""
@@ -341,6 +371,7 @@ class Guard:
                     "note", kind="write_refused", method=ex.method, path=ex.path, reason=ex.refused
                 )
                 notes.append(f"Your save was refused before it reached the app: {ex.refused}")
+                self.attention = "a save was refused"
             elif ex.method != "GET" and ex.status and 200 <= ex.status < 400:
                 self.since_progress = 0
                 self.log.emit(
@@ -357,6 +388,8 @@ class Guard:
                     "failure", kind=ex.kind.value, detail=detail, response=ADVICE[ex.kind]
                 )
                 notes.append(ADVICE[ex.kind])
+                if ex.kind.value == "uncertain_write":
+                    self.attention = "high:a save had an unknown result"
         if self.gate.fatal:
             self.stop_reason = "two saves had unknown results"
         return notes
@@ -425,3 +458,12 @@ def normalize_targets(args: dict) -> None:
     for field in args.get("fields") or []:
         if isinstance(field, dict) and "target" in field:
             field["target"] = fix(field["target"])
+
+
+SAVE_WORDS = re.compile(r'button "[^"]*(save|submit|create|request|post|send|approve)', re.I)
+
+
+def has_form(snapshot: str) -> bool:
+    """A page where the next action may be a write: editable fields and a save-like button."""
+    editable = "textbox" in snapshot or "combobox" in snapshot
+    return editable and bool(SAVE_WORDS.search(snapshot)) and "role=search" not in snapshot
