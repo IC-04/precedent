@@ -1,0 +1,77 @@
+{
+  "run_id": "20261010-185357-0f7d",
+  "task": "Invoice entry and approval routing",
+  "reported_seconds": 270.4,
+  "steps": 33,
+  "assessment": "Separate generated-company invoice run; source of the passing hearing shown in the film",
+  "privacy": "Only verdicts and condition IDs are published. Mail bodies, people, accounts and provider object IDs are omitted.",
+  "source_digests": {
+    "tribunal/verdict.json": "2f52aaf73c5871beb4cf285b65cc46167fb9abb432339bffa797a89624ed9753",
+    "grade.json": "e01b657c68d6b3d019682fe7c9501f3e49a367bef9d4ac1af02e66ac14460334"
+  },
+  "assessments": {
+    "tribunal": {
+      "overall": "pass",
+      "counts": {
+        "pass": 11,
+        "fail": 0,
+        "disputed": 0,
+        "unknown": 0
+      },
+      "conditions": [
+        {
+          "id": "c1",
+          "result": "pass"
+        },
+        {
+          "id": "c2",
+          "result": "pass"
+        },
+        {
+          "id": "c3",
+          "result": "pass"
+        },
+        {
+          "id": "c4",
+          "result": "pass"
+        },
+        {
+          "id": "c5",
+          "result": "pass"
+        },
+        {
+          "id": "c6",
+          "result": "pass"
+        },
+        {
+          "id": "c7",
+          "result": "pass"
+        },
+        {
+          "id": "c8",
+          "result": "pass"
+        },
+        {
+          "id": "c9",
+          "result": "pass"
+        },
+        {
+          "id": "n1",
+          "result": "pass"
+        },
+        {
+          "id": "n2",
+          "result": "pass"
+        }
+      ]
+    },
+    "hidden_truth_grader": {
+      "overall": "pass",
+      "counts": {
+        "pass": 14,
+        "fail": 0,
+        "unknown": 0
+      }
+    }
+  }
+}

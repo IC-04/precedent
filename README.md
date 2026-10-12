@@ -1,278 +1,139 @@
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/readme/banner-dark.svg">
+  <img src="assets/readme/banner-light.svg" alt="Precedent. Give Ava the outcome. She brings back the proof." width="1200">
+</picture>
+
 # Precedent
 
-An autonomous company workspace: Ava reads company records and operates real applications through Google ADK and Playwright MCP. She supports invoice entry/routing and meeting preparation with persisted email drafts and local calendar holds, and she works in the owner's own Gmail and Google Calendar in a browser the owner signed into. Ava retains run evidence, gates writes, and checks the resulting state. Unsupported checks remain unknown.
+An autonomous company worker: **Ava learns the company from its records, operates real applications, and returns completed work with inspectable evidence.** Built for the CentrAlign AI Engineering take-home.
 
-> Focused browser prototype for the CentrAlign internship take-home. The original problem statement governs requirements.
+[**Full narrated demo · 4:46**](https://github.com/IC-04/precedent/releases/tag/readme-showcase-v1) · [**Inspect the evidence**](docs/evidence/README.md) · [**Run locally**](docs/run_locally.md)
 
-## Ava in your own Gmail and Calendar
+## Watch Ava work
 
-Ava reads the generated company in one tab, then opens real **gmail.com** and
-**calendar.google.com** in others, in a Chrome profile you signed into yourself. She leaves
-a draft in your Gmail and a hold on your calendar. She cannot send, invite, delete or discard.
+[![Recorded execution: company context becomes a real Gmail draft and Google Calendar hold](assets/readme/execution.gif)](https://github.com/IC-04/precedent/releases/tag/readme-showcase-v1)
 
-Example request, run live on 2026-10-12 (run `20261011-210344-d343`, 158 s):
+**One request. Five company apps. Real Gmail and Google Calendar.** Ava reads the sources, types an unsent briefing, and reserves a requested half hour without inviting anyone. This 18-second preview is edited from actual browser footage. Accelerated passages are labelled; the full film retains its narration and context.
 
-> Draft a mail to (your address) informing about the latest bill and vendor details and
-> summarising the chat messages inside #design, and put a 30 minute hold on my Google
-> Calendar next week to review it.
+The film's cross-app run passed 16 worker checks; the independent Tribunal disputed one condition. A separate Gmail/Calendar run passed all 13 checks in both assessments. [See the distinct results](docs/evidence/README.md)—a convincing output is not automatically a verified one.
 
-Ava's own read-back from Google passed 13 of 13 checks, and so did the Tribunal reading
-Google itself. Other retained runs: Gmail only (`20261011-204107-0722`, 7 of 7), Calendar
-only (`20261011-205136-04cf`, 6 of 6), combined (`20261011-205309-0816`, 13 of 13).
+<details>
+<summary>Open the full film and its recording notes</summary>
 
-**One-time setup**
+[![Open the narrated project film](assets/readme/poster.webp)](https://github.com/IC-04/precedent/releases/tag/readme-showcase-v1)
 
-1. Connect your Google account for read-only proof (Gmail read and drafts, Calendar),
-   as described in [the connected worker milestone](docs/google_connected_worker_milestone.md):
+[Open the full film on GitHub](https://github.com/IC-04/precedent/releases/tag/readme-showcase-v1) or [download the film](https://github.com/IC-04/precedent/releases/download/readme-showcase-v1/precedent-demo.mp4). It combines several recordings. The passing invoice hearing is a different run from the Gmail task. The Ava/Loki recovery scene is a labelled staged explanation based on a recorded failure. [Footage provenance](assets/readme/manifest.json).
 
-   ```sh
-   uv run precedent connected
-   ```
+</details>
 
-2. Sign into Google in Ava's own Chrome profile, by hand, then quit that window (Cmd+Q).
-   Neither Ava nor any tool sees your password:
+## One request, several applications
 
-   ```sh
-   open -na "Google Chrome" --args --user-data-dir="$HOME/.local/share/precedent/ava-chrome" --no-first-run "https://accounts.google.com/ServiceLogin?continue=https://mail.google.com/mail/"
-   ```
+> “Brief me by email: cover the newest invoice and its PDF, the latest bill and vendor, the approver's calendar, and the design chat. Put a 30-minute hold on my Calendar next week.”
 
-   Both must be the same Google account: Ava writes in the browser account and the checks
-   read the connected one.
+| Request | Execution | Result |
+| --- | --- | --- |
+| Give the outcome, not click-by-click instructions | Read Mail, Drive, Books, Calendar and Chat; decide what matters; operate Gmail and Calendar | An unsent draft, an owner-only hold, fresh checks and a receipt |
 
-**Run it**
+![Native Gmail draft and Calendar outcome from the recording; personal details masked](assets/readme/native-results.webp)
 
-```sh
-PRECEDENT_NATIVE_GOOGLE=1 .venv/bin/python scripts/demo.py --port 8041 --apps-port 8141 --world-root output/native-demo --reuse
+The generated company supplies history, policies and sometimes stale instructions. Ava must determine which sources govern the task. Native Google execution uses sites we do not control. Browser actions, source-backed decisions and subsequent readback establish that work happened; narration alone does not.
+
+## A workspace built around the worker
+
+![Precedent's narrated project guide and recorded evidence](assets/readme/guide.webp)
+
+Tasks, company records and proof share one workspace. Mail has persisted drafts; Calendar exposes availability and tentative holds; Drive, Books and Chat provide the working context. Ava's companion offers suggestions from the page you are viewing, then prefills the composer rather than silently starting work.
+
+The guide explains the project through recorded execution and optional Ava/Loki narration. Run details expose actual phases, decisions, cited sources, failures and outcomes. In local headed mode, you can watch the Chromium window that Playwright controls, with real typing and Ava's separate action indicator.
+
+<details>
+<summary>See the task workspace, Gmail and Calendar at full size</summary>
+
+![Task assignment in the actual workspace](assets/readme/workspace.webp)
+
+![Real unsent Gmail draft; personal details masked](assets/readme/gmail.webp)
+
+![Real Google Calendar hold; personal details masked](assets/readme/calendar.webp)
+
+</details>
+
+## Ava has to prove it
+
+![Independent invoice hearing and labelled recovery explanation](assets/readme/verification.gif)
+
+Consequential writes require a recorded decision citing sources. If a save has an uncertain result, writes stay locked until Ava searches for the business record and reconciles what happened. Repeat execution checks for existing work before creating more.
+
+Fresh verification reads the resulting state. The **Tribunal** performs its own checks and can use jurors from two model families; a separate hidden-truth grader assesses generated-company benchmarks. Missing proof stays **unknown**, and model disagreement stays **disputed**. These are distinct assessments, not one blended score.
+
+The preview includes a separate passing invoice hearing and a staged recovery explanation. In the controlled recovery run, approval routing was removed, the Tribunal caught unsupported claims, and a bounded remand led to rechecking. [Verification implementation](src/precedent/tribunal) · [Recorded boundaries](docs/evidence/README.md).
+
+## Ava's mind, and Teach Ava
+
+![Persistent learning, a draft skill and demonstration interpretation](assets/readme/learning.gif)
+
+Completed work can produce scoped learning notes: what was checked, what remains uncertain and where the guidance came from. People can inspect, correct or archive those notes. A successful procedure can become a **skill candidate**, which needs sandbox validation and explicit activation before reuse.
+
+Or demonstrate a task once: Teach Ava interprets the recording, checks steps against the applications and marks gaps for review. The filmed candidate is not proof of successful activation. A separate invoice milestone did validate and reuse an activated skill after restart. Reuse is demonstrated; a general speedup is not.
+
+<details>
+<summary>Inspect memory and the teaching review</summary>
+
+![Ava's mind: a candidate remains a draft](assets/readme/memory.webp)
+
+![Teach Ava: review of the interpreted demonstration](assets/readme/teaching.webp)
+
+[Learning delivery report](docs/trustworthy_learning_milestone.md) · [Learning service](src/precedent/learning).
+
+</details>
+
+## How it works
+
+```mermaid
+flowchart LR
+    R[Requested outcome] --> C["Current company context<br/>and scoped memory"]
+    C --> G[Goal and plan]
+    G --> B[Guarded browser actions]
+    B --> O[Observe and adapt]
+    O --> B
+    O --> V[Fresh verification]
+    V --> T[Independent assessment]
+    T --> E[Artifacts and evidence]
+    E --> M[Reviewed learning]
+    M --> C
 ```
 
-Open http://localhost:8041/, paste a request like the one above and press **Assign to
-Ava**. Her Chrome window opens on your screen. For the first run at a new path, omit
-`--reuse`. Keep reusing the same path afterwards: a regenerated company is a different
-company, and the Tribunal refuses to judge a run against another company.
+**Google ADK** runs the agent loop; **Gemini on Vertex AI** handles goals, reasoning and actions. **Playwright MCP** supplies browser tools. Python guards enforce permissions, decision-before-write and uncertain-write recovery. FastAPI serves the company apps and operator workspace; SQLite stores company state and separately scoped learning. **Amazon Bedrock** supplies configured second-family reviewers/jurors. Narration uses existing Gemini TTS assets.
 
-**What keeps it safe.** Google's traffic does not pass through Ava's gateway, so the rules
-are code on her browser actions (`src/precedent/worker/native.py`):
-- **Sites:** she may visit only the company apps, Gmail and Google Calendar. Sign-in and
-  account pages are refused.
-- **Controls:** Send, Forward, Delete, Discard, Archive and Invite are refused, and so are
-  keyboard shortcuts.
-- **Decisions:** a decision citing sources is required before her first keystroke.
-- **Recipients:** only addresses named in the request, including addresses prefilled
-  through a link. No guests can be added to events.
-- **Company apps:** read-only for the task.
+The worker cannot read company SQLite or hidden grader truth. Native-site execution uses browser guards and separately consented Google API readback; provider-backed OAuth execution is another supported path with its own acceptance status. These mechanisms establish bounded proof, not unrestricted desktop autonomy. [Architecture](docs/01_architecture.md) · [Design decisions](docs/decisions_log.md) · [Core contracts](src/precedent/contracts.py).
 
-In the live run, Ava reached for **Discard draft** after writing; the rule refused it and
-the draft was kept.
+## Recorded results
 
-**How it is proven.** Nothing is taken from Ava's report. The draft, the Sent folder and
-every calendar change during the run are read back through the read-only connection,
-bounded to the run's own time window:
-- **Draft:** exactly one new draft to the named recipient, with a subject.
-- **Content:** the latest bill's facts and the vendor details match Books, and the #design
-  messages are covered.
-- **Nothing sent:** the Sent folder has nothing new, and no other recipient appears.
-- **Hold:** exactly one new event, of the requested length, inside the requested window and
-  working hours, with no overlap, a title and no guests.
-- **Nothing else changed:** no other calendar event was created, changed or deleted.
+| Task / run | Worker checks | Independent result |
+| --- | --- | --- |
+| Gmail + Calendar, **d343**, 158.2 s | 13/13 pass | Tribunal 13/13 pass |
+| Cross-app film source, **5080**, 257.0 s | 16/16 pass | 15 pass; 1 disputed |
+| Invoice routing, **0f7d**, 270.4 s | 11/11 pass | Tribunal 11/11; grader 14/14 |
+| Different invoice after restart, **fc9a** | 12/12 pass | Grader 14/14; scoped learning reused |
 
-The Tribunal repeats these checks with its own reads, and its jury reads the draft and the
-calendar changes as exhibits.
+[Open the sanitized per-run evidence](docs/evidence/README.md). Timings come from retained events, not film length. These selected examples are not a benchmark success rate. Historical failures and unknowns are preserved in the delivery reports.
 
-**Limits.**
-- The #design check confirms coverage of the messages, not the faithfulness of the summary;
-  the jury can still flag an unfaithful one.
-- Ava reads Google's pages through their accessibility tree.
-- Running Chrome with remote debugging on a signed-in profile is a local prototype choice,
-  not a deployment design.
-- Ava cannot delete her drafts or holds; you remove them yourself.
+## Run locally
 
-The [meeting workflow milestone](docs/meeting_workflow_milestone.md) adds a Calendar app,
-editable unsent email drafts, fresh availability checks, and explicit local tentative holds.
-Its delivery report records real browser runs, restart/repeat evidence, independent grades,
-screenshots and the limitations of this local sandbox.
-
-The retained meeting demo is [Ava's task workspace](http://localhost:8018/) with
-[company Calendar](http://localhost:8124/calendar/?start=2026-10-05) and
-[the saved draft](http://localhost:8124/mail/drafts/draft-1e9d559df51d).
-Choose **Prepare a catch-up**, then **Assign to Ava**, and bring her browser forward.
-The generated company clock is September 28, 2026; “next week” is October 5–11.
-Restart that company without regenerating it:
+Requires Python 3.11+, uv, Node/npm and configured Vertex ADC. Model usage is billed to the configured cloud project.
 
 ```sh
-.venv/bin/python scripts/demo.py --port 8018 --apps-port 8124 --world-root output/meeting-milestone/verified-worlds --reuse
-```
-
-For a fresh company at a new path, omit `--reuse`; `--seed 8` also changes the participant,
-topic and calendar fixtures. Choose available ports. Draft preparation sends nothing;
-a requested local hold reserves the organizer's time only.
-
-The current [trustworthy learning milestone](docs/trustworthy_learning_milestone.md) adds
-persistent scoped memory, Ava’s mind, reviewed invoice skills, and stricter verification.
-Its cold task and post-restart different-invoice task both passed worker verification and
-14/14 independent checks. The measured warm task was slower overall; memory reuse is
-proven, a general speedup is not. Earlier milestone figures below are historical evidence.
-
-The [immersive workspace milestone](docs/immersive_milestone.md) adds focused task assignment, a guided introduction, truthful preparation phases, native-browser handoff, decisions with sources, and inspectable results. Its real invoice run completed in **170.4 seconds**, passing **13/13 independent grading checks**. Ava's own fresh verification passed **5/7 checks**, with two explicitly unresolved.
-
-Start a fresh isolated demo after setup and ADC authentication:
-
-```sh
-.venv/bin/python scripts/demo.py --port 8009 --apps-port 8116
-```
-
-Open http://localhost:8009/, select **Enter & route an invoice**, then **Assign to Ava**. Use **Bring Ava’s browser forward** to watch actual execution. Return for the saved bill and checks. Existing companies are preserved. See the milestone guide for evidence and limitations; the [earlier observable demo](docs/observable_browser_demo.md) remains historical evidence.
-
-## Meet Ava: the landing page
-
-Open **Start here** in the workspace, or `/guide` on any console. It is the project in eight
-chapters, built from recorded evidence: Ava's own browser frames from a real run, the rules
-she induced from the company's history (and the stale procedure she caught), the loop as
-recorded events, the write gate, the Tribunal, memory and taught skills, Ava in your own
-Gmail and Calendar (with personal details blurred), and a wall of real runs, failures
-included. **Let Ava show you around** plays a three-minute narrated tour; in
-the Tribunal chapter Loki joins her for a voiced scene scripted from run `dd3f`, where the
-exhibit, the branches and the pruning follow the dialogue. Without the tour, Ava hops to the
-chapter you are reading. Reduced motion shows everything still.
-
-The numbers and images come from `src/precedent/console/guide_evidence.json`. After new runs:
-
-```sh
-.venv/bin/python scripts/build_guide_evidence.py
-```
-
-Narration (Ava: Sulafat, Loki: Algieba, Gemini-TTS through ADC) is versioned by script; after
-editing `guide.json`, regenerate and activate it:
-
-```sh
-.venv/bin/python scripts/generate_guide_audio.py
-```
-
-```sh
-.venv/bin/python scripts/generate_guide_audio.py --activate
-```
-
-The same Ava appears across the product: a dock in every company app, the task home, the run
-page and her own worker browser. Select her for suggestions from the record you are looking
-at; they only prefill the task composer. See [the companion milestone](docs/companion_milestone.md).
-
-## Ava’s mind and persistent learning
-
-Open **Ava’s mind** in the header, or `/mind`. Completed tasks produce learning notes
-with observed checks, reusable guidance, uncertain claims and captured sources. Search,
-correct or archive those notes. In **Skills**, review an invoice procedure draft, run its
-real isolated sandbox validation, then explicitly activate it. Subsequent invoice tasks
-show which skill and memories were used and still check current company sources.
-
-`uv sync` installs the ADK database extras. Local learning is stored in `learning/` beside
-`runs/` (override with `PRECEDENT_MEMORY_ROOT`). These files are gitignored and separate
-from the company's database. Session history, curated recall and skill provenance use
-separate SQLite stores. This is local single-user persistence, not cloud onboarding.
-
-To retain the same demo company across a restart:
-
-```sh
-.venv/bin/python scripts/demo.py --port 8016 --apps-port 8122 --world-root output/learning-milestone/demo-worlds --reuse
-```
-
-Omit `--reuse` only for first creation at a new path. Regenerating a company intentionally
-creates a new memory scope. Never use world regeneration to restart a retained demo.
-The labelled `scripts/seed_learning_invoice.py WORLD_DIRECTORY` fixture adds a different
-source invoice for demonstration, without creating a bill or a learned answer. See
-[the learning milestone](docs/trustworthy_learning_milestone.md) for the reviewer route,
-actual run evidence, independent assessments and limitations.
-
-## Google Cloud authentication
-
-Gemini is accessed through Vertex AI using Application Default Credentials (ADC).
-A Gemini API key is not required. Goal preparation, actions and fallbacks all use
-the same ADC model factory. The configured model names are unchanged.
-
-Install the [Google Cloud CLI](https://cloud.google.com/sdk/docs/install), then run:
-
-```sh
-gcloud auth login
-gcloud config set project YOUR_PROJECT_ID
-gcloud services enable aiplatform.googleapis.com --project=YOUR_PROJECT_ID
-gcloud auth application-default login
-gcloud auth application-default set-quota-project YOUR_PROJECT_ID
-```
-
-Set these values in `.env` (or export them in your environment):
-
-```sh
-GOOGLE_CLOUD_PROJECT=your-project-id
-GOOGLE_CLOUD_LOCATION=global
-```
-
-The runtime identity needs Vertex AI inference access, normally `roles/aiplatform.user`,
-and permission to use the configured project for quota/billing
-(`serviceusage.services.use`, normally `roles/serviceusage.serviceUsageConsumer`).
-An administrator can enable the API and grant these permissions; runtime identities
-do not need Owner or Editor.
-
-Verify with one small model request:
-
-```sh
+git clone https://github.com/IC-04/precedent.git
+cd precedent
+make setup
+# Configure Vertex ADC and GOOGLE_CLOUD_PROJECT; see the setup guide.
 uv run precedent check-model
+uv run python scripts/demo.py --port 8000 --apps-port 8100
 ```
 
-Expected response: `Vertex ADC works`. No company records are accessed or changed.
-Restart the console after changing `.env`. Production should use an attached
-service identity or Workload Identity, rather than a developer's local ADC file.
-See the [authentication guide](docs/google_cloud_auth.md) for Docker, CI, model
-compatibility, IAM and the migration validation results.
+Open `http://localhost:8000/`, choose an invoice or meeting task and assign it to Ava. The demo creates a fresh isolated company; use a retained world path with `--reuse` when restarting. [Complete setup, native Google consent and troubleshooting](docs/run_locally.md). `make test` and `make lint` run the checks.
 
-## Open the delivered workspace
+## Limits and next steps
 
-With the existing seed-7 company, use two terminals:
+This is a focused prototype with supported invoice and meeting workflows, accessibility-guided browser operation and local persistence. It does not support every website or arbitrary desktop applications. Native Google currently requires an owner-signed-in local Chrome profile; its write guards do not prove complete resistance to every changing UI. Exact content coverage cannot establish every semantic claim. Preparation, model availability and jury review add latency. Multi-seed evaluation orchestration remains unfinished.
 
-```sh
-uv run precedent apps --seed 7 --port 8101
-```
-
-```sh
-PRECEDENT_APPS_URL=http://localhost:8101 uv run precedent console --port 8000
-```
-
-Open [the company workspace](http://localhost:8101/) or [Ava's task inbox](http://localhost:8000/).
-For a local demo showing the actual browser rather than a streamed image, start
-the console with `--headed`. Assign a task in the inbox, then switch to Ava's
-Chromium window. Playwright controls that same visible browser session. The
-browser starts on the company overview during preparation. Text entry uses actual character-by-character keystrokes. Ava's purple cursor
-moves to the control selected by the model and pulses on clicks; your mouse
-movement does not drive it. Native dropdowns and segmented date controls use
-Playwright's format-aware input after the pointer reaches the control. This is
-an accessibility-guided browser agent; it does not infer actions from pixels. The window closes when the run finishes; its recorded
-evidence remains in Tasks.
-The legacy optional image-stream viewer is separate from native viewing. For that viewer, open `/watch` on the same console in a second tab before
-starting a task. It follows that console's active task automatically and shows
-the run's dedicated continuous browser stream. This viewer reconnects after
-interruptions and never substitutes saved captures. After completion, open Task
-details for the outcome and recorded evidence; return to `/watch` for the next task.
-The console supports one active worker and actual isolated-browser captures. Starting a task
-uses the configured model. Context induction and fresh verification are implemented; coverage is bounded by the supported check primitives. Multi-seed eval orchestration remains unfinished. The [live ADC workspace validation](docs/vertex_adc_e2e_validation.md)
-confirmed model access and browser execution, but the task failed to complete
-before its token limit. The scripted replay is labelled separately.
-
-See [the delivery guide](docs/workspace_implementation.md) for exact desktop launch
-settings, the labelled scripted replay, before/after screenshots, 133 passing tests,
-lint results, the Act 1 walkthrough and remaining limits.
-
-## First installation
-
-```
-make setup            # uv sync, npm ci (Playwright MCP; needs Node 18+), Chromium, .env
-make world SEED=7     # first generation only; overwrites that world's existing data
-make apps SEED=7      # Mail, Books, Drive, Chat on http://localhost:8100
-make console          # product screen on http://localhost:8000
-```
-
-The original [CentrAlign problem statement](../JD%20CentrAlign%20AI_Engineering%20Hiring.docx)
-is the source of truth for assignment requirements. Earlier kickoff briefs are
-historical guidance. See `docs/01_architecture.md` for the design.
-
-## Real Google workspace
-
-`uv run precedent connected` opens the owner-private Google workspace on port 8250, with an OAuth callback-only listener on 8251. A configured Web OAuth client lives outside the repository; normal users connect through Google consent and choose Mail/calendar access in the app. Ava operates real Precedent views backed by official Gmail/Calendar APIs, saves unsent Gmail drafts, and creates only explicitly requested owner-only calendar holds. Native outputs have independent fresh provider checks and account-scoped learning.
-
-Actual consent, restart, autonomous Calendar creation, repeat reuse and lost-acknowledgement recovery have live evidence. Gmail and composed meeting acceptance are awaiting the synthetic incoming demo email; this milestone is not yet fully accepted. See [the current Google milestone results](docs/google_connected_worker_milestone.md) for exact gate status, launch details, real run IDs, recordings, tests and remaining work.
+The README previews and demo film are recordings and make no model calls. A hosted worker, isolated visitor sessions and operator-funded execution are the next deployment milestone; they are not claimed available here. Further work includes completing the provider-backed Gmail acceptance, reducing measured latency, and expanding workflows through explicit capabilities while preserving fresh verification.

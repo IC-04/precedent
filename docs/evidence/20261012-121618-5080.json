@@ -1,0 +1,162 @@
+{
+  "run_id": "20261012-121618-5080",
+  "task": "Cross-app briefing (film source)",
+  "reported_seconds": 257.0,
+  "steps": 41,
+  "assessment": "Worker completed; independent Tribunal retained a dispute",
+  "privacy": "Only verdicts and condition IDs are published. Mail bodies, people, accounts and provider object IDs are omitted.",
+  "source_digests": {
+    "native-verification.json": "eb4042beb8ae71a6c85fc30dac28ee6bbabb67162fe53a1191920a8c246e54a6",
+    "tribunal/verdict.json": "cc3e495f2fdc244109e1246703cd0cdc2c0c08b41f0cc5912e5a3f0296c3167d"
+  },
+  "assessments": {
+    "worker_readback": {
+      "checks": [
+        {
+          "id": "c1",
+          "result": "pass"
+        },
+        {
+          "id": "c2",
+          "result": "pass"
+        },
+        {
+          "id": "c3",
+          "result": "pass"
+        },
+        {
+          "id": "c4",
+          "result": "pass"
+        },
+        {
+          "id": "c5",
+          "result": "pass"
+        },
+        {
+          "id": "c6",
+          "result": "pass"
+        },
+        {
+          "id": "c7",
+          "result": "pass"
+        },
+        {
+          "id": "c8",
+          "result": "pass"
+        },
+        {
+          "id": "n1",
+          "result": "pass"
+        },
+        {
+          "id": "n2",
+          "result": "pass"
+        },
+        {
+          "id": "k1",
+          "result": "pass"
+        },
+        {
+          "id": "k2",
+          "result": "pass"
+        },
+        {
+          "id": "k3",
+          "result": "pass"
+        },
+        {
+          "id": "k4",
+          "result": "pass"
+        },
+        {
+          "id": "m1",
+          "result": "pass"
+        },
+        {
+          "id": "m2",
+          "result": "pass"
+        }
+      ],
+      "counts": {
+        "pass": 16,
+        "fail": 0,
+        "unknown": 0
+      }
+    },
+    "tribunal": {
+      "overall": "disputed",
+      "counts": {
+        "pass": 15,
+        "fail": 0,
+        "disputed": 1,
+        "unknown": 0
+      },
+      "conditions": [
+        {
+          "id": "c1",
+          "result": "pass"
+        },
+        {
+          "id": "c2",
+          "result": "pass"
+        },
+        {
+          "id": "c3",
+          "result": "disputed"
+        },
+        {
+          "id": "c4",
+          "result": "pass"
+        },
+        {
+          "id": "c5",
+          "result": "pass"
+        },
+        {
+          "id": "c6",
+          "result": "pass"
+        },
+        {
+          "id": "c7",
+          "result": "pass"
+        },
+        {
+          "id": "c8",
+          "result": "pass"
+        },
+        {
+          "id": "n1",
+          "result": "pass"
+        },
+        {
+          "id": "n2",
+          "result": "pass"
+        },
+        {
+          "id": "k1",
+          "result": "pass"
+        },
+        {
+          "id": "k2",
+          "result": "pass"
+        },
+        {
+          "id": "k3",
+          "result": "pass"
+        },
+        {
+          "id": "k4",
+          "result": "pass"
+        },
+        {
+          "id": "m1",
+          "result": "pass"
+        },
+        {
+          "id": "m2",
+          "result": "pass"
+        }
+      ]
+    }
+  }
+}

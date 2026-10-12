@@ -1,0 +1,21 @@
+{
+  "run_id": "20261010-154410-fc9a",
+  "task": "Different invoice after restart",
+  "reported_seconds": null,
+  "steps": null,
+  "assessment": "Scoped notes and an activated invoice skill reused; not a general speedup claim",
+  "privacy": "Only verdicts and condition IDs are published. Mail bodies, people, accounts and provider object IDs are omitted.",
+  "source_digests": {
+    "grade.json": "00fc698ba731b4814316c67f9d25adc278fac96585eaf9f594eba76b44eb0588"
+  },
+  "assessments": {
+    "hidden_truth_grader": {
+      "overall": "pass",
+      "counts": {
+        "pass": 14,
+        "fail": 0,
+        "unknown": 0
+      }
+    }
+  }
+}

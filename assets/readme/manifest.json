@@ -1,0 +1,241 @@
+{
+  "version": 1,
+  "source_film": "output/film-assets/precedent-demo.mp4",
+  "source_film_seconds": 286.14,
+  "source_resolution": "1920x1080",
+  "privacy": "Use only reviewed edited segments with baked-in masks. Raw profiles, sources, run logs and OAuth screens are excluded.",
+  "film_url": "https://github.com/IC-04/precedent/releases/download/readme-showcase-v1/precedent-demo.mp4",
+  "assets": [
+    {
+      "file": "guide.webp",
+      "source": "segments/b01-hello.mp4",
+      "at_seconds": 9,
+      "kind": "recorded screenshot",
+      "edits": "Resize only; source privacy masks retained",
+      "bytes": 71834
+    },
+    {
+      "file": "workspace.webp",
+      "source": "segments/c01-ask.mp4",
+      "at_seconds": 3,
+      "kind": "recorded screenshot",
+      "edits": "Resize only; source privacy masks retained",
+      "bytes": 59198
+    },
+    {
+      "file": "gmail.webp",
+      "source": "segments/c08-real-gmail.mp4",
+      "at_seconds": 3,
+      "kind": "recorded screenshot",
+      "edits": "Resize only; source privacy masks retained",
+      "bytes": 90680
+    },
+    {
+      "file": "calendar.webp",
+      "source": "segments/c09-real-calendar.mp4",
+      "at_seconds": 3,
+      "kind": "recorded screenshot",
+      "edits": "Resize only; source privacy masks retained",
+      "bytes": 55330
+    },
+    {
+      "file": "tribunal.webp",
+      "source": "segments/d02-verdict.mp4",
+      "at_seconds": 3,
+      "kind": "recorded screenshot",
+      "edits": "Resize only; source privacy masks retained",
+      "bytes": 72916
+    },
+    {
+      "file": "memory.webp",
+      "source": "segments/e03-draft.mp4",
+      "at_seconds": 3,
+      "kind": "recorded screenshot",
+      "edits": "Resize only; source privacy masks retained",
+      "bytes": 49968
+    },
+    {
+      "file": "teaching.webp",
+      "source": "segments/f04-review.mp4",
+      "at_seconds": 8,
+      "kind": "recorded screenshot",
+      "edits": "Resize only; source privacy masks retained",
+      "bytes": 98128
+    },
+    {
+      "file": "poster.webp",
+      "source": "segments/c04-typing.mp4",
+      "at_seconds": 3,
+      "kind": "recorded screenshot",
+      "edits": "Resize only; source privacy masks retained",
+      "bytes": 21372
+    },
+    {
+      "file": "native-results.webp",
+      "sources": [
+        "gmail.webp",
+        "calendar.webp"
+      ],
+      "kind": "two recorded screenshots",
+      "edits": "Side by side on paper; no UI content altered",
+      "bytes": 56350
+    },
+    {
+      "file": "execution.gif",
+      "kind": "edited recorded preview",
+      "caption": "One request across company apps, real Gmail and Calendar. Recorded run 5080; edited to 18 seconds.",
+      "output_seconds": 18,
+      "fps": 8,
+      "sources": [
+        {
+          "file": "segments/c01-ask.mp4",
+          "start_seconds": 0.4,
+          "duration_seconds": 3
+        },
+        {
+          "file": "segments/c02-read.mp4",
+          "start_seconds": 1,
+          "duration_seconds": 3
+        },
+        {
+          "file": "segments/c04-typing.mp4",
+          "start_seconds": 1,
+          "duration_seconds": 5
+        },
+        {
+          "file": "segments/c06-calendar.mp4",
+          "start_seconds": 2,
+          "duration_seconds": 3
+        },
+        {
+          "file": "segments/c08-real-gmail.mp4",
+          "start_seconds": 1,
+          "duration_seconds": 2
+        },
+        {
+          "file": "segments/c09-real-calendar.mp4",
+          "start_seconds": 1,
+          "duration_seconds": 2
+        }
+      ],
+      "edits": "Cuts, resize and GIF encoding. Existing speed, staging and privacy labels retained.",
+      "bytes": 1062920
+    },
+    {
+      "file": "verification.gif",
+      "kind": "edited recorded preview",
+      "caption": "Separate invoice hearing and a labelled staged explanation of recovery; not the Gmail run's verdict.",
+      "output_seconds": 9,
+      "fps": 8,
+      "sources": [
+        {
+          "file": "segments/d01-hearing.mp4",
+          "start_seconds": 10,
+          "duration_seconds": 3
+        },
+        {
+          "file": "segments/d02-verdict.mp4",
+          "start_seconds": 2,
+          "duration_seconds": 3
+        },
+        {
+          "file": "segments/d03-scene-caught.mp4",
+          "start_seconds": 4,
+          "duration_seconds": 3
+        }
+      ],
+      "edits": "Cuts, resize and GIF encoding. Existing speed, staging and privacy labels retained.",
+      "bytes": 737453
+    },
+    {
+      "file": "learning.gif",
+      "kind": "edited recorded preview",
+      "caption": "Recorded memory, demonstration interpretation and a draft skill. A candidate is not an activated skill.",
+      "output_seconds": 12,
+      "fps": 8,
+      "sources": [
+        {
+          "file": "segments/e01-memory.mp4",
+          "start_seconds": 0.3,
+          "duration_seconds": 3
+        },
+        {
+          "file": "segments/e03-draft.mp4",
+          "start_seconds": 0.4,
+          "duration_seconds": 3
+        },
+        {
+          "file": "segments/f03-watch.mp4",
+          "start_seconds": 2,
+          "duration_seconds": 3
+        },
+        {
+          "file": "segments/f04-review.mp4",
+          "start_seconds": 6,
+          "duration_seconds": 3
+        }
+      ],
+      "edits": "Cuts, resize and GIF encoding. Existing speed, staging and privacy labels retained.",
+      "bytes": 1302418
+    },
+    {
+      "file": "banner-light.svg",
+      "kind": "original vector banner",
+      "source": "src/precedent/apps/static/ava/ava.svg + ava.css",
+      "edits": "Existing character and palette; editorial wordmark and project statement",
+      "bytes": 13321
+    },
+    {
+      "file": "banner-dark.svg",
+      "kind": "original vector banner",
+      "source": "src/precedent/apps/static/ava/ava.svg + ava.css",
+      "edits": "Existing character and palette; editorial wordmark and project statement",
+      "bytes": 13321
+    }
+  ],
+  "runs": [
+    {
+      "id": "20261011-210344-d343",
+      "task": "Gmail briefing and Calendar hold",
+      "seconds": 158.2,
+      "steps": 34,
+      "worker_checks": "13/13 pass",
+      "independent": "13/13 pass",
+      "assessment": "Native browser execution; fresh Google API readback and Tribunal"
+    },
+    {
+      "id": "20261012-121618-5080",
+      "task": "Cross-app briefing (film source)",
+      "seconds": 257.0,
+      "steps": 41,
+      "worker_checks": "16/16 pass",
+      "independent": "15 pass, 1 disputed",
+      "assessment": "Worker completed; independent Tribunal retained a dispute"
+    },
+    {
+      "id": "20261010-185357-0f7d",
+      "task": "Invoice entry and approval routing",
+      "seconds": 270.4,
+      "steps": 33,
+      "worker_checks": "11/11 pass",
+      "independent": "Tribunal 11/11; hidden-truth grade 14/14",
+      "assessment": "Separate generated-company invoice run; source of the passing hearing shown in the film"
+    },
+    {
+      "id": "20261010-154410-fc9a",
+      "task": "Different invoice after restart",
+      "worker_checks": "12/12 pass",
+      "independent": "14/14 pass",
+      "assessment": "Scoped notes and an activated invoice skill reused; not a general speedup claim"
+    }
+  ],
+  "staged_recovery_run": "20261010-193810-dd3f",
+  "chapter_seconds": [
+    0,
+    55,
+    119,
+    138,
+    207,
+    269
+  ]
+}

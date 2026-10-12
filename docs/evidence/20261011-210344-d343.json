@@ -1,0 +1,138 @@
+{
+  "run_id": "20261011-210344-d343",
+  "task": "Gmail briefing and Calendar hold",
+  "reported_seconds": 158.2,
+  "steps": 34,
+  "assessment": "Native browser execution; fresh Google API readback and Tribunal",
+  "privacy": "Only verdicts and condition IDs are published. Mail bodies, people, accounts and provider object IDs are omitted.",
+  "source_digests": {
+    "native-verification.json": "dd6b9a36ef3ba391c2855af8b28f9565dc6bccf7854c50ef7b4cff8beffa4855",
+    "tribunal/verdict.json": "cc2c5f20fed8859669ca56ccf53ff0143cd4558abb1791ca5ec05648e6bb676c"
+  },
+  "assessments": {
+    "worker_readback": {
+      "checks": [
+        {
+          "id": "c1",
+          "result": "pass"
+        },
+        {
+          "id": "c2",
+          "result": "pass"
+        },
+        {
+          "id": "c3",
+          "result": "pass"
+        },
+        {
+          "id": "c4",
+          "result": "pass"
+        },
+        {
+          "id": "c5",
+          "result": "pass"
+        },
+        {
+          "id": "n1",
+          "result": "pass"
+        },
+        {
+          "id": "n2",
+          "result": "pass"
+        },
+        {
+          "id": "k1",
+          "result": "pass"
+        },
+        {
+          "id": "k2",
+          "result": "pass"
+        },
+        {
+          "id": "k3",
+          "result": "pass"
+        },
+        {
+          "id": "k4",
+          "result": "pass"
+        },
+        {
+          "id": "m1",
+          "result": "pass"
+        },
+        {
+          "id": "m2",
+          "result": "pass"
+        }
+      ],
+      "counts": {
+        "pass": 13,
+        "fail": 0,
+        "unknown": 0
+      }
+    },
+    "tribunal": {
+      "overall": "pass",
+      "counts": {
+        "pass": 13,
+        "fail": 0,
+        "disputed": 0,
+        "unknown": 0
+      },
+      "conditions": [
+        {
+          "id": "c1",
+          "result": "pass"
+        },
+        {
+          "id": "c2",
+          "result": "pass"
+        },
+        {
+          "id": "c3",
+          "result": "pass"
+        },
+        {
+          "id": "c4",
+          "result": "pass"
+        },
+        {
+          "id": "c5",
+          "result": "pass"
+        },
+        {
+          "id": "n1",
+          "result": "pass"
+        },
+        {
+          "id": "n2",
+          "result": "pass"
+        },
+        {
+          "id": "k1",
+          "result": "pass"
+        },
+        {
+          "id": "k2",
+          "result": "pass"
+        },
+        {
+          "id": "k3",
+          "result": "pass"
+        },
+        {
+          "id": "k4",
+          "result": "pass"
+        },
+        {
+          "id": "m1",
+          "result": "pass"
+        },
+        {
+          "id": "m2",
+          "result": "pass"
+        }
+      ]
+    }
+  }
+}
