@@ -1,0 +1,103 @@
+/* Ava's character: one drawing (ava.svg), one set of poses. Shared by the console,
+   the company apps and the worker browser's isolated overlay. A pose is a word on
+   data-pose; it never encodes progress, only what the recorded state says she is doing. */
+.ava{--ava-body:#c6add4;--ava-light:#ece2f2;--ava-deep:#8f74a2;--ava-ear:#ab8fbd;--ava-ear-in:#e7c8dc;--ava-limb:#a68ab7;--ava-ink:#493654;--ava-mouth:#674976;--ava-cheek:#efc5d5;--ava-paper:#fffdf9;--ava-prop:#ded5e5;--ava-prop-ink:#8b7499;display:inline-block;position:relative;line-height:0}
+.ava-art{width:100%;height:auto;overflow:visible;display:block}
+.ava-shadow{fill:#d8d0db;opacity:.55}
+.ava-ear-outer{fill:var(--ava-ear)}.ava-ear-inner{fill:var(--ava-ear-in);opacity:.7}
+.ava-foot{fill:var(--ava-deep)}
+.ava-torso{fill:var(--ava-body)}.ava-shade{fill:var(--ava-deep);opacity:.32}.ava-glow{fill:var(--ava-light);opacity:.6}
+.ava-sheen{fill:none;stroke:#fbf6fc;stroke-width:5;stroke-linecap:round;opacity:.6}
+.ava-eyes{fill:var(--ava-ink)}.ava-glint{fill:#fff;opacity:.85}
+.ava-eyes-closed path,.ava-flat,.ava-smile{fill:none;stroke:var(--ava-mouth);stroke-width:3;stroke-linecap:round}
+.ava-cheek{fill:var(--ava-cheek);opacity:.62}
+.ava-grin,.ava-talk{fill:var(--ava-mouth)}
+.ava-arms path,.ava-typing path,.ava-hold-arm{fill:none;stroke:var(--ava-limb);stroke-width:10;stroke-linecap:round}
+.ava-arms circle{fill:var(--ava-limb)}
+.ava-laptop-lid{fill:#f3eff6;stroke:#cfc3d8;stroke-width:1.5}.ava-laptop-mark{fill:var(--ava-body)}
+.ava-laptop-base{fill:#ddd3e4;stroke:#c7b9d1;stroke-width:1.2}
+.ava-paper-sheet{fill:var(--ava-paper);stroke:#d6cadf;stroke-width:1.5}.ava-paper-fold{fill:#efe8f3;stroke:#d6cadf;stroke-width:1.5}
+.ava-paper-lines{stroke:#cbbdd6;stroke-width:3;stroke-linecap:round}
+.ava-seal circle{fill:#b58fc9}.ava-seal path{fill:#9d79b1}
+.ava-lens circle{fill:#ffffff66;stroke:var(--ava-prop-ink);stroke-width:4}.ava-lens path{stroke:var(--ava-prop-ink);stroke-width:6;stroke-linecap:round}
+.ava-bubble-ask path,.ava-rest g>path:first-child{fill:#fffdfa;stroke:#cdbcd8;stroke-width:1.5}
+.ava-bubble-ask text{font:600 24px/1 Georgia,serif;fill:#7d5f8f;text-anchor:middle}
+.ava-thought circle{fill:#e9e0ef;stroke:#cdbcd8;stroke-width:1.2}
+.ava-sound path{fill:none;stroke:#b9a3c7;stroke-width:3;stroke-linecap:round}
+.ava-rest-bars{stroke:#a593b0;stroke-width:3;stroke-linecap:round}
+
+/* Default: idle. Everything pose-specific is hidden until a pose asks for it. */
+.ava-prop,.ava-arms,.ava-eyes-closed,.ava-mouth,.ava-seal,.ava-lens{display:none}
+.ava-arms-rest,.ava-smile{display:inline}
+.ava-figure{transform-origin:111px 208px;transition:transform .35s ease,filter .35s,opacity .35s}
+.ava-head{transform-origin:113px 160px;transition:transform .35s ease}
+.ava-eyes{transform-origin:113px 128px;transition:transform .3s ease}
+.ava-ear{transition:transform .35s ease}.ava-ear-l{transform-origin:52px 112px}.ava-ear-r{transform-origin:168px 110px}
+.ava-breath{transform-origin:113px 205px}.ava-blink{transform-origin:113px 128px}.ava-ear-l .ava-twitch{transform-origin:52px 112px}.ava-ear-r .ava-twitch{transform-origin:168px 110px}
+@media(prefers-reduced-motion:no-preference){
+  .ava-motion .ava-breath{animation:ava-breathe 5s ease-in-out infinite}
+  .ava-motion .ava-blink{animation:ava-blink 6s infinite}
+  .ava-motion .ava-ear-r .ava-twitch{animation:ava-ear 11s ease-in-out infinite}
+}
+
+/* greet: a small wave, three times, then a calm smile. */
+.ava[data-pose=greet] .ava-arms-rest{display:none}.ava[data-pose=greet] .ava-arms-wave{display:inline}
+.ava[data-pose=greet] .ava-smile{display:none}.ava[data-pose=greet] .ava-grin{display:inline}
+.ava[data-pose=greet] .ava-ear-l{transform:rotate(-5deg)}.ava[data-pose=greet] .ava-ear-r{transform:rotate(5deg)}
+.ava-wave-arm{transform-origin:178px 148px}
+/* listen: ears up, head tilted, waiting for words. */
+.ava[data-pose=listen] .ava-head{transform:rotate(-4deg)}
+.ava[data-pose=listen] .ava-ear-l{transform:rotate(-8deg)}.ava[data-pose=listen] .ava-ear-r{transform:rotate(9deg)}
+.ava[data-pose=listen] .ava-eyes{transform:translateY(-3px)}.ava[data-pose=listen] .ava-sound{display:inline}
+/* speak: the guide's narration is playing. */
+.ava[data-pose=speak] .ava-smile{display:none}.ava[data-pose=speak] .ava-talk{display:inline}
+/* read: studying a page. */
+.ava[data-pose=read] .ava-arms-rest,.ava[data-pose=check] .ava-arms-rest,.ava[data-pose=deliver] .ava-arms-rest{display:none}
+.ava[data-pose=read] .ava-hold,.ava[data-pose=check] .ava-hold,.ava[data-pose=deliver] .ava-hold{display:inline}
+.ava[data-pose=read] .ava-eyes,.ava[data-pose=check] .ava-eyes{transform:translateY(5px) scaleY(.85)}
+/* check: the saved record, under a lens. */
+.ava[data-pose=check] .ava-lens{display:inline}.ava[data-pose=check] .ava-ear-r{transform:rotate(6deg)}
+/* deliver: holds up the result. Only for a fresh, fully verified outcome. */
+.ava[data-pose=deliver] .ava-hold{transform:translateY(-10px)}.ava[data-pose=deliver] .ava-seal{display:inline}
+.ava[data-pose=deliver] .ava-smile{display:none}.ava[data-pose=deliver] .ava-grin{display:inline}
+/* think: choosing the next action or waiting for the model. */
+.ava[data-pose=think] .ava-arms-rest{display:none}.ava[data-pose=think] .ava-arms-chin{display:inline}
+.ava[data-pose=think] .ava-thought{display:inline}.ava[data-pose=think] .ava-eyes{transform:translate(4px,-5px)}
+.ava[data-pose=think] .ava-head{transform:rotate(3deg)}
+/* work: at her little laptop while the browser executes. */
+.ava[data-pose=work] .ava-arms-rest{display:none}.ava[data-pose=work] .ava-laptop{display:inline}
+.ava[data-pose=work] .ava-eyes{transform:translateY(6px) scaleY(.8)}
+/* ask: a hand up and a question. */
+.ava[data-pose=ask] .ava-arms-rest{display:none}.ava[data-pose=ask] .ava-arms-wave{display:inline}
+.ava[data-pose=ask] .ava-bubble-ask{display:inline}.ava[data-pose=ask] .ava-smile{display:none}.ava[data-pose=ask] .ava-flat{display:inline}
+.ava[data-pose=ask] .ava-ear-l{transform:rotate(-7deg)}.ava[data-pose=ask] .ava-ear-r{transform:rotate(8deg)}
+/* away: interrupted or unavailable. Ears down, eyes closed, colour lowered. */
+.ava[data-pose=away] .ava-eyes{display:none}.ava[data-pose=away] .ava-eyes-closed{display:inline}
+.ava[data-pose=away] .ava-smile{display:none}.ava[data-pose=away] .ava-flat{display:inline}
+.ava[data-pose=away] .ava-ear-l{transform:rotate(-22deg)}.ava[data-pose=away] .ava-ear-r{transform:rotate(22deg)}
+.ava[data-pose=away] .ava-figure{filter:saturate(.45);opacity:.82}.ava[data-pose=away] .ava-rest{display:inline}
+
+@media(prefers-reduced-motion:no-preference){
+  .ava-motion[data-pose=greet] .ava-wave-arm{animation:ava-wave .5s ease-in-out 4 alternate}
+  .ava-motion[data-pose=speak] .ava-talk{animation:ava-talk .42s ease-in-out infinite alternate;transform-origin:113px 149px}
+  .ava-motion[data-pose=work] .ava-typing-l{animation:ava-type .32s ease-in-out infinite alternate;transform-origin:48px 150px}
+  .ava-motion[data-pose=work] .ava-typing-r{animation:ava-type .32s ease-in-out .16s infinite alternate;transform-origin:178px 150px}
+  .ava-motion[data-pose=think] .ava-thought circle{animation:ava-dot 1.8s ease-in-out infinite}
+  .ava-motion[data-pose=think] .ava-thought circle:nth-child(2){animation-delay:.25s}
+  .ava-motion[data-pose=think] .ava-thought circle:nth-child(3){animation-delay:.5s}
+  .ava-motion[data-pose=check] .ava-lens{animation:ava-scan 2.6s ease-in-out infinite}
+  .ava-motion[data-pose=read] .ava-paper{animation:ava-page 4s ease-in-out infinite;transform-origin:114px 200px}
+  .ava-motion[data-pose=ask] .ava-bubble-ask{animation:ava-float 2.8s ease-in-out infinite}
+  .ava-motion[data-pose=listen] .ava-sound path{animation:ava-dot 1.6s ease-in-out infinite}
+  .ava-motion[data-pose=listen] .ava-sound path+path{animation-delay:.3s}
+}
+@keyframes ava-breathe{50%{transform:scale(1.012,.988)}}
+@keyframes ava-blink{0%,46%,50%,100%{transform:scaleY(1)}48%{transform:scaleY(.1)}}
+@keyframes ava-ear{0%,90%,100%{transform:rotate(0)}93%{transform:rotate(7deg)}96%{transform:rotate(-2deg)}}
+@keyframes ava-wave{from{transform:rotate(-10deg)}to{transform:rotate(14deg)}}
+@keyframes ava-talk{from{transform:scaleY(.45)}to{transform:scaleY(1)}}
+@keyframes ava-type{from{transform:rotate(0)}to{transform:rotate(-3deg)}}
+@keyframes ava-dot{0%,100%{opacity:.25}50%{opacity:1}}
+@keyframes ava-scan{0%,100%{transform:translate(0,0)}50%{transform:translate(22px,8px)}}
+@keyframes ava-page{0%,100%{transform:rotate(0)}50%{transform:rotate(-2deg)}}
+@keyframes ava-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}

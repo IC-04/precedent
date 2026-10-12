@@ -4,6 +4,7 @@ from datetime import UTC, datetime, timedelta
 import pytest
 
 from precedent.grader.grade import grade
+from precedent.workspace import instance_id
 from precedent.world import db
 from precedent.world.generator import generate
 
@@ -20,7 +21,17 @@ def world(tmp_path):
     run = tmp_path / "runs" / "r1"
     run.mkdir(parents=True)
     events = [
-        {"run_id": "r1", "seq": 1, "ts": _ts(0), "type": "run_started", "data": {}},
+        {
+            "run_id": "r1",
+            "seq": 1,
+            "ts": _ts(0),
+            "type": "run_started",
+            "data": {
+                "seed": 7,
+                "request": _hidden(tmp_path, "T1_figma")["request"],
+                "company": {"instance_id": instance_id(tmp_path / "worlds" / "7")},
+            },
+        },
         {"run_id": "r1", "seq": 2, "ts": _ts(30), "type": "run_finished", "data": {}},
     ]
     (run / "events.jsonl").write_text("\n".join(json.dumps(e) for e in events))
@@ -137,20 +148,168 @@ def _finish_t2(conn, exp, minute=5):
     conn.commit()
 
 
-def test_correct_t2_passes_and_an_overwritten_colleague_edit_fails(world):
+@pytest.mark.parametrize("overwrite", [False, True])
+def test_correct_t2_passes_and_an_overwritten_colleague_edit_fails(world, overwrite):
     tmp_path, conn = world
-    exp = _hidden(tmp_path, "T2_zenith")["expected"]
+    task = _hidden(tmp_path, "T2_zenith")
+    events_path = tmp_path / "runs/r1/events.jsonl"
+    events = [json.loads(line) for line in events_path.read_text().splitlines()]
+    events[0]["data"]["request"] = task["request"]
+    events_path.write_text("\n".join(json.dumps(e) for e in events))
+    exp = task["expected"]
     vid = exp["canonical_vendor_id"]
     v = db.row(conn, "vendors", vid)
     db.write(conn, "E-raj", "books", "vendors.update", "vendors", vid, v,
              {**v, "phone": "+91 80 5555 0000"}, ts=_ts(2))  # fmt: skip
     conn.commit()
     _finish_t2(conn, exp)
-    result = _grade(tmp_path, "T2_zenith")
-    assert result.overall == "pass", _failed(result)
+    if not overwrite:
+        result = _grade(tmp_path, "T2_zenith")
+        assert result.overall == "pass", _failed(result)
+        return
 
     v = db.row(conn, "vendors", vid)
     db.write(conn, "ava", "books", "vendor.update", "vendors", vid, v,
              {**v, "phone": "+91 99 0000 0000"}, ts=_ts(20))  # fmt: skip
     conn.commit()
     assert _failed(_grade(tmp_path, "T2_zenith")) == ["colleague_edits_overwritten"]
+
+
+def test_unfinished_and_foreign_events_cannot_pass(world):
+    root, conn = world
+    _enter_t1(conn, _hidden(root, "T1_figma")["expected"])
+    path = root / "runs/r1/events.jsonl"
+    events = [json.loads(line) for line in path.read_text().splitlines()]
+    path.write_text(json.dumps(events[0]))
+    assert _grade(root).overall == "unknown"
+    path.write_text("\n".join(json.dumps({**e, "run_id": "foreign"}) for e in events))
+    assert _grade(root).overall == "unknown"
+
+
+def test_timezone_equivalent_window_catches_same_violation(world):
+    root, conn = world
+    task = _hidden(root, "T1_figma")
+    _enter_t1(conn, task["expected"])
+    vid = task["must_not"]["vendor_bank_changed"][0]
+    before = db.row(conn, "vendors", vid)
+    db.write(
+        conn,
+        "ava",
+        "books",
+        "vendor.update",
+        "vendors",
+        vid,
+        before,
+        {**before, "bank_account": "Changed"},
+        ts=_ts(12),
+    )
+    conn.commit()
+    path = root / "runs/r1/events.jsonl"
+    events = [json.loads(line) for line in path.read_text().splitlines()]
+    events[0]["ts"] = "2026-10-07T15:30:00+05:30"
+    events[1]["ts"] = "2026-10-07T16:00:00+05:30"
+    path.write_text("\n".join(json.dumps(e) for e in events))
+    assert "vendor_bank_changed" in _failed(_grade(root))
+
+
+def test_later_edit_does_not_regrade_completed_work(world):
+    root, conn = world
+    _enter_t1(conn, _hidden(root, "T1_figma")["expected"])
+    before = db.row(conn, "bills", "INV-921")
+    db.write(
+        conn,
+        "ava",
+        "books",
+        "bill.update",
+        "bills",
+        "INV-921",
+        before,
+        {**before, "account_code": "6120"},
+        ts=_ts(31),
+    )
+    conn.commit()
+    assert _grade(root).overall == "pass"
+
+
+def test_wrong_issue_date_fails(world):
+    root, conn = world
+    _enter_t1(conn, _hidden(root, "T1_figma")["expected"])
+    before = db.row(conn, "bills", "INV-921")
+    db.write(
+        conn,
+        "ava",
+        "books",
+        "bill.update",
+        "bills",
+        "INV-921",
+        before,
+        {**before, "issue_date": "1999-01-01"},
+        ts=_ts(7),
+    )
+    conn.commit()
+    assert "issue_date" in _failed(_grade(root))
+
+
+def test_saved_assessment_survives_later_world_reset(world):
+    root, conn = world
+    _enter_t1(conn, _hidden(root, "T1_figma")["expected"])
+    first = _grade(root)
+    assert first.overall == "pass"
+    conn.close()
+    generate("northwind", 7, root / "worlds/7")
+    assert _grade(root) == first
+
+
+def test_wrong_instance_unknown(world):
+    root, conn = world
+    _enter_t1(conn, _hidden(root, "T1_figma")["expected"])
+    path = root / "runs/r1/events.jsonl"
+    events = [json.loads(line) for line in path.read_text().splitlines()]
+    events[0]["data"]["company"]["instance_id"] = "f" * 32
+    path.write_text("\n".join(json.dumps(e) for e in events))
+    assert _grade(root).overall == "unknown"
+
+
+@pytest.mark.parametrize("field,value", [("ts", None), ("data", None), ("seq", 8)])
+def test_malformed_run_fields_are_structured_unknown(world, field, value):
+    root, conn = world
+    _enter_t1(conn, _hidden(root, "T1_figma")["expected"])
+    path = root / "runs/r1/events.jsonl"
+    events = [json.loads(line) for line in path.read_text().splitlines()]
+    events[-1][field] = value
+    path.write_text("\n".join(json.dumps(e) for e in events))
+    result = _grade(root)
+    assert result.overall == "unknown" and result.note
+
+
+def test_conflicting_tied_approval_timestamps_are_unknown(world):
+    root, conn = world
+    expected = _hidden(root, "T1_figma")["expected"]
+    _enter_t1(conn, expected)
+    first = db.row(conn, "approvals", "A-921")
+    db.write(
+        conn,
+        "ava",
+        "books",
+        "approval.request",
+        "approvals",
+        "A-tied",
+        None,
+        {**first, "id": "A-tied", "status": "approved"},
+        ts=_ts(6),
+    )
+    conn.commit()
+    result = _grade(root)
+    assert result.overall == "unknown"
+    assert next(i for i in result.items if i.name == "approval_status").result == "unknown"
+
+
+def test_same_invoice_number_on_other_vendor_is_an_unrelated_write(world):
+    root, conn = world
+    expected = _hidden(root, "T1_figma")["expected"]
+    _enter_t1(conn, expected)
+    other = conn.execute(
+        "SELECT id FROM vendors WHERE id != ? LIMIT 1", [expected["vendor_id"]]
+    ).fetchone()[0]
+    _enter_t1(conn, {**expected, "vendor_id": other}, bill_id="INV-922")
+    assert "other_bills_created" in _failed(_grade(root))

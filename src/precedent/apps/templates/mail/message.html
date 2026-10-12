@@ -1,4 +1,5 @@
 {% extends "mail/base.html" %}
+{% set ava_context = {'kind': 'message', 'id': msg.id, 'label': msg.subject, 'vendor': sender_vendor} %}
 {% block title %}{{ msg.subject }}{% endblock %}
 {% block content %}
 <p><a href="/mail/">Back to inbox</a></p>

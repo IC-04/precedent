@@ -1,0 +1,3 @@
+{% extends "shell.html" %}{% set app_name="Calendar" %}
+{% block head %}<link rel="stylesheet" href="/static/meetings.css">{% endblock %}
+{% block before_content %}<nav class="meeting-tabs" aria-label="Calendar views"><a href="/calendar/">Week</a><a href="/calendar/availability">Find a time</a><a href="/calendar/context">People & preferences</a><a href="/mail/drafts">Meeting drafts</a></nav>{% endblock %}

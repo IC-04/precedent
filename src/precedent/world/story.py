@@ -587,6 +587,7 @@ class Story:
                 "invoice_no": t1["invoice_no"],
                 "amount_minor": t1["amount_minor"],
                 "currency": b.company["currency"],
+                "issue_date": iso(t1["issue_date"]),
                 "due_date": iso(t1["due_date"]),
                 "account": account_for(r, v1.category, t1["periods"]),
                 "approver": approver_for(r, v1.cost_center, t1["amount_minor"], t1["issue_date"]),
@@ -617,6 +618,7 @@ class Story:
                 "invoice_no": t2["invoice_no"],
                 "vendor_id": t2["vendor_id"],
                 "amount_minor": t2["amount_minor"],
+                "issue_date": iso(t2["issue_date"]),
                 "due_date": iso(t2["due_date"]),
                 "account": account_for(r, t2["category"], 1),
                 "approver": approver_for(

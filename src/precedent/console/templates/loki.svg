@@ -1,0 +1,40 @@
+<svg class="loki-art" viewBox="0 0 230 236" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+<ellipse class="loki-shadow" cx="113" cy="216" rx="62" ry="7"/>
+<g class="loki-figure">
+<path class="loki-cape" d="M50 118C28 150 20 192 32 210Q113 226 194 210C206 192 198 150 176 118Z"/>
+<path class="loki-cape-fold" d="M58 170Q54 192 60 208M168 170Q172 192 166 208"/>
+<g class="loki-horn loki-horn-l"><path class="loki-gold" d="M66 94C42 74 30 44 38 12C48 40 64 58 88 74Z"/><path class="loki-gold-edge" d="M64 90C46 72 38 48 40 22"/></g>
+<g class="loki-horn loki-horn-r"><path class="loki-gold" d="M160 94C184 74 196 44 188 12C178 40 162 58 138 74Z"/><path class="loki-gold-edge" d="M162 90C180 72 188 48 186 22"/></g>
+<path class="loki-foot" d="M62 186Q47 211 72 210L92 197Z"/><path class="loki-foot" d="M135 195Q157 215 174 204L160 181Z"/>
+<g class="loki-head"><g class="loki-breath">
+<path class="loki-torso" d="M48 118C48 56 171 47 179 117L183 159C184 216 41 211 43 159Z"/>
+<path class="loki-shade" d="M183 150C186 208 66 216 44 168C86 198 158 196 183 150Z"/>
+<ellipse class="loki-glow" cx="96" cy="100" rx="30" ry="15" transform="rotate(-18 96 100)"/>
+<path class="loki-hair" d="M52 106C42 128 42 156 50 176C58 170 58 140 66 116Z"/>
+<path class="loki-hair" d="M175 106C185 128 185 156 177 176C169 170 169 140 161 116Z"/>
+<path class="loki-gold loki-helm" d="M50 108C56 58 170 50 178 106C150 92 80 92 50 108Z"/>
+<path class="loki-helm-line" d="M58 100C86 88 142 86 170 98"/>
+<path class="loki-gem loki-crest" d="M114 68L121 80 114 92 107 80Z"/>
+<g class="loki-face">
+<path class="loki-brow" d="M78 114L97 119M148 114L129 119"/>
+<g class="loki-eyes"><g class="loki-blink"><ellipse cx="89" cy="130" rx="5" ry="8"/><ellipse cx="137" cy="130" rx="5" ry="8"/><circle class="loki-glint" cx="91" cy="125.5" r="1.8"/><circle class="loki-glint" cx="139" cy="125.5" r="1.8"/></g></g>
+<path class="loki-wink" d="M130 131Q137 137 144 131"/>
+<ellipse class="loki-cheek" cx="74" cy="147" rx="10" ry="5"/><ellipse class="loki-cheek" cx="151" cy="147" rx="10" ry="5"/>
+<path class="loki-mouth loki-smirk" d="M104 150Q114 156 124 147"/>
+<path class="loki-mouth loki-grin" d="M103 147Q113 161 123 147Z"/>
+<path class="loki-mouth loki-flat" d="M107 152Q113 150 119 152"/>
+</g>
+</g></g>
+<g class="loki-arm-l"><path class="loki-limb" d="M48 152Q34 170 46 178"/></g>
+<g class="loki-seal"><circle class="loki-seal-disc" cx="40" cy="186" r="14"/><circle class="loki-seal-ring" cx="40" cy="186" r="9"/></g>
+<g class="loki-scepter">
+<path class="loki-staff" d="M201 212L205 60"/>
+<path class="loki-staff-band" d="M199.8 196h6.6M200.8 160h6.6M201.8 124h6.6"/>
+<circle class="loki-halo" cx="206" cy="44" r="20"/>
+<path class="loki-gold loki-crescent" d="M206 66C187 60 183 36 198 24C194 38 200 51 212 53C222 45 222 31 214 23C232 35 228 62 206 66Z"/>
+<path class="loki-gem" d="M206 35L212 44 206 53 200 44Z"/>
+<g class="loki-arm-r"><path class="loki-limb" d="M178 152Q196 152 200 138"/><circle class="loki-hand" cx="201" cy="136" r="7"/></g>
+</g>
+<g class="loki-beam"><path d="M206 44L92 150L130 168Z"/></g>
+</g>
+</svg>

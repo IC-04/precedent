@@ -1,9 +1,10 @@
-"""An honest partial receipt until the fresh browser verifier is implemented."""
+"""Evidence receipts from recorded goal checks, with unsupported checks left unknown."""
 
 from __future__ import annotations
 
 from precedent.contracts import CheckResult, DecisionRecord, Receipt
 from precedent.worker.events import EventLog, read_events
+from precedent.worker.verify import outcome as checked_outcome
 
 
 def write_receipt(log: EventLog, request: str, claimed: dict | None, cost: dict) -> Receipt:
@@ -12,7 +13,14 @@ def write_receipt(log: EventLog, request: str, claimed: dict | None, cost: dict)
     decisions = [
         DecisionRecord.model_validate(e.data) for e in events if e.type == "decision_record"
     ]
-    checks = [CheckResult.model_validate(e.data) for e in events if e.type == "check"]
+    # Rechecks are append-only. The receipt reports the latest evidence per
+    # condition; superseded results remain in the event log for review.
+    latest = {
+        e.data["condition_id"]: CheckResult.model_validate(e.data)
+        for e in events
+        if e.type == "check"
+    }
+    checks = list(latest.values())
     checked = {c.condition_id for c in checks}
     for condition in goal.get("conditions", []):
         if condition["id"] not in checked:
@@ -21,16 +29,29 @@ def write_receipt(log: EventLog, request: str, claimed: dict | None, cost: dict)
                     condition_id=condition["id"],
                     text=condition["text"],
                     result="unknown",
-                    evidence="Fresh browser verifier unavailable",
+                    evidence="No fresh check was recorded for this condition",
                 )
             )
+    result = checked_outcome(checks, cost.get("error"), (claimed or {}).get("claimed") == "blocked")
+    if result == "pass" and cost.get("outcome", "unknown") != "pass":
+        result = "unknown"
+    pending = [f"Check unresolved: {c.text}" for c in checks if c.result == "unknown"]
+    if result == "unknown" and not pending:
+        pending = ["The run did not establish a complete verified outcome."]
+    verified = sum(c.result == "pass" for c in checks)
+    prefix = (
+        f"Fresh checks passed for {verified} of {len(checks)} conditions. "
+        if checks
+        else "No fresh goal checks were recorded. "
+    )
     receipt = Receipt(
         run_id=log.run_id,
         request=request,
-        outcome="unknown",
-        summary="The run ended without fresh goal verification. "
+        outcome=result,
+        summary=prefix
+        + "Worker report: "
         + ((claimed or {}).get("summary") or cost.get("error") or "No completion claim recorded."),
-        pending=["Fresh browser verification is not implemented; outcome remains unknown."],
+        pending=pending,
         questions_asked=cost.get("questions", 0),
         decisions=decisions,
         checks=checks,
@@ -42,7 +63,7 @@ def write_receipt(log: EventLog, request: str, claimed: dict | None, cost: dict)
         "",
         f"Run: {log.run_id}",
         f"Request: {request}",
-        "Outcome: unknown",
+        f"Outcome: {receipt.outcome}",
         "",
         receipt.summary,
         "",

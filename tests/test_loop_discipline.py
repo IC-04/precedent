@@ -85,8 +85,9 @@ def test_a_placeholder_plan_is_refused(tmp_path):
     assert read_events(log.path) == []
 
 
-def test_form_filling_tool_is_offered_to_the_model():
-    assert "browser_fill_form" in runner.BROWSER_TOOLS
+def test_worker_uses_observable_input_tools():
+    assert "browser_fill_form" not in runner.BROWSER_TOOLS
+    assert {"browser_type", "browser_click", "browser_select_option"} <= set(runner.BROWSER_TOOLS)
 
 
 def test_the_apps_hide_console_links_and_state_from_the_worker(tmp_path):

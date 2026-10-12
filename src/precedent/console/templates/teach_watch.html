@@ -1,0 +1,51 @@
+{% extends "base.html" %}{% set nav_active = "teach" %}{% block title %}{{ meta.title }} · Teach Ava{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="/static/teach/teach.css?v={{ asset_version }}">
+<main class="teach-page watch-page" id="main" data-demo="{{ meta.id }}" data-kind="{{ meta.kind }}">
+<div class="run-kicker"><a href="/teach">&larr; Teach Ava</a><span> / </span><span>Lesson</span></div>
+<header class="watch-heading">
+  <div>
+    <div class="eyebrow" id="watch-status">Ava is getting ready</div>
+    <h1>{{ meta.title }}</h1>
+  </div>
+  <form method="post" action="/teach/{{ meta.id }}/save" id="save-form" hidden><button type="submit">Save as skill draft</button></form>
+</header>
+
+<div class="watch-grid">
+  <section class="lesson">
+    {% if meta.kind == 'video' %}
+    <div class="screen-card">
+      <video id="video" src="/teach/{{ meta.id }}/video" controls playsinline preload="metadata"></video>
+      <div class="scrubber" id="scrubber" aria-hidden="true"></div>
+    </div>
+    {% else %}
+    <div class="screen-card procedure-card"><span class="eyebrow">Written procedure</span><p>Ava reads it step by step and checks each one against the real apps.</p></div>
+    {% endif %}
+
+    <div class="notebook-row">
+      <div class="note-taker">{{ ava_art('read', label='Ava taking notes', cls='taker') }}<span id="taker-line">Watching</span></div>
+      <div class="notebook">
+        <div class="notebook-head"><strong>Ava’s notes</strong><span id="note-count"></span></div>
+        <ol class="lesson-notes" id="notes"><li class="note-empty">Notes appear here as Ava watches.</li></ol>
+      </div>
+    </div>
+  </section>
+
+  <aside class="learned" aria-label="What Ava learned">
+    <h2>What Ava learned</h2>
+    <p class="learned-empty" id="learned-empty">Ava turns her notes into a reusable skill once she has watched it all.</p>
+    <div id="learned" hidden>
+      <section><h3>When to use it</h3><p id="l-description"></p></section>
+      <section><h3>What changes each time</h3><ul class="chips" id="l-parameters"></ul></section>
+      <section><h3>Rules she picked up</h3><ul id="l-rules"></ul></section>
+      <section><h3>Done when</h3><ul id="l-done"></ul><small>The Tribunal checks these whenever the skill is used.</small></section>
+      <section><h3>Stop and ask a person when</h3><ul id="l-stop"></ul></section>
+      <section class="questions" id="l-questions-wrap"><h3>Questions for you</h3><ul id="l-questions"></ul></section>
+      <section><h3>Rehearsal</h3><label class="trial-label" for="l-trial">Ava will rehearse on this case. Edit it if you prefer another.</label><textarea id="l-trial" name="trial_request" form="save-form" rows="3"></textarea><small>After you save, rehearse it in a sandbox company from Ava’s mind. Only a passing rehearsal can make it active.</small></section>
+      <details class="skill-file"><summary>SKILL.md</summary><pre id="l-skill"></pre></details>
+    </div>
+  </aside>
+</div>
+</main>
+<script src="/static/teach/teach.js?v={{ asset_version }}" defer></script>
+{% endblock %}

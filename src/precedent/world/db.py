@@ -40,7 +40,7 @@ def create(path: Path) -> sqlite3.Connection:
 
 
 def _now() -> str:
-    return datetime.now(UTC).isoformat(timespec="seconds")
+    return datetime.now(UTC).isoformat(timespec="microseconds")
 
 
 def write(

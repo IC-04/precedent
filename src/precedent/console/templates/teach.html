@@ -1,0 +1,53 @@
+{% extends "base.html" %}{% set nav_active = "teach" %}{% block title %}Teach Ava{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="/static/teach/teach.css">
+<main class="teach-page" id="main">
+<header class="teach-heading">
+  <div>
+    <div class="eyebrow">Show once. Ava learns the way your company does it.</div>
+    <h1>Teach Ava<span class="teach-dot"></span></h1>
+    <p>Record yourself doing a task in the company apps, or write the procedure down. Ava watches, takes notes, checks every step against the real apps, and drafts a skill for you to review.</p>
+  </div>
+  <div class="teach-character">{{ ava_art('listen', label='Ava, ready to learn') }}<span>Ready to watch</span></div>
+</header>
+
+{% if error %}<p class="recovery-note" role="alert">{{ error }}</p>{% endif %}
+
+<form class="teach-form assignment" method="post" action="/teach" enctype="multipart/form-data">
+  <div class="assignment-heading"><strong>What are you teaching?</strong></div>
+  <label class="teach-field"><span>Task name</span><input name="title" required maxlength="120" placeholder="Enter and route a vendor invoice"></label>
+  <div class="teach-sources">
+    <label class="teach-drop" id="drop">
+      <input type="file" name="video" accept="video/mp4,video/webm,video/quicktime" id="video-input">
+      <strong>Upload a screen recording</strong>
+      <small id="video-name">MP4, WebM or MOV, under 10 minutes. Narrate why you do each step.</small>
+    </label>
+    <div class="teach-or">or</div>
+    <label class="teach-field teach-text"><span>Write the procedure</span><textarea name="procedure" rows="6" placeholder="1. Open the invoice email in Mail and read the attached PDF.&#10;2. Check the AP policy in Drive for the account and approver.&#10;3. In Books, create a bill with the invoice's details and attach the PDF.&#10;…"></textarea></label>
+  </div>
+  <div class="assignment-footer">
+    <div><strong>Before you record</strong><small>Close anything private. Don't type passwords. The recording stays in this workspace; Ava keeps a still frame per step for review.</small></div>
+    <button type="submit">Show Ava</button>
+  </div>
+</form>
+
+{% if demos %}
+<section class="teach-past">
+  <h2>Earlier lessons</h2>
+  <ul>
+  {% for d in demos %}
+    <li><a href="/teach/{{ d.id }}"><strong>{{ d.title }}</strong><span>{{ 'Recording' if d.kind == 'video' else 'Written procedure' }} · {{ d.created[:16].replace('T', ' ') }}</span><em data-status="{{ d.status }}">{{ {'ready': 'Ready for review', 'saved': 'Saved as skill draft', 'failed': 'Could not learn', 'watching': 'Watching', 'queued': 'Waiting'}.get(d.status, d.status) }}</em></a></li>
+  {% endfor %}
+  </ul>
+</section>
+{% endif %}
+</main>
+<script>
+  const input = document.getElementById("video-input");
+  input && input.addEventListener("change", () => {
+    const file = input.files[0];
+    document.getElementById("video-name").textContent = file ? `${file.name} · ${(file.size / 1048576).toFixed(1)} MB` : "MP4, WebM or MOV, under 10 minutes.";
+    document.getElementById("drop").classList.toggle("chosen", !!file);
+  });
+</script>
+{% endblock %}

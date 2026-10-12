@@ -61,7 +61,7 @@ def test_create_bill_then_request_approval(world):
     assert [tuple(a)[1] for a in _audit(conn, 2)] == ["bill.route", "approval.request"]
 
     page = client.get("/books/bills/INV-921").text
-    assert "Ava (AP)" in page and "approval.request" in page  # activity is visible
+    assert "Ava" in page and "approval.request" in page  # activity is visible
 
     again = client.post("/books/bills/INV-921/request-approval", data={"approver_id": "E-ana"})
     assert again.status_code == 409

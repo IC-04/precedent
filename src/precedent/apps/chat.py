@@ -71,7 +71,11 @@ async def post(request: Request, conn: Conn, name: str):
     body = str((await request.form()).get("body", "")).strip()
     if not body:
         return _channel_page(request, conn, name, error="Write a message first.", code=400)
-    ids = [int(r[0].split("-")[1]) for r in conn.execute("SELECT id FROM chat_messages")]
+    ids = [
+        int(r[0].split("-")[1])
+        for r in conn.execute("SELECT id FROM chat_messages")
+        if r[0].startswith("cm-") and r[0][3:].isdigit()
+    ]
     mid = f"cm-{max(ids, default=0) + 1:04d}"
     now = datetime.now(UTC).isoformat(timespec="seconds")
     write(

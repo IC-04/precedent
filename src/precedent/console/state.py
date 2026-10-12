@@ -59,6 +59,8 @@ def reconstruct(events: list[Event], active: bool = False) -> dict[str, Any]:
         "wait": None,
         "screen": None,
         "thinking": None,
+        "browser_focus": None,
+        "preparation": {},
     }
     questions: dict[str, dict] = {}
     for event in events:
@@ -82,6 +84,7 @@ def reconstruct(events: list[Event], active: bool = False) -> dict[str, Any]:
             state["validation"] = d.get("validation")
         elif event.type == "goal_contract":
             state["goal"] = d
+            state["preparation"]["goal"] = "Ready"
             state["activity"] = "Goal contract recorded"
         elif event.type in ("plan", "plan_changed"):
             state["plan"] = d.get("steps", [])
@@ -172,6 +175,12 @@ def reconstruct(events: list[Event], active: bool = False) -> dict[str, Any]:
                 state["company"] = d.get("company")
             if d.get("kind") == "screen":
                 state["screen"] = d.get("url")
+                state["browser_focus"] = d.get("focus_url")
+            if d.get("kind") == "context_gathered":
+                state["preparation"]["records"] = len(d.get("items", []))
+                state["preparation"]["rows"] = d.get("rows", 0)
+            if d.get("kind") == "context":
+                state["preparation"]["context"] = d.get("text", "Context prepared")
             if d.get("kind") == "thinking":
                 state["thinking"] = {"level": d.get("level"), "reason": d.get("reason")}
             if d.get("kind") == "app_effect":
@@ -252,4 +261,17 @@ def reconstruct(events: list[Event], active: bool = False) -> dict[str, Any]:
     state["display_outcome"] = "unknown" if reported == "pass" and not verified else reported
     if state["finished"] and state["finished"].get("outcome") == "pass" and not verified:
         state["status"] = "Finished · unverified claim"
+    # Phases come from recorded work, never elapsed time or an invented percentage.
+    state["phase"] = (
+        "finish"
+        if state["finished"]
+        else "verify"
+        if state["checks"]
+        or any(n.get("kind") == "phase" and n.get("phase") == "verify" for n in state["notes"])
+        else "execute"
+        if state["goal"] and state["plan"]
+        else "prepare"
+    )
+    if state["finished"]:
+        state["browser_focus"] = None
     return state

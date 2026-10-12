@@ -19,6 +19,15 @@ eval/results/
 node_modules/
 output/
 
+# Local agent memory and sessions
+/learning/
+
+# Owner-private connected workspace and OAuth data
+.connected/
+
+# Playwright MCP debug snapshots
+.playwright-mcp/
+
 # Local AI-assistant instructions
 CLAUDE.md
 .claude/

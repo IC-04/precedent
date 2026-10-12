@@ -16,6 +16,7 @@ from fastapi import Request
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 
+from precedent import companion
 from precedent.world import db
 from precedent.world.pdf import inr
 
@@ -51,6 +52,7 @@ def money(minor: int | None) -> str:
 
 
 templates.env.filters["money"] = money
+templates.env.globals.update(ava_dock=companion.dock, ava_art=companion.art)
 templates.env.filters["pairs"] = lambda xs: [(x, x) for x in xs]
 
 

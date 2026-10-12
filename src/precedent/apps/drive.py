@@ -65,6 +65,10 @@ def viewer(request: Request, conn: Conn, fid: str):
         size=path.stat().st_size,
         pages=min(len(PdfReader(path).pages), 20) if f["mime"] == "application/pdf" else 0,
         names=people(conn),
+        attachment=conn.execute(
+            "SELECT 1 FROM mail_attachments WHERE file_id = ?", [fid]
+        ).fetchone()
+        is not None,
     )
 
 

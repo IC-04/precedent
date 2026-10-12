@@ -1,0 +1,50 @@
+/* Ava's dock, bubble and task panel on human-facing pages. Modest footprint; it keeps
+   clear of business controls by reserving space at the end of the page. */
+.ava-dock{position:fixed;right:18px;bottom:16px;z-index:60;display:flex;flex-direction:column;align-items:flex-end;pointer-events:none}
+.ava-dock-button,.ava-trigger{display:inline-block;position:relative;border-radius:16px;color:inherit;text-decoration:none!important;cursor:pointer;pointer-events:auto;outline-offset:3px}
+.ava-dock-button{width:74px;padding:4px;background:transparent;transition:transform .2s ease}
+.ava-dock-button:hover{transform:translateY(-2px)}
+.ava-dock-button:focus-visible,.ava-trigger:focus-visible{outline:2px solid #8c6b9e}
+.ava-dock .ava{width:100%}
+.has-ava-dock .content,.has-ava-dock .home-main{padding-bottom:112px}
+.ava-bubble{position:absolute;right:calc(100% - 8px);bottom:58px;width:max-content;max-width:min(240px,calc(100vw - 110px));margin:0;padding:7px 11px;border:1px solid #ddd2e4;border-radius:12px 12px 3px 12px;background:#fffdfa;color:#5f4e69;font:13px/1.35 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;box-shadow:0 6px 22px #43354d17;pointer-events:none;animation:ava-bubble-in .25s ease-out}
+.ava-bubble[data-persistent]{font-size:12px;color:#6c587a}
+.ava-trigger .ava-bubble{right:auto;left:calc(100% + 6px);bottom:auto;top:6px;border-radius:12px 12px 12px 3px}
+.ava-tucked .ava-dock-button{width:44px;height:44px;padding:0;overflow:hidden;border:1px solid #dacfe2;border-radius:50%;background:#f4eff7;box-shadow:0 3px 14px #43354d1c}
+.ava-tucked .ava{width:58px;margin:-3px 0 0 -7px}
+.ava-tucked .ava-bubble{display:none}
+.ava-panel{position:fixed;z-index:61;width:min(340px,calc(100vw - 24px));padding:14px 16px 12px;background:#fffefb;border:1px solid #dcd1e3;border-radius:12px;box-shadow:0 12px 44px #43354d24;color:var(--ink,#24252a);font:14px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;animation:ava-bubble-in .2s ease-out}
+.ava-panel-docked{right:18px;bottom:104px}
+.ava-panel[hidden]{display:none}
+.ava-panel-head{display:flex;align-items:center;gap:8px}
+.ava-panel-head strong{font-size:14px}
+.ava-panel-status{font-size:11px;color:#6a5a75;margin-right:auto;padding:1px 7px;border-radius:9px;background:#f2edf5}
+.ava-panel-close{min-height:26px!important;padding:2px 8px!important;font-size:11px!important}
+.ava-panel-line{margin:10px 0 8px;color:#5c4e66;font-size:14px}
+.ava-panel-form label{display:block;font-size:11px;color:#6a5a75;margin-bottom:4px}
+.ava-panel-form textarea{min-height:76px;font-size:13px}
+.ava-suggestions-label{display:block;font-size:11px;color:#6a5a75;margin:10px 0 5px}
+.ava-suggestions{display:flex;flex-wrap:wrap;gap:6px}
+.ava-chip{min-height:28px!important;padding:3px 9px!important;font-size:12px!important;font-weight:400!important;white-space:normal!important;text-align:left;border-radius:14px!important;max-width:100%}
+.ava-panel-hint{min-height:1em;margin:8px 0 6px;font-size:12px;color:#7a6a84}
+.ava-panel-hint[data-tone=problem]{color:#9a3b4a}
+.ava-panel-submit{width:100%}
+.ava-panel-note{margin:6px 0 0;font-size:11px;color:#6f6477;text-align:center}
+.ava-panel-active p{margin:6px 0}.ava-panel-working{font-size:13px;color:#6c587a}.ava-panel-request{font-size:13px;color:#4b4252;max-height:5.8em;overflow:auto}
+.ava-panel-return{margin-top:8px}
+.ava-panel-foot{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:10px;padding-top:9px;border-top:1px solid #eee8f1;font-size:12px}
+.ava-panel-foot:empty{display:none}
+.ava-tuck{min-height:26px!important;padding:2px 8px!important;font-size:11px!important;margin-left:auto}
+.draft-note{margin:0 0 8px;font-size:13px;color:#6c587a}
+.draft-note.error{color:#9a3b4a}
+@keyframes ava-bubble-in{from{opacity:0;transform:translateY(4px)}}
+@media(max-width:700px){
+  .ava-dock{right:10px;bottom:10px}
+  .ava-dock-button{width:54px}
+  .ava-bubble{bottom:42px;font-size:12px}
+  .ava-panel-docked{left:8px;right:8px;bottom:72px;width:auto}
+  .has-ava-dock .content,.has-ava-dock .home-main{padding-bottom:84px}
+}
+@media(prefers-reduced-motion:reduce){.ava-bubble,.ava-panel{animation:none}.ava-dock-button{transition:none}}
+@media print{.ava-dock,.ava-panel{display:none}}
+.guide-hero .ava-trigger .ava-bubble{left:auto;right:calc(100% - 14px);top:4px;border-radius:12px 12px 3px 12px}

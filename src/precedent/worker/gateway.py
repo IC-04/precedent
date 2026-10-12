@@ -41,6 +41,8 @@ class Exchange:
     kind: FailureKind | None = None
 
 
+FIRST_SEEN_LIMIT = 400  # pages kept as baselines per run
+
 AUTOMATIC = ("/favicon.ico", "/robots.txt", "/apple-touch-icon")
 STATIC = (".ico", ".png", ".jpg", ".svg", ".css", ".js", ".woff", ".woff2", ".map")
 
@@ -72,10 +74,17 @@ class Gateway:
         on_exchange: Callable[[Exchange], None] | None = None,
         port: int = 0,
         timeout: float = 20.0,
+        upstream_headers: dict[str, str] | None = None,
     ):
         self.upstream = upstream.rstrip("/")
+        self.upstream_headers = upstream_headers or {}
         self.gate, self.on_exchange = gate, on_exchange or (lambda e: None)
         self.lock = threading.Lock()
+        # the first version of each page Ava read: the baseline for "did not change" checks
+        self.first_seen: dict[str, str] = {}
+        self.before_writes: dict[str, str] = {}
+        self.write_attempted = False
+        self.write_policy = None
         self.client = httpx.Client(timeout=timeout, follow_redirects=False)
         self.server = ThreadingHTTPServer(("127.0.0.1", port), self._handler())
         self.url = f"http://localhost:{self.server.server_address[1]}"
@@ -96,7 +105,8 @@ class Gateway:
         if is_automatic(method, path):  # the browser's own requests (favicon...): not Ava's
             return self._pass_through(method, path, headers, body)
         with self.lock:
-            refused = self.gate.on_request(method)
+            refused = self.write_policy(method, path, body) if self.write_policy else None
+            refused = refused or self.gate.on_request(method)
         if refused:
             self.on_exchange(Exchange(method, path, None, refused=refused))
             return (
@@ -104,8 +114,11 @@ class Gateway:
                 {"Content-Type": "text/html"},
                 _page("Save refused by Ava's safety gate", refused),
             )
+        if method not in ("GET", "HEAD", "OPTIONS"):
+            self.write_attempted = True
         clean = {k: v for k, v in headers.items() if k.lower() not in HOP_HEADERS}
         clean[AGENT_HEADER] = "ava"
+        clean.update(self.upstream_headers)
         try:
             r = self.client.request(method, self.upstream + path, headers=clean, content=body)
         except httpx.TimeoutException:
@@ -114,6 +127,16 @@ class Gateway:
             return self._lost(method, path, timed_out=False)
         with self.lock:
             kind = self.gate.on_response(method, path, r.status_code)
+            if (
+                method == "GET"
+                and r.status_code == 200
+                and path not in self.first_seen
+                and len(self.first_seen) < FIRST_SEEN_LIMIT
+                and "html" in r.headers.get("content-type", "")
+            ):
+                self.first_seen[path] = r.text
+                if not self.write_attempted:
+                    self.before_writes[path] = r.text
         self.on_exchange(Exchange(method, path, r.status_code, kind=kind))
         out = {
             k: v.replace(self.upstream, self.url)
@@ -125,6 +148,7 @@ class Gateway:
     def _pass_through(self, method: str, path: str, headers: dict[str, str], body: bytes):
         clean = {k: v for k, v in headers.items() if k.lower() not in HOP_HEADERS}
         clean[AGENT_HEADER] = "ava"
+        clean.update(self.upstream_headers)
         try:
             r = self.client.request(method, self.upstream + path, headers=clean, content=body)
         except httpx.HTTPError:

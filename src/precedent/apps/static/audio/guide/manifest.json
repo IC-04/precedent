@@ -1,0 +1,63 @@
+{
+  "version": "v-09dd17d21d32",
+  "voice": {
+    "provider": "Google Cloud TTS",
+    "model": "gemini-2.5-pro-tts",
+    "voice": "Sulafat",
+    "language": "en-US",
+    "style": "You are Ava, a friendly colleague welcoming one person into a shared workspace. Speak warmly and relaxed, with a slight smile you can hear. Use a natural, conversational rhythm and vary your emphasis; let short pauses separate ideas. Be confident and clear, gently playful, and sincere when you explain limits. Not a sales announcer and not a cartoon. Keep the same character throughout."
+  },
+  "chapters": {
+    "hello": {
+      "file": "v-09dd17d21d32/hello.mp3",
+      "key": "1cfdffdb00247da702b63eabe0af457c8abe2154e28ceceac56b1a830d5913d1",
+      "seconds": 14.76
+    },
+    "handbook": {
+      "file": "v-09dd17d21d32/handbook.mp3",
+      "key": "d331dc8132a5f166669582938031798035fd0cb7ec41b1c1803c0ccab12254ef",
+      "seconds": 25.68
+    },
+    "work": {
+      "file": "v-09dd17d21d32/work.mp3",
+      "key": "7cf6da80cc0878bfa6e1d6109e5737edc382538d4618057b318ca89f6f80b7cb",
+      "seconds": 16.848
+    },
+    "guardrails": {
+      "file": "v-09dd17d21d32/guardrails.mp3",
+      "key": "f995211e2a73d461abb573163261cba0e0f9709c5725478599df5b143fee8db1",
+      "seconds": 15.432
+    },
+    "tribunal": {
+      "file": "v-09dd17d21d32/tribunal.mp3",
+      "key": "6c052a8ad794a73c7f6a162d6eb9a1f32a4a037c07290ff3dda519e729710cd7",
+      "seconds": 71.52,
+      "cues": [
+        0.0,
+        6.6,
+        17.832,
+        19.92,
+        28.224,
+        43.032,
+        50.688,
+        62.232,
+        64.872
+      ]
+    },
+    "learn": {
+      "file": "v-09dd17d21d32/learn.mp3",
+      "key": "e19762113b797ac00ec08259eaecfa80c24bf4a8668ea559d9147d2f57ac9da9",
+      "seconds": 20.208
+    },
+    "google": {
+      "file": "v-09dd17d21d32/google.mp3",
+      "key": "05fb53eaafe5f76c9a07265bd0db9bf47435471d360b2002d411a963a124ef51",
+      "seconds": 18.072
+    },
+    "proof": {
+      "file": "v-09dd17d21d32/proof.mp3",
+      "key": "d71ff90fe32b8341e327dabd0a055a73c14ad4a2629fd9611ba8b3689929608d",
+      "seconds": 10.536
+    }
+  }
+}

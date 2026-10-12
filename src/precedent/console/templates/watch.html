@@ -1,0 +1,18 @@
+{% extends "base.html" %}{% set nav_active = "tasks" %}
+{% block title %}Ava's workspace{% endblock %}
+{% block company %}Ava's workspace{% endblock %}
+{% block content %}
+<main class="run-workspace" id="main">
+  <div class="run-title"><div><h1>Ava's workspace</h1><p>Watch the actual browser as Ava works.</p></div></div>
+  <section class="browser-viewport">
+    <div class="browser-empty">
+      <span class="empty-window" aria-hidden="true"></span>
+      <h2>Waiting for your task</h2>
+      <p>Submit a task in the Tasks tab. This tab will open its live workspace automatically.</p>
+      <p id="watch-status" role="status">Connected · waiting for a task</p>
+      <a href="/" target="_blank" rel="noopener">Open Tasks in another tab</a>
+    </div>
+  </section>
+</main>
+<script src="/static/watch.js" defer></script>
+{% endblock %}

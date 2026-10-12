@@ -63,6 +63,10 @@ def unfinished_run(task_id: str, root: Path = RUNS) -> Path | None:
     candidates = []
     for path in root.glob("*/events.jsonl"):
         events = read_events(path)
-        if events and events[0].task_id == task_id and events[-1].type != "run_finished":
+        if (
+            events
+            and events[0].task_id == task_id
+            and not any(e.type == "run_finished" for e in events)
+        ):
             candidates.append((events[0].ts, path.parent))
     return max(candidates)[1] if candidates else None

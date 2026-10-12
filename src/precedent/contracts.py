@@ -25,10 +25,25 @@ class Condition(BaseModel):
     text: str  # human-readable condition
     kind: Literal["must_be_true", "must_not_happen"]
     check_hint: str | None = None  # how the verifier could check it
+    claims: list[str] = []  # explicit atomic proof keys; unknown keys remain unverified
+
+
+class MeetingIntent(BaseModel):
+    participant: str = ""
+    topic: str = ""
+    duration: int = Field(default=30, ge=15, le=240)
+    date_mode: Literal["next_week", "explicit", "unresolved"] = "next_week"
+    range_start: str | None = None
+    range_end: str | None = None
+    local_hold: bool = False
+    hold_option: int = Field(default=1, ge=1, le=2)
+    unsupported: list[str] = []
 
 
 class GoalContract(BaseModel):
     request: str
+    task_family: str = "invoice"
+    meeting: MeetingIntent | None = None
     outcome: str  # one-sentence intended end state
     conditions: list[Condition]
     assumptions: list[str] = []
@@ -48,7 +63,7 @@ class Authority(StrEnum):
 
 
 class SourceRef(BaseModel):
-    app: Literal["mail", "books", "drive", "chat"]
+    app: Literal["mail", "books", "drive", "chat", "calendar"]
     ref: str  # e.g. "mail:m-0412", "drive:AP-Policy-2025.pdf#4"
     quote: str | None = None
     authority: Authority
@@ -108,6 +123,9 @@ class CheckResult(BaseModel):
     text: str
     result: Literal["pass", "fail", "unknown"]
     evidence: str | None = None
+    claims: list[str] = []
+    sources: list[str] = []
+    verifier_version: int = 2
 
 
 Outcome = Literal["pass", "fail", "blocked", "unknown"]

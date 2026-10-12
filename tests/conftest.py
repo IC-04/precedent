@@ -12,6 +12,15 @@ from precedent.world.generator import generate
 TOKEN = "test-token"
 
 
+@pytest.fixture(autouse=True)
+def no_real_models(monkeypatch):
+    """Tests never call a model: the in-run Tribunal is off and no Bedrock key is visible.
+    Tribunal tests seat scripted jurors explicitly."""
+    monkeypatch.setenv("PRECEDENT_TRIBUNAL", "0")
+    monkeypatch.setenv("PRECEDENT_TRIBUNAL_PLANNER", "0")
+    monkeypatch.delenv("AWS_BEARER_TOKEN_BEDROCK", raising=False)
+
+
 def _free_port() -> int:
     with socket.socket() as s:
         s.bind(("127.0.0.1", 0))

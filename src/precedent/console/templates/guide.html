@@ -1,0 +1,391 @@
+{% extends "base.html" %}{% set nav_active = "guide" %}
+{% block title %}Meet Ava{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="/static/loki/loki.css?v={{ asset_version }}">
+<link rel="stylesheet" href="/static/guide.css?v={{ asset_version }}">
+{% set C = {} %}{% for c in guide.chapters %}{% set _ = C.update({c.id: c}) %}{% endfor %}
+{% set E = evidence %}{% set H = E.hero or {} %}{% set T = E.totals or {} %}
+{% set task_href = active_url or '/#request' %}
+{% macro run_link(run_id, label='Open the run') %}{% if run_id in installed %}<a class="gx-runlink" href="/runs/{{ run_id }}">{{ label }} <span aria-hidden="true">↗</span></a>{% else %}<span class="gx-runlink off" title="This run is not installed in this workspace">Run {{ run_id[-4:] }} · not installed here</span>{% endif %}{% endmacro %}
+{% macro chapter_head(id, n, perch=True) %}{% set c = C[id] %}
+<header class="gx-head">
+  <div class="gx-head-title"><div class="section-number"><span>0{{ n }}</span>{{ c.label }}</div><h2 id="heading-{{ id }}">{{ c.title }}</h2></div>
+  <div class="gx-head-lead"><p>{{ c.summary }}</p><details class="story-notes"><summary>The details</summary>{% for p in c.paragraphs %}<p>{{ p }}</p>{% endfor %}</details><details class="chapter-transcript"><summary>{{ 'Read the scene' if c.dialogue else 'Read Ava’s narration' }}</summary><p>{{ c.narration }}</p></details></div>
+  {% if perch %}<span class="story-perch" aria-hidden="true"></span>{% endif %}
+</header>{% endmacro %}
+
+<div class="gx">
+
+
+<nav class="gx-rail guide-outline" aria-label="On this page">{% for c in guide.chapters %}<a href="#{{ c.id }}"><i aria-hidden="true"></i><span>0{{ loop.index }}</span><b>{{ c.label }}</b></a>{% endfor %}</nav>
+
+<main id="main" class="guide-document">
+
+{# ------------------------------------------------------------------ 01 hello #}
+<section id="hello" class="guide-section gx-hero guide-hero" aria-labelledby="heading-hello">
+  <div class="gx-hero-copy">
+    <p class="gx-kicker"><span class="gx-dot" aria-hidden="true"></span>Precedent · an autonomous company worker</p>
+    <h1 id="heading-hello">{{ guide.title }}</h1>
+    <p class="gx-deck">{{ guide.subtitle }}</p>
+    <div class="guide-actions"><button id="tour-start" type="button" disabled><span aria-hidden="true">▷</span> Let Ava show you around</button><a class="guide-task gx-textlink" href="{{ task_href }}">{{ 'Return to Ava’s task' if active_url else 'Give Ava a task' }} <span aria-hidden="true">↗</span></a></div>
+    <p class="tour-disclosure">{% if guide.audio_ready %}A {{ (guide.audio_seconds / 60)|round(0, 'ceil')|int }}-minute narrated tour, with Loki joining for the Tribunal. Ava leads; scroll yourself to take over.{% else %}Narration is not installed here. The page and its transcripts cover everything.{% endif %}</p>
+    <details class="chapter-transcript"><summary>Read Ava’s narration</summary><p>{{ C.hello.narration }}</p></details>
+  </div>
+  <div class="gx-hero-stage">
+    <div class="ava-companion"><a class="ava-trigger" data-ava-mount href="{{ task_href }}" aria-label="Ava, your guide · {{ 'return to her task' if active_url else 'start a task' }}">{{ ava_art("greet") }}</a></div>
+    {% if H.frames %}
+    <figure class="gx-film" data-beat aria-label="Ava’s own browser during run {{ H.run_id }}, replayed from {{ H.frames|length }} recorded frames">
+      <div class="gx-window"><i></i><i></i><i></i><span>Ava’s browser · recorded run {{ H.run_id[-4:] }}</span><em class="gx-live">Replay</em></div>
+      <div class="gx-frames">{% for f in H.frames %}<img src="{{ f.src }}" alt="" loading="{{ 'eager' if loop.index < 3 else 'lazy' }}" data-caption="{{ f.caption }}" data-title="{{ f.title }}" data-t="{{ f.t }}"{% if loop.first %} class="on"{% endif %}>{% endfor %}</div>
+      <figcaption class="gx-film-caption"><b id="film-caption">{{ H.frames[0].caption }}</b><span id="film-time">{{ H.frames[0].t|round|int }} s</span></figcaption>
+      <div class="gx-film-ticks" aria-hidden="true">{% for f in H.frames %}<i{% if loop.first %} class="on"{% endif %}></i>{% endfor %}</div>
+    </figure>
+    <div class="gx-request" data-beat><small>The request</small><strong>“{{ H.request }}”</strong></div>
+    <div class="gx-seals" data-beat>
+      <div><span>Ava’s own fresh check</span><b>{{ H.ava.passed }}<small>/{{ H.ava.total }}</small></b></div>
+      <div class="loki-tint"><span>The Tribunal</span><b>{{ H.tribunal.passed }}<small>/{{ H.tribunal.total }}</small></b></div>
+      <div><span>Hidden-truth grader</span><b>{{ H.grader.passed }}<small>/{{ H.grader.total }}</small></b></div>
+    </div>
+    {% endif %}
+    <span class="story-perch" aria-hidden="true"></span>
+  </div>
+</section>
+
+{% if T %}
+<section class="gx-stats" aria-label="By the numbers">
+  <div><b data-count="{{ T.tests }}">{{ T.tests }}</b><span>automated tests passing</span></div>
+  <div><b data-count="{{ T.runs }}">{{ T.runs }}</b><span>retained runs, failures included</span></div>
+  <div><b data-count="{{ T.failures }}">{{ T.failures }}</b><span>failures handled across {{ T.failure_runs }} runs</span></div>
+  <div><b>3</b><span>independent checks before “done”</span></div>
+  <div><b>3</b><span>model families: Gemini for Ava, Qwen and Grok to check her</span></div>
+</section>
+{% endif %}
+
+{# ------------------------------------------------------------------ 02 handbook #}
+<section id="handbook" class="guide-section gx-chapter" aria-labelledby="heading-handbook">
+  {{ chapter_head('handbook', 2) }}
+  {% if E.sources %}{% set S = E.sources %}{% set P3 = H.featured %}
+  <div class="gx-precedent">
+    <div class="gx-docs">
+      <article class="gx-doc stale" data-beat>
+        <div class="gx-doc-meta"><span class="gx-app drive">Drive</span>{{ S.sop.title }}<em>Effective {{ S.sop.effective }}</em></div>
+        <p><span class="gx-sec">§{{ S.sop.section }}</span>{{ S.sop.text }}</p>
+        <span class="gx-stamp">Out of date</span>
+      </article>
+      <article class="gx-doc mail" data-beat>
+        <div class="gx-doc-meta"><span class="gx-app mail">Mail</span>{{ S.mail.title }}<em>{{ S.mail.sender }} · {{ S.mail.dated }}</em></div>
+        <p>{{ S.mail.text }}</p>
+      </article>
+    </div>
+    <ol class="gx-settle" data-beat aria-label="What code checks">
+      <li><b>Quote found</b><span>The cited words are in the source.</span></li>
+      <li><b>Authority from location</b><span>An internal email from the CFO is an instruction.</span></li>
+      <li><b>Later source wins</b><span>From 14 July it supersedes SOP §3.2.</span></li>
+      <li><b>History agrees</b><span>{{ P3.support }}.</span></li>
+    </ol>
+    <article class="gx-rule" data-beat>
+      <small>Precedent · {{ P3.status }}</small>
+      <h3>{{ P3.rule }}</h3>
+      {% set m = P3.support|default('', true) %}{% set nums = m.split(' ') %}
+      {% if nums|length > 2 and nums[0]|int and nums[2]|int %}
+      <div class="gx-bills" role="img" aria-label="{{ P3.support }}">{% for i in range(nums[2]|int) %}<i class="{{ 'hit' if i < nums[0]|int else 'miss' }}" style="--i:{{ i }}"></i>{% endfor %}</div>
+      {% endif %}
+      <p class="gx-rule-foot">Governed by <code>{{ P3.source }}</code>{% for x in P3.exceptions %} · {{ x }}{% endfor %}</p>
+    </article>
+  </div>
+
+  <div class="gx-table-wrap">
+    <table class="gx-table">
+      <caption>All {{ H.precedents|length }} precedents from run {{ H.run_id[-4:] }}, read from {{ S.listing|length }} sources including {{ H.context.rows }} past bills in {{ H.context.seconds|round|int }} seconds</caption>
+      <thead><tr><th>Rule</th><th>Source</th><th>Followed by history</th><th>Status</th></tr></thead>
+      <tbody>{% for p in H.precedents %}{% set parts = (p.support or '').split(' ') %}
+        <tr><td>{{ p.rule }}</td><td><code>{{ p.source }}</code></td>
+        <td>{% if parts|length > 2 and parts[2]|int %}<span class="gx-bar"><i style="width:{{ (100 * parts[0]|int / parts[2]|int)|round|int }}%"></i></span>{{ parts[0] }} of {{ parts[2] }}{% else %}<span class="muted">Not counted</span>{% endif %}</td>
+        <td><span class="gx-tag {{ p.status }}">{{ p.status }}</span>{% if 'stale_sop' in p.flags %}<span class="gx-tag warn">SOP out of date</span>{% endif %}</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+
+  {% if E.ghost %}{% set G = E.ghost %}
+  <div class="gx-ghost" data-beat>
+    <div class="gx-ghost-head"><h3>Same model. Same tools. Without the handbook.</h3><p>The baseline worker got the policy and procedure text only: no ranking, no history. Same Figma invoice.</p></div>
+    <div class="gx-ghost-pair">
+      <article class="is-ghost"><small>Baseline · run {{ G.run_id[-4:] }}</small><div class="gx-field"><span>Approver</span><b>{{ G.approver }}</b></div><p>Followed SOP §3.2, which the CFO had replaced.</p><span class="gx-verdict fail">Grader: {{ G.result }}</span>{{ run_link(G.run_id) }}</article>
+      <article class="is-ava"><small>Ava · run {{ H.run_id[-4:] }}</small><div class="gx-field"><span>Approver</span><b>{{ G.ava_approver }}</b></div><p>Cited the CFO’s email and the 8 of 9 bills that follow it.</p><span class="gx-verdict pass">Grader: {{ G.ava_result }}</span>{{ run_link(H.run_id) }}</article>
+    </div>
+    <p class="gx-footnote">One baseline run, recorded {{ G.date }} on an earlier version of the runtime. It shows the failure the context stage exists to prevent; it is not a measured success rate.</p>
+  </div>
+  {% endif %}
+</section>
+
+{# ------------------------------------------------------------------ 03 work #}
+<section id="work" class="guide-section gx-chapter" aria-labelledby="heading-work">
+  {{ chapter_head('work', 3) }}
+  {% if H.conditions %}
+  <div class="gx-loop">
+    <ol class="gx-steps-nav" aria-label="The loop">
+      {% for name, line in [('Goal','The request becomes a contract'),('Understand','Read the company first'),('Plan','Steps, each with what to expect'),('Execute','Real clicks and keystrokes'),('Observe','A fresh look after every action'),('Adapt','Code steers effort and focus'),('Verify','Fresh reads, never memory'),('Complete','The work and its evidence')] %}
+      <li data-step="{{ loop.index0 }}"{% if loop.first %} class="on"{% endif %}><a href="#step-{{ loop.index }}"><span>0{{ loop.index }}</span><b>{{ name }}</b><small>{{ line }}</small></a></li>
+      {% endfor %}
+    </ol>
+    <div class="gx-steps">
+      <article class="gx-step" id="step-1" data-step="0">
+        <div class="gx-card"><div class="gx-card-head"><span>Goal contract</span><code>{{ H.conditions|length }} conditions</code></div>
+          <p class="gx-quote">“{{ H.request }}”</p><p class="gx-outcome">{{ H.outcome }}</p>
+          <ul class="gx-conds">{% for c in H.conditions %}<li class="{{ c.kind }}"><code>{{ c.id }}</code><span>{{ c.text }}</span><em>{{ 'must not happen' if c.kind == 'must_not_happen' else 'must be true' }}</em></li>{% endfor %}</ul>
+        </div><p class="gx-step-note">One structured model call writes it; code then adds any proof the request needs and the model forgot.</p>
+      </article>
+      <article class="gx-step" id="step-2" data-step="1">
+        <div class="gx-card"><div class="gx-card-head"><span>Company context</span><code>{{ H.context.seconds|round(1) }} s · read-only</code></div>
+          <ul class="gx-sources">{% for s in E.sources.listing %}<li><span class="gx-app {{ s.app }}">{{ s.app|capitalize }}</span><b>{{ s.title }}</b><em>{% if s.rows %}{{ s.rows }} rows{% elif s.dated %}{{ s.dated }}{% else %}policy{% endif %}</em></li>{% endfor %}</ul>
+          <p class="gx-card-foot">{{ H.precedents|length }} precedents kept, 0 dropped</p>
+        </div><p class="gx-step-note">Plain page reads through Ava’s gateway, the same pages a browser loads. No database access.</p>
+      </article>
+      <article class="gx-step" id="step-3" data-step="2">
+        <div class="gx-card"><div class="gx-card-head"><span>Plan</span><code>update_plan</code></div>
+          <ol class="gx-plan">{% for p in H.plan %}<li>{{ p }}</li>{% endfor %}</ol>
+        </div><p class="gx-step-note">Progress on a plan step is self-reported and labelled that way. It never counts as verification.</p>
+      </article>
+      <article class="gx-step" id="step-4" data-step="3">
+        <div class="gx-card gx-card-film"><div class="gx-card-head"><span>Ava’s browser</span><code>{{ H.actions }} actions</code></div>
+          <div class="gx-filmstrip">{% for f in H.frames %}{% if f.caption.startswith('Typing') or f.caption.startswith('Choosing') or 'Request approval' in f.caption or 'Save draft' in f.caption %}<figure><img src="{{ f.src }}" alt="Ava’s browser: {{ f.caption }}" loading="lazy"><figcaption>{{ f.caption }}</figcaption></figure>{% endif %}{% endfor %}</div>
+        </div><p class="gx-step-note">A fixed executor moves the real mouse and Ava’s purple pointer together and types each character. Your own pointer never drives hers.</p>
+      </article>
+      <article class="gx-step" id="step-5" data-step="4">
+        <div class="gx-card"><div class="gx-card-head"><span>Action, then observation</span><code>events.jsonl</code></div>
+          <ol class="gx-observe">{% for f in H.frames %}<li><span>{{ f.caption }}</span><b>{{ f.title }}</b><time>{{ f.t|round|int }} s</time></li>{% endfor %}</ol>
+        </div><p class="gx-step-note">Every action returns a fresh accessibility snapshot. Only the two newest stay full size, so long runs stay readable to the model.</p>
+      </article>
+      <article class="gx-step" id="step-6" data-step="5">
+        <div class="gx-card"><div class="gx-card-head"><span>Run state, written by code every turn</span><code>guard.run_state()</code></div>
+<pre class="gx-pre">[Run state, written by the system]
+Write permission: record_decision required before the next submission
+Plan:
+{% for p in H.plan %}- s{{ loop.index }} {{ p }}
+{% endfor %}Facts you have remembered:
+{% for f in H.facts %}- {{ f }}
+{% endfor %}</pre>
+          <div class="gx-think"><div><b>Low</b><span>Reading, filling and saving</span></div><div><b>Medium</b><span>Writing the plan, after a refusal, failure or stall</span></div><div><b>High</b><span>Only after a save with an unknown result</span></div></div>
+        </div><p class="gx-step-note">Thinking effort is chosen by code from what just happened. Measured: more thinking on forms added 25 to 100 seconds and no accuracy. A third visit to the same page, or 12 steps without progress, earns a nudge.</p>
+      </article>
+      <article class="gx-step" id="step-7" data-step="6">
+        <div class="gx-card"><div class="gx-card-head"><span>Fresh verification</span><code>{{ H.ava.passed }} of {{ H.ava.total }} pass</code></div>
+          <ul class="gx-checks">{% for c in H.checks %}<li><code>{{ c.id }}</code><span class="gx-tag {{ c.result }}">{{ c.result }}</span><em>{{ c.evidence|truncate(96) }}</em></li>{% endfor %}</ul>
+        </div><p class="gx-step-note">A model maps each condition to one of seven check primitives; code runs it on freshly read pages. A condition that cannot be checked is unknown, never pass.</p>
+      </article>
+      <article class="gx-step" id="step-8" data-step="7">
+        <div class="gx-card gx-receipt"><div class="gx-card-head"><span>Receipt</span><code>run {{ H.run_id[-4:] }}</code></div>
+          <div class="gx-receipt-grid"><div><b>{{ (H.seconds / 60)|round(1) }}</b><span>minutes</span></div><div><b>{{ H.steps }}</b><span>steps</span></div><div><b>{{ (H.tokens_in / 1000)|round|int }}k</b><span>input tokens</span></div><div><b>{{ H.questions }}</b><span>questions</span></div></div>
+          <ul class="gx-decisions">{% for d in H.decisions %}<li><b>Decided</b> {{ d.decided|truncate(150) }}<span>{% for s in d.sources %}<code>{{ s }}</code>{% endfor %}</span></li>{% endfor %}</ul>
+          <div class="gx-card-links">{{ run_link(H.run_id, 'Open the task') }}{% if H.run_id in installed %}<a class="gx-runlink" href="/runs/{{ H.run_id }}/tribunal">The Tribunal <span aria-hidden="true">↗</span></a>{% endif %}{% if proof %}{% for a in proof.artifacts[:1] %}<a class="gx-runlink" href="{{ proof.apps_url }}{{ a.path }}">Open the saved bill <span aria-hidden="true">↗</span></a>{% endfor %}{% endif %}</div>
+        </div><p class="gx-step-note">The run’s own times include waiting for the model, which is most of it.</p>
+      </article>
+    </div>
+  </div>
+  {% endif %}
+</section>
+
+{# ------------------------------------------------------------------ 04 guardrails #}
+<section id="guardrails" class="guide-section gx-chapter" aria-labelledby="heading-guardrails">
+  {{ chapter_head('guardrails', 4) }}
+  <div class="gx-guard">
+    <figure class="gx-gate" data-beat aria-label="The write gate: a decision with sources permits one save; an unknown result locks writes until Ava searches again">
+      <svg viewBox="0 0 640 330" role="img" aria-hidden="true">
+        <defs><marker id="gx-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5 0 10z"/></marker></defs>
+        <path class="gx-flow" d="M120 70H250" marker-end="url(#gx-arrow)"/><path class="gx-flow" d="M390 70H500" marker-end="url(#gx-arrow)"/>
+        <path class="gx-flow" d="M570 95V150Q570 170 550 170H90Q70 170 70 150V96" marker-end="url(#gx-arrow)"/>
+        <path class="gx-flow warn" d="M320 95V215" marker-end="url(#gx-arrow)"/><path class="gx-flow warn" d="M250 260H160" marker-end="url(#gx-arrow)"/>
+        <path class="gx-flow warn" d="M90 235Q70 160 230 95" marker-end="url(#gx-arrow)"/><path class="gx-flow stop" d="M390 260H480" marker-end="url(#gx-arrow)"/>
+        <g class="gx-node"><rect x="20" y="45" width="100" height="50" rx="12"/><text x="70" y="75">Reading</text></g>
+        <g class="gx-node ok"><rect x="250" y="45" width="140" height="50" rx="12"/><text x="320" y="68">One save</text><text x="320" y="84" class="sub">permitted</text></g>
+        <g class="gx-node"><rect x="500" y="45" width="120" height="50" rx="12"/><text x="560" y="68">Saved</text><text x="560" y="84" class="sub">decision used</text></g>
+        <g class="gx-node warn"><rect x="250" y="235" width="140" height="50" rx="12"/><text x="320" y="258">Unknown result</text><text x="320" y="274" class="sub">writes locked</text></g>
+        <g class="gx-node"><rect x="40" y="235" width="120" height="50" rx="12"/><text x="100" y="258">Search by</text><text x="100" y="274" class="sub">business key</text></g>
+        <g class="gx-node stop"><rect x="480" y="235" width="140" height="50" rx="12"/><text x="550" y="258">Second unknown</text><text x="550" y="274" class="sub">run stops</text></g>
+        <text class="gx-edge" x="185" y="58">decision + sources</text><text class="gx-edge" x="445" y="58">POST</text><text class="gx-edge" x="320" y="190">next save needs a new decision</text>
+        <text class="gx-edge" x="330" y="150" text-anchor="start">timeout or 5xx</text><text class="gx-edge" x="122" y="205">decide again</text>
+        <circle class="gx-token" r="7"><animateMotion dur="5s" repeatCount="indefinite" path="M70 70H320H560V170H70Z"/></circle>
+      </svg>
+      <figcaption>The write gate in <code>worker/failures.py</code>, enforced by the gateway every browser save passes through.</figcaption>
+    </figure>
+    <div class="gx-guard-side">
+      {% if T.failures %}<article class="gx-counter" data-beat><b data-count="{{ T.failures }}">{{ T.failures }}</b><span>failures detected and handled across {{ T.failure_runs }} retained runs</span>
+        {% for kind, n in T.failure_kinds.items() %}<div class="gx-kind"><span>{{ kind }}</span><i style="--w:{{ (100 * n / T.failures)|round|int }}%"></i><em>{{ n }}</em></div>{% endfor %}</article>{% endif %}
+      <ul class="gx-classes">
+        <li><b>Tool</b>A page failed on a read. Retry it; it changes nothing.</li>
+        <li><b>Interface</b>The page refused the action. Look again, fix what it says.</li>
+        <li><b>Uncertain write</b>A save may have landed. Search before anything else.</li>
+        <li><b>Missing authority</b>No source governs the choice. Ask one question.</li>
+        <li><b>Contradiction</b>Evidence contradicts the request. Stop as blocked.</li>
+      </ul>
+      {% if E.blocked %}<article class="gx-mini"><small>Blocked, not guessed · run {{ E.blocked.run_id[-4:] }}</small><p>Asked to enter a Cloudflare invoice that was already recorded and routed, Ava refused to create a duplicate and finished as {{ E.blocked.outcome }}.</p>{{ run_link(E.blocked.run_id) }}</article>{% endif %}
+    </div>
+  </div>
+</section>
+
+{# ------------------------------------------------------------------ 05 tribunal #}
+{% set D = C.tribunal %}{% set X = E.staged or {} %}
+<section id="tribunal" class="guide-section gx-chapter gx-tribunal" aria-labelledby="heading-tribunal">
+  {{ chapter_head('tribunal', 5, perch=False) }}
+  <div class="gx-scene-controls"><button type="button" id="scene-play" class="secondary"><span aria-hidden="true">▷</span> Play the scene</button><span id="scene-status">{% if guide.audio_ready %}Voiced by Ava and Loki · {{ D.dialogue|length }} lines{% else %}Narration not installed · the scene plays as text{% endif %}</span><b id="scene-count" aria-hidden="true"></b></div>
+  <div class="gx-scene" id="scene" data-scroll-anchor data-line="-1" data-lines="{{ D.dialogue|length }}">
+    <div class="gx-scene-sky" aria-hidden="true"></div>
+    <div class="gx-actor ava-side"><span class="story-perch" aria-hidden="true"></span><span class="gx-name">Ava</span></div>
+    <div class="gx-exhibit" aria-label="Exhibit E1: the Tribunal’s own fresh read of the bill">
+      {% if X.exhibit %}<img src="{{ X.exhibit }}" alt="The bill as the Tribunal read it: status draft, approver not requested" loading="lazy">{% endif %}
+      <span class="gx-hl status" aria-hidden="true"></span><span class="gx-hl approver" aria-hidden="true"></span>
+      <span class="gx-exhibit-tag">Exhibit E1 · the Tribunal’s own read</span>
+      <span class="gx-scan" aria-hidden="true"></span>
+    </div>
+    <div class="gx-actor loki-side"><div class="loki" id="scene-loki" data-pose="idle">{% include "loki.svg" %}</div><span class="gx-name">Loki</span></div>
+    <ol class="gx-bubbles" aria-live="polite">{% for line in D.dialogue %}<li class="gx-bubble from-{{ line.speaker }}" data-n="{{ loop.index0 }}" data-pose="{{ line.pose }}" data-loki="{{ line.loki }}"><b>{{ line.speaker|capitalize }}</b>{{ line.text }}</li>{% endfor %}</ol>
+    <svg class="gx-strand" viewBox="0 0 1000 100" aria-hidden="true">
+      <path class="main" d="M0 70H1000"/>
+      {% for i in range(3) %}{% set x = 430 + i * 90 %}
+      <path class="branch b{{ i }}" d="M{{ x }} 70C{{ x + 30 }} 70 {{ x + 40 }} {{ 22 + i * 6 }} {{ x + 95 }} {{ 18 + i * 6 }}"/>
+      <g class="cut c{{ i }}"><path d="M{{ x + 52 }} {{ 30 + i * 4 }}l14 14m0-14l-14 14"/></g>
+      {% endfor %}
+      {% for i in range(11) %}<circle cx="{{ 40 + i * 92 }}" cy="70" r="5"/>{% endfor %}
+    </svg>
+  </div>
+  {% if X.staging %}<div class="gx-staged"><img src="{{ X.staging }}" alt="Activity on the bill: Bills update · scenario: lost approval routing" loading="lazy"><p><b>Staged on purpose.</b> A scenario hook removed the routing after Ava saved it, so her report no longer matched the records. The Tribunal’s own activity read shows it.</p>{{ run_link(X.run_id, 'Open this hearing') }}</div>{% endif %}
+
+  <div class="gx-layers">
+    <article data-beat><span class="gx-layer-n">1</span><h3>Ava’s own fresh check</h3><p>Seven check primitives, run by code on freshly read pages. What cannot be checked stays unknown.</p><b>{{ H.ava.passed }}/{{ H.ava.total }}</b><small>run {{ H.run_id[-4:] }}</small></article>
+    <article data-beat class="loki-tint"><span class="gx-layer-n">2</span><h3>The Tribunal</h3><p>Its own identity and fresh reads with screenshots. Grok 4.3 plans checks from where the run went, not what Ava claims. A jury of Qwen3-VL and Gemini, three samples each, with Grok as arbiter. Verdict rules in code, one remand.</p>{% if X.before %}<b>{{ X.before.counts.pass }}/{{ X.before.counts.values()|sum }} <span>then</span> {{ X.after.counts.pass }}/{{ X.after.counts.values()|sum }}</b><small>run {{ X.run_id[-4:] }} · {{ X.votes }} ballots · {{ X.before.seconds|round|int }} s</small>{% endif %}</article>
+    <article data-beat><span class="gx-layer-n">3</span><h3>The hidden-truth grader</h3><p>The only code that reads the generated company’s hidden expectations. It rebuilds the records as they were when the run finished, from the audit log.</p><b>{{ H.grader.passed }}/{{ H.grader.total }}</b><small>run {{ H.run_id[-4:] }}</small></article>
+  </div>
+  {% if E.meeting %}<article class="gx-mini wide"><small>Not staged · meeting run {{ E.meeting.run_id[-4:] }}</small><p>Asked to prepare a catch-up, Ava drafted an email quoting a Chat message while citing only a Mail thread. The Tribunal’s exact grounding check failed it: {{ E.meeting.counts.pass }} points held, {{ E.meeting.counts.fail }} branched.</p>{{ run_link(E.meeting.run_id, 'Open the hearing') }}</article>{% endif %}
+</section>
+
+{# ------------------------------------------------------------------ 06 learn #}
+<section id="learn" class="guide-section gx-chapter" aria-labelledby="heading-learn">
+  {{ chapter_head('learn', 6) }}
+  <div class="gx-learn">
+    {% if E.restart %}{% set R = E.restart %}
+    <article class="gx-memory" data-beat>
+      <h3>Memory that survives a restart</h3>
+      <ol class="gx-timeline">
+        <li><b>Verified run</b><span>Learning notes keep observed checks, guidance, sources and what stayed uncertain.</span></li>
+        <li class="cut"><b>Service restarted</b><span>Same company instance, same memory scope. A regenerated company starts empty.</span></li>
+        <li><b>A different invoice</b><span>{{ R.recalled[0] if R.recalled else 'Recalled notes' }}: suggestions to check, never authority.</span></li>
+        <li class="pass"><b>{{ R.ava.passed }}/{{ R.ava.total }} own checks · {{ R.grader.passed }}/{{ R.grader.total }} grader</b><span>run {{ R.run_id[-4:] }} {{ run_link(R.run_id) }}</span></li>
+      </ol>
+      <p class="gx-footnote">Reuse is proven; a speed-up is not. The measured warm run took 30 seconds longer than the cold one.</p>
+    </article>
+    {% endif %}
+    {% if E.taught %}{% set L = E.taught %}
+    <article class="gx-teach" data-beat>
+      <h3>Teach Ava by showing her</h3>
+      <div class="gx-lesson">
+        <div class="gx-lesson-video">{% if L.notes %}<img src="{{ L.notes[-1].frame }}" alt="A frame from the recorded demonstration" loading="lazy">{% endif %}<span>Demonstration · {{ L.steps }} steps · {{ L.grounded }} confirmed in the real apps</span></div>
+        <ol class="gx-notebook">{% for n in L.notes %}<li style="--i:{{ loop.index0 }}"><time>{{ n.t }}</time><span>{{ {'click':'Clicked','select':'Chose','type':'Typed'}[n.action] }} <b>{{ n.value or n.target }}</b>{% if n.value %} for <b>{{ n.target }}</b>{% endif %}</span><em class="{{ 'ok' if n.confirmed else 'ask' }}">{{ 'Confirmed in the apps' if n.confirmed else 'Not found · a question for you' }}</em></li>{% endfor %}</ol>
+      </div>
+      <div class="gx-skillfile"><code>SKILL.md</code><b>{{ L.skill }}</b><div class="chips">{% for p in L.parameters %}<span>{{ p }}</span>{% endfor %}</div><small>Done when</small><ul>{% for d in L.done_when %}<li>{{ d }}</li>{% endfor %}</ul></div>
+      <ol class="gx-lifecycle"><li>Draft</li><li class="pass">Sandbox rehearsal · Tribunal {{ L.tribunal.passed }}/{{ L.tribunal.total }}</li><li>A person activates it</li></ol>
+      <p class="gx-footnote">In rehearsal run {{ L.run_id[-4:] }} Ava loaded the skill herself, and its “done when” list became Tribunal charges. {{ run_link(L.run_id) }}</p>
+    </article>
+    {% endif %}
+  </div>
+</section>
+
+{# ------------------------------------------------------------------ 07 google #}
+{% set N = E.native or {} %}
+<section id="google" class="guide-section gx-chapter" aria-labelledby="heading-google">
+  {{ chapter_head('google', 7) }}
+  {% if N.frames %}
+  <div class="gx-native">
+    <figure class="gx-tabbed" data-beat aria-label="Ava's own browser during run {{ N.run_id }}: the company apps, Google Calendar and Gmail, in separate tabs">
+      <div class="gx-window gx-tabstrip">
+        <i></i><i></i><i></i>
+        {% for label, app in [('Company apps', 'company'), ('Google Calendar', 'calendar'), ('Gmail', 'gmail')] %}<span class="gx-tab" data-app="{{ app }}">{{ label }}</span>{% endfor %}
+        <em class="gx-live">Recorded run {{ N.run_id[-4:] }}</em>
+      </div>
+      <div class="gx-frames gx-native-frames">{% for f in N.frames %}<img src="{{ f.src }}" alt="{{ f.caption }}" loading="lazy" data-caption="{{ f.caption }}" data-app="{{ 'gmail' if 'Gmail' in f.caption else 'calendar' if 'Calendar' in f.caption else 'company' }}"{% if loop.first %} class="on"{% endif %}>{% endfor %}</div>
+      <figcaption class="gx-film-caption"><b id="native-caption">{{ N.frames[0].caption }}</b><span>Your real account · personal details blurred</span></figcaption>
+    </figure>
+    <div class="gx-native-side">
+      <p class="gx-quote">“{{ N.request }}”</p>
+      <ul class="gx-rules" data-beat>
+        <li><b>Never sends</b><span>Send, Forward, Delete, Discard, Archive and Invite are refused, and so are shortcuts.</span></li>
+        <li><b>Decides before writing</b><span>A decision with sources comes before the first keystroke.</span></li>
+        <li><b>Recipients locked</b><span>Only addresses named in the request; no guests on events.</span></li>
+        <li><b>Three sites only</b><span>The company apps, Gmail and Google Calendar.</span></li>
+      </ul>
+      {% if N.refused %}<article class="gx-mini"><small>Caught in this run</small><p>After writing the draft, Ava reached for <b>Discard draft</b>. The rule refused the click before it happened, so the draft she had written was kept, and both checks then found it.</p></article>{% endif %}
+      <div class="gx-native-verdicts" data-beat>
+        <div><span>Ava's read-back from Google</span><b>{{ N.ava.passed }}<small>/{{ N.ava.total }}</small></b></div>
+        <div class="loki-tint"><span>The Tribunal, reading Google itself</span><b>{{ N.tribunal.passed }}<small>/{{ N.tribunal.total }}</small></b></div>
+      </div>
+      <p class="gx-footnote">{{ N.actions }} browser actions across {{ N.sites|length + 1 }} tabs in {{ (N.seconds / 60)|round(1) }} minutes. {{ run_link(N.run_id) }}</p>
+    </div>
+  </div>
+  {% endif %}
+</section>
+
+{# ------------------------------------------------------------------ 08 proof #}
+<section id="proof" class="guide-section gx-chapter" aria-labelledby="heading-proof">
+  {{ chapter_head('proof', 8) }}
+  {% if T.outcomes %}
+  <figure class="gx-history" data-beat>
+    <div class="gx-history-dots" role="img" aria-label="Outcomes of {{ T.outcomes|length }} retained runs in order">{% for o in T.outcomes %}<i class="{{ o.outcome }}{% if o.tribunal %} heard{% endif %}" title="{{ o.date }} · {{ o.family }} · {{ o.outcome }}{% if o.tribunal %} · Tribunal {{ o.tribunal }}{% endif %}" style="--i:{{ loop.index0 }}"></i>{% endfor %}</div>
+    <figcaption><span><i class="pass"></i>pass</span><span><i class="unknown"></i>unknown</span><span><i class="fail"></i>fail</span><span><i class="blocked"></i>blocked</span><span><i class="heard"></i>heard by the Tribunal</span><em>{{ T.outcomes|length }} retained runs by the worker, oldest first, from {{ T.outcomes[0].date }} to {{ T.outcomes[-1].date }}</em></figcaption>
+  </figure>
+  {% endif %}
+  <div class="gx-wall">
+    {% for card in [
+      (H.run_id, 'Invoice, end to end', H.ava.passed ~ '/' ~ H.ava.total ~ ' own · ' ~ H.tribunal.passed ~ '/' ~ H.tribunal.total ~ ' Tribunal · ' ~ H.grader.passed ~ '/' ~ H.grader.total ~ ' grader'),
+      ((E.ghost or {}).run_id, 'Baseline without context', 'Routed to ' ~ (E.ghost or {}).approver ~ ' · grader fail'),
+      (X.run_id, 'Staged lost routing', (X.branches or 0) ~ ' branches caught, remanded, pruned'),
+      ((E.meeting or {}).run_id, 'Meeting draft', 'Uncited quote caught by the Tribunal'),
+      ((E.blocked or {}).run_id, 'Duplicate refused', 'Finished blocked instead of entering it twice'),
+      ((E.restart or {}).run_id, 'After a restart', 'Different invoice · 14/14 grader'),
+      ((E.taught or {}).run_id, 'Taught skill rehearsal', 'Loaded unprompted · Tribunal 13/13'),
+      ((E.native or {}).run_id, 'Real Gmail and Calendar', 'Draft and hold · 13/13 own · 13/13 Tribunal')] if card[0] %}
+    <a class="gx-wallcard{% if card[0] not in installed %} off{% endif %}" {% if card[0] in installed %}href="/runs/{{ card[0] }}"{% endif %}><small>run {{ card[0][-4:] }}</small><b>{{ card[1] }}</b><span>{{ card[2] }}</span></a>
+    {% endfor %}
+  </div>
+
+  <div class="gx-apps">
+    <div class="gx-apps-head"><h3>Six working apps, one generated company</h3><p>Synthetic records, real forms. Every write goes through one audited path. Gmail and Slack connections are not built.</p></div>
+    <div class="gx-mosaic">{% for name, file, path in [('Mail','mail','/mail/'),('Books','books','/books/bills'),('Calendar','calendar','/calendar/'),('Drive','drive','/drive/'),('Chat','chat','/chat/'),('Overview','overview','/')] %}<a href="{{ apps_url }}{{ path }}"><img src="/static/guide/app-{{ file }}.webp" alt="The {{ name }} app" loading="lazy"><span>{{ name }} <span aria-hidden="true">↗</span></span></a>{% endfor %}</div>
+  </div>
+
+  <div class="gx-under">
+    <figure class="gx-arch" aria-label="Architecture">
+      <div class="gx-arch-row"><span class="node you">You<small>console · task, questions, receipt</small></span></div>
+      <div class="gx-arch-row"><span class="node runner">Ava’s runner<small>Google ADK · Gemini on Vertex · Ava’s tools · callbacks</small></span><span class="node">Playwright MCP<small>headed Chrome · visible input</small></span></div>
+      <div class="gx-arch-row"><span class="node gate">Gateway<small>write gate · failure classes · agent identity</small></span></div>
+      <div class="gx-arch-row"><span class="node apps">Company apps<small>FastAPI · SQLite · audit log on every write</small></span></div>
+      <div class="gx-arch-row side"><span class="node loki-tint">The Tribunal<small>own reads · Grok, Qwen, Gemini on Bedrock and Vertex</small></span><span class="node">Grader<small>hidden truth · state at completion</small></span><span class="node">Learning<small>scoped memory · skills · lessons</small></span><span class="node">Your Google<small>Gmail · Calendar · read-only proof</small></span></div>
+    </figure>
+    <div class="gx-limits">
+      <h3>What it does not do yet</h3>
+      <ul>
+        <li>An invoice run takes about four to six and a half minutes including the Tribunal, and roughly 390 to 610 thousand input tokens. Most of that time is waiting for models.</li>
+        <li>It reads pages through the accessibility tree, not pixels, and runs one task at a time.</li>
+        <li>The company is generated. Your own Gmail and Calendar work through a browser profile you sign into; Slack and other accounts are not connected.</li>
+        <li>The half-finished vendor setup, the split-history question and the prompt-injection invoice are built and graded in tests, but no retained live run shows them.</li>
+        <li>The multi-seed scoreboard and the policy screening model are not wired in.</li>
+      </ul>
+      <p class="muted">Models: Gemini 3.6 Flash for Ava’s actions; Gemini for the goal, context and lessons; Qwen3-VL and Gemini as jurors; Grok 4.3 as planner and arbiter; Gemini-TTS for these voices.</p>
+    </div>
+  </div>
+</section>
+
+<section class="gx-closing"><div class="gx-closing-loki loki" data-pose="wink" aria-hidden="true">{% include "loki.svg" %}</div><div><p class="gx-kicker">Your turn</p><h2>Give Ava an outcome. Ask her for the proof.</h2><a class="button guide-task" href="{{ task_href }}">{{ 'Return to Ava’s task' if active_url else 'Give Ava a task' }} <span aria-hidden="true">↗</span></a></div></section>
+<footer class="guide-footer">Precedent · an autonomous company worker. Built for the CentrAlign AI engineering internship. {% if E.generated %}Evidence snapshot {{ E.generated }}.{% endif %}</footer>
+</main>
+</div>
+
+<section class="tour-player" aria-label="Ava’s guided introduction" hidden>
+  <div class="tour-player-top"><span class="tour-avatar" aria-hidden="true">a</span><div class="tour-heading"><strong>Ava’s introduction</strong><span id="tour-status" role="status">Ready when you are</span></div><label class="sr-only" for="tour-chapter">Tour chapter</label><select id="tour-chapter">{% for chapter in guide.chapters %}<option value="{{ loop.index0 }}">0{{ loop.index }} · {{ chapter.label }}</option>{% endfor %}</select><button type="button" id="tour-toggle" class="secondary" aria-label="Play narration">Play</button><button type="button" id="tour-stop" class="secondary" aria-label="Stop and reset narration">Stop</button><button type="button" id="tour-mute" class="secondary" aria-pressed="false" aria-label="Mute narration">Mute</button></div>
+  <div class="tour-follow-row"><button type="button" id="tour-follow" class="secondary" aria-pressed="true">Auto-scroll on</button><span id="tour-follow-hint">Ava follows the story. Scroll yourself to take control.</span></div><div class="tour-progress"><time id="tour-time">0:00 / 0:00</time><label class="sr-only" for="tour-seek">Position in current chapter</label><input id="tour-seek" type="range" min="0" max="100" value="0" step="0.1" disabled></div>
+  <details class="player-transcript"><summary>Chapter transcript <span>Scripted introduction · synthetic voices{% if guide.voice_label %} ({{ guide.voice_label }}){% endif %}</span></summary><p id="tour-caption">{{ guide.chapters[0].narration }}</p></details>
+</section>
+<audio id="tour-audio" preload="metadata"></audio>
+<script id="guide-data" type="application/json">{{ guide|tojson }}</script>
+<script src="/static/guide.js?v={{ asset_version }}" defer></script>
+{% endblock %}
+{% block companion %}{{ ava_dock('guide', '', status_url='/watch/state', handoff='console', mount='inline') }}{% endblock %}

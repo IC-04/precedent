@@ -146,3 +146,95 @@ Goal, action and fallback models share this factory. Model API keys are not part
 of the contract. Missing configuration/ADC is reported with setup guidance;
 Google inference errors retain their original details. `precedent check-model`
 uses the same factory for one explicit small inference, without company actions.
+
+## Trustworthy learning additions (October 10)
+
+`Condition.claims` declares atomic proof keys. A conservative text coverage floor also
+rejects familiar compound claims whose mappings omit a field. Every key needs one
+check; missing, duplicate or foreign mappings remain unknown. A shared latest-invoice
+selection can discharge linked field claims only for the same source document and
+a freshly matched bill vendor; the source selection primitive still executes.
+`CheckResult.claims`, `sources`, and `verifier_version=2` record supported coverage.
+Unchanged vendor proof compares complete pre-write visible edit fields, not masked bank
+summaries. Expectations need independently captured source quotations. A single bounded
+citation repair can change source citations, never expected values or targets.
+
+The evaluator requires complete ordered events, aware timestamp instants, matching run,
+seed, instance and exact benchmark request. Version-2 assessments reconstruct assessed
+tables at completion by reversing later audited writes in an isolated copy, then freeze
+the result with the event digest and world path. Historical run events and receipts are
+never rewritten. A reset before the first assessment or missing evidence is unknown;
+a previously frozen assessment survives a reset. Immutable file blobs are independently
+hashed. This assumes all company mutations use the audited write path.
+
+`learning/` is an application-owned service, separate from company state. Registry entry
+fields: id, scope, kind, title, status, version, source run, created/updated times, payload.
+Payloads retain source references/hashes, supported and uncertain checks, revalidation
+requirements and revision history. Episodes, company knowledge and skills are distinct.
+Scope `local:<instance UUID>:ava` identifies the current local single-user workspace.
+Restart preserves `instance.json`; regeneration replaces it.
+
+ADK sessions persist in `sessions.sqlite`; curated lexical recall uses `recall.sqlite`;
+`registry.sqlite` controls current status/provenance. Search results are filtered against
+the current registry version and status. Corrections, archive and deactivation take effect
+on subsequent retrieval/selection. Relevant authority edits/additions/removals invalidate
+context-candidate reuse, and history support is always recomputed from fresh pages.
+
+Skill lifecycle: draft → validating → validated → active, or validation_failed; deactivation
+produces inactive. The only procedure is invoice entry/routing with fresh current policy.
+Critical proof coverage plus a real isolated browser trial and matching instruction hash
+are required before explicit UI acceptance. Only ADK `load_skill` is exposed. No execution
+scripts, privileged grader data or company-specific answer values enter the skill.
+
+## Meeting workflow additions (October 11)
+
+`GoalContract.task_family` selects invoice or meeting semantics within one harness.
+`MeetingIntent` carries the participant/topic, bounded duration, next-week or explicit
+interval, local-hold authorization, selected option and unsupported requirements.
+Its numeric option is a bounded integer compatible with the installed Gemini SDK schema.
+`worker/meetings.py` resolves contacts and dates from public current Calendar context;
+it does not consult company SQLite or the evaluator. Seven typed claim keys cover draft,
+identity, grounding, time options, fresh availability, reconciliation and write permissions.
+An explicit requested hold adds `meeting_hold`. Missing coverage stays unknown.
+
+`world/meeting_schema.sql` defines scheduling settings, access-declared calendars,
+persisted mail drafts and calendar events. Draft intent identity combines organizer,
+recipient, normalized topic and interval. It is not a run/prompt hash. Unique intent
+and linked-hold constraints plus atomic audited saves and optimistic versions prevent
+duplicate creation and lost human edits. Local events are tentative organizer reservations;
+they do not send mail/invitations or imply attendee acceptance.
+
+Public `/calendar/context` exposes contacts, working hours, IANA timezone and the disclosed
+generated clock. `/calendar/availability` exposes complete bounded busy records, coverage
+and suitable options through semantic HTML. Times are aware UTC instants in persistence
+and local values in forms. Relative weeks resolve against the company clock. Intervals
+are half-open; naive ambiguous/nonexistent DST instants are rejected. Missing attendee
+access is organizer-only, never mutual; missing organizer access is unknown.
+
+`/mail/drafts` and stable `/mail/drafts/{id}` links expose unsent editable artifacts.
+Source quotes must be short literal excerpts from linked current Mail/Chat and included
+in the body. This is a bounded factual rubric, not an overall prose-quality proof.
+`/calendar/new?draft={id}&option={1|2}` prepopulates a real local hold form; its save
+rechecks current conflicts transactionally. Own linked holds are excluded when verifying
+their draft's proposed slot; unrelated calendar commitments remain conflicts.
+
+Meeting execution uses the existing browser gateway, source-backed decisions and lost-
+acknowledgement reconciliation gate, with family-specific operation permissions. It skips
+AP gathering and invoice skill selection. Current observed source excerpts survive meeting
+compaction with stale refs stripped; they remain evidence, not authorization.
+Fresh read-back emits `meeting-verification.json`, `learning-sources.json` and artifact
+links. Episodes retain family identity; scheduling preferences require current sources,
+and recalled availability never authorizes a new booking. Meeting episodes cannot be
+promoted into the invoice procedure; meeting skill validation is not delivered yet.
+
+Independent `M1_prepare`/`M2_hold` graders accept any valid option satisfying declared
+constraints. Completion reconstruction includes draft/calendar/settings and source tables,
+preserving exact task/run/instance binding, aware audit windows and frozen assessments.
+Worker verification, the Tribunal hearing and privileged benchmark grades are separate
+results. See `docs/meeting_workflow_milestone.md` for actual runs and limitations.
+
+## Google connected environment
+
+`/workspace.json` distinguishes `mode=connected`, `connector=google`, stable account `memory_id`, access revision `instance_id`, real current `date`/IANA `timezone`, enabled capabilities and actual inference recipients. Google task families (`google_reply`, `google_meeting`, `google_reservation`) use the shared planning/decision/browser/receipt/memory loop. Generated-company hidden truth never applies.
+
+Server-owned operation records bind stable account, native intent, current source versions, artifact ID, native provider ID, state (`pending`, `uncertain`, `saved`) and native inspection reference. Browser form writes require task-bound authorization and recorded decisions; their Google API effects remain narrow and journaled. Calendar free/busy is a semantic read. Native writes never blind-retry; read-only reconciliation can adopt a proven committed result. A separate read-only provider facade verifies fresh objects. Fail dominates unknown, and both are distinct from pass. Raw private run evidence expires after 24 hours; scoped procedural memory and native-operation metadata persist until owner forget-data.

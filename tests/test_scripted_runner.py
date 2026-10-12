@@ -107,3 +107,25 @@ def test_parallel_model_calls_are_serialized_with_their_own_capture(
         assert observation.data["url"] == action.data["args"]["url"]
         assert observation.data["action_step_id"] == action.data["step_id"]
         assert observation.data["screenshot"]
+
+
+def test_unavailable_memory_runs_fresh_without_claiming_learning(tmp_path, live_apps, monkeypatch):
+    unavailable = tmp_path / "not-a-directory"
+    unavailable.write_text("Explicit outage fixture")
+    monkeypatch.setenv("PRECEDENT_MEMORY_ROOT", str(unavailable))
+    monkeypatch.setattr(runner, "make_model", lambda name: ScriptedModel(model="scripted"))
+    result = asyncio.run(
+        runner.run(
+            runner.RunConfig(
+                request="Read company overview", apps_url=live_apps[0], runs_root=tmp_path / "runs"
+            )
+        )
+    )
+    directory = tmp_path / "runs" / result["run_id"]
+    events = read_events(directory / "events.jsonl")
+    assert result["error"] is None and result["outcome"] == "unknown"
+    assert any(e.data.get("kind") == "memory_unavailable" for e in events)
+    assert any("Session persistence unavailable" in e.data.get("text", "") for e in events)
+    assert any(e.type == "action" for e in events)
+    assert not (directory / "learning.json").exists()
+    assert (directory / "learning-error.txt").exists()

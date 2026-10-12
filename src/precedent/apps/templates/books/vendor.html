@@ -1,4 +1,5 @@
 {% extends "books/base.html" %}
+{% set ava_context = {'kind': 'vendor', 'id': vendor.id, 'label': vendor.name, 'vendor': vendor.name} %}
 {% block title %}{{ vendor.name }}{% endblock %}
 {% block content %}
 <div class="crumbs"><a href="/books/vendors">Vendors</a> / {{ vendor.id }}</div><div class="record-heading"><div><div class="eyebrow">Vendor {{ vendor.id }}</div><h1>{{ vendor.name }}</h1><span class="status">{{ vendor.status | capitalize }}</span></div></div>

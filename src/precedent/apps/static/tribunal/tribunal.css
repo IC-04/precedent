@@ -1,0 +1,187 @@
+/* Verification: Ava's warm paper and purple, with Loki as the verifier. The centre of the
+   page is the real record Ava produced, with each proven field marked on it. Builds on
+   workspace.css and console.css; nothing here introduces a new palette. */
+.verify-page{--proven:#4b7055;--proven-fill:#84998226;--proven-line:#849982;--contra:#9a5530;--contra-fill:#c48a6226;--contra-line:#c48a62;--disputed:#5554a3;--disputed-fill:#a9a8d633;--unproven:#8a857a;--unproven-fill:#d6d2c933;--warm:#f6f1e7;max-width:1360px;margin:auto;padding:26px 36px 90px}
+.verify-page .run-kicker{margin-bottom:16px}
+
+/* Hero: the Mind page's heading, with Loki in a soft spotlight */
+.verify-hero{position:relative;display:grid;grid-template-columns:minmax(0,1fr) 230px;gap:28px;align-items:center;padding:38px 44px;border:1px solid #e6e0d6;border-radius:16px;overflow:hidden;background:radial-gradient(520px 260px at 0% 0%,#f1ebf8 0%,transparent 70%),radial-gradient(420px 300px at 100% 100%,#f3ecdc 0%,transparent 70%),#fbf9f5}
+.verify-hero:after{content:'';position:absolute;z-index:0;inset:auto -10% -60% 50%;height:120%;background:radial-gradient(closest-side,#fff8e9,transparent);opacity:.8;pointer-events:none}
+.hero-copy{position:relative;z-index:2}
+.verify-hero .eyebrow{font-size:10px;letter-spacing:.14em;color:#827c92}
+.verify-hero h1{font-size:42px;font-weight:550;letter-spacing:-1.8px;margin:10px 0 6px;line-height:1.1}
+.hero-dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#9683d7;margin:0 0 9px 10px;transition:background .5s,box-shadow .5s}
+.verify-hero[data-state=working] .hero-dot{animation:v-breathe 1.4s ease-in-out infinite}
+.verify-hero[data-state=pass] .hero-dot{background:var(--proven-line);box-shadow:0 0 0 6px #84998222}
+.verify-hero[data-state=fail] .hero-dot{background:var(--contra-line);box-shadow:0 0 0 6px #c48a6222}
+.verify-hero[data-state=disputed] .hero-dot{background:#8f8ed0}
+.hero-task{font-size:15px;color:#5f5a52;margin:0 0 14px}
+.hero-line{font-size:14px;line-height:1.7;color:#6b6575;max-width:640px;min-height:48px;margin:0 0 18px;transition:opacity .25s}
+.hero-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.hero-actions button{font-size:12px}
+.speed{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted)}
+.speed select{width:auto;min-height:30px;font-size:11px;padding:4px 6px}
+.hero-loki{position:relative;z-index:2;text-align:center}
+.hero-loki:before{content:'';position:absolute;left:50%;top:46%;width:210px;height:210px;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(closest-side,#fffaf0 0%,#f4ecdb 60%,transparent 100%)}
+.hero-loki .loki{position:relative;width:190px;margin:auto}
+.loki-name{position:relative;display:block;font-size:12px;font-weight:600;margin-top:2px;color:#4a4652}
+
+/* The timeline strand: the real timeline runs along the hero; a claim the records don't
+   support spawns a branch off it; a branch Ava fixed after a remand shows as pruned. */
+.verify-hero{padding-bottom:104px}
+.strand{position:absolute;left:0;right:0;bottom:0;width:100%;height:120px;z-index:1;pointer-events:none;overflow:visible}
+.strand-line{fill:none;stroke:#b6a5c8;stroke-width:2.2;stroke-linecap:round}
+.strand-glow{fill:none;stroke:#e8e0f1;stroke-width:10;stroke-linecap:round;opacity:.8}
+.strand-node{fill:#fbf9f5;stroke:#b6a5c8;stroke-width:2;transition:fill .4s,stroke .4s}
+.strand-node.holds{fill:#9b86b3;stroke:#7d6996}
+.strand-node.branch{fill:#c48a62;stroke:#9a5530}
+.strand-node.possible{fill:#a9a8d6;stroke:#5554a3}
+.strand-node.open{stroke-dasharray:3 2;stroke:#a39e93}
+.strand-branch{fill:none;stroke-width:2;stroke-linecap:round;stroke-dasharray:120;stroke-dashoffset:120;animation:v-draw 1.1s ease-out forwards}
+.strand-branch.spawned{stroke:#c48a62}
+.strand-branch.possible{stroke:#8f8ed0;stroke-dasharray:4 4;animation:v-flicker 1.6s ease-in-out infinite;stroke-dashoffset:0}
+.strand-branch.pruned{stroke:#cfc6b8;stroke-dasharray:3 4;stroke-dashoffset:0;animation:none;opacity:.8}
+.strand-tip.spawned{fill:#c48a62}.strand-tip.possible{fill:#8f8ed0}.strand-tip.pruned{fill:#d9d2c6}
+.strand-label{font:600 10px -apple-system,BlinkMacSystemFont,sans-serif;fill:#9a5530}
+.strand-label.possible{fill:#5554a3}.strand-label.pruned{fill:#a39e93;font-weight:500}
+.strand-cut{stroke:#9a5530;stroke-width:1.6;stroke-linecap:round}
+.strand-pulse{fill:#837392;opacity:0}
+.verify-hero[data-state=working] .strand-pulse{opacity:.9;animation:v-travel 2.6s linear infinite}
+.verify-hero[data-state=working] .strand-line{stroke-dasharray:6 6;animation:v-flow 1.2s linear infinite}
+@keyframes v-draw{to{stroke-dashoffset:0}}
+@keyframes v-flicker{0%,100%{opacity:.35}50%{opacity:1}}
+@keyframes v-flow{to{stroke-dashoffset:-24}}
+@keyframes v-travel{from{transform:translateX(0)}to{transform:translateX(100%)}}
+.verify-hero[data-state=fail] .hero-dot{animation:v-breathe 1.6s ease-in-out infinite}
+
+.timeline-switch{display:inline-flex;border:1px solid #dcd6cb;border-radius:7px;overflow:hidden;margin-left:4px}
+.timeline-switch button{border:0;border-radius:0;box-shadow:none;min-height:32px;font-size:11px;background:#fff;color:var(--muted)}
+.timeline-switch button[aria-pressed=true]{background:#f1ebf8;color:#4a3f5c;font-weight:600}
+.timeline-switch button+button{border-left:1px solid #dcd6cb}
+
+/* Escalation ladder */
+.ladder{margin:22px 0;padding:22px 26px;border:1px solid var(--line);border-radius:12px;background:#fff}
+.ladder-head{display:flex;align-items:baseline;gap:16px;margin-bottom:16px}
+.ladder-head h2{font-size:13px;margin:0}
+.ladder-head p{margin:0;font-size:12px;color:var(--muted)}
+.rungs{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));position:relative}
+.rungs:before{content:'';position:absolute;left:7px;right:7px;top:6px;height:2px;background:#ece7de}
+.rungs:after{content:'';position:absolute;left:7px;top:6px;height:2px;width:var(--reach,0%);background:linear-gradient(90deg,#b8a6c9,#837392);transition:width .8s cubic-bezier(.3,.7,.3,1)}
+.rungs li{position:relative;z-index:1;padding-right:14px}
+.rung-dot{display:block;width:14px;height:14px;border-radius:50%;background:#fff;border:2px solid #d9d2c6;margin-bottom:12px;transition:all .4s}
+.rungs strong{display:block;font-size:12px;font-weight:600;color:#9b968c;transition:color .3s}
+.rungs small{display:block;font-size:11px;color:#a8a399;margin-top:3px;line-height:1.45}
+.rungs li[data-state=done] .rung-dot{background:#c9bfd6;border-color:#837392}
+.rungs li[data-state=done] strong{color:var(--ink)}
+.rungs li[data-state=done] small{color:var(--muted)}
+.rungs li[data-state=active] .rung-dot{border-color:#837392;background:#fff;box-shadow:0 0 0 5px #e8e1ef;animation:v-breathe 1.2s ease-in-out infinite}
+.rungs li[data-state=active] strong{color:var(--ink)}
+.rungs li[data-state=settled] .rung-dot{background:var(--proven-line);border-color:var(--proven);box-shadow:0 0 0 5px #84998224}
+.rungs li[data-state=settled] strong{color:var(--proven)}
+.rungs li[data-state=settled] small{color:#56705d}
+.rungs li[data-state=needed] .rung-dot{background:#e7b46b;border-color:#a8742b;box-shadow:0 0 0 5px #e7b46b33}
+.rungs li[data-state=needed] strong{color:#8c5a1c}
+.rungs li[data-state=skipped]{opacity:.55}
+
+/* Evidence viewer and conditions */
+.verify-grid{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:22px;align-items:start}
+.viewer{border:1px solid var(--line);border-radius:12px;background:#fff;overflow:hidden;position:sticky;top:14px}
+.viewer-tabs{display:flex;gap:6px;padding:12px 14px;border-bottom:1px solid var(--line);overflow-x:auto;background:#fbfaf7}
+.viewer-tab{flex:none;background:transparent;color:var(--muted);border:1px solid transparent;box-shadow:none;min-height:30px;font-size:11px;padding:4px 10px;animation:v-enter .4s ease-out}
+.viewer-tab small{color:#a39e93;margin-left:6px;font-size:10px}
+.viewer-tab[aria-selected=true]{background:#fff;color:var(--ink);border-color:#dcd6cb}
+.viewer-stage{position:relative;max-height:620px;overflow:auto;background:#f4f1eb}
+.viewer-empty{display:grid;place-items:center;min-height:340px;padding:30px;text-align:center;color:var(--muted);font-size:13px}
+.viewer-page{position:relative;line-height:0}
+.viewer-page img{display:block;width:100%;height:auto}
+.viewer-marks{position:absolute;inset:0}
+.mark{position:absolute;border:2px solid var(--unproven);border-radius:6px;background:var(--unproven-fill);transition:opacity .3s,box-shadow .3s;animation:v-mark .55s cubic-bezier(.2,1.3,.4,1) backwards}
+.mark span{position:absolute;right:6px;top:50%;transform:translateY(-50%);font:600 10px/1 -apple-system,BlinkMacSystemFont,sans-serif;white-space:nowrap;padding:3px 7px;border-radius:999px;color:#fff;background:var(--unproven);box-shadow:0 1px 3px #0000001a}
+.mark.tall span{top:8px;transform:none}
+.mark.proven{border-color:var(--proven-line);background:var(--proven-fill)}.mark.proven span{background:var(--proven)}
+.mark.contradicted{border-color:var(--contra-line);background:var(--contra-fill)}.mark.contradicted span{background:var(--contra)}
+.mark.disputed{border-color:#a9a8d6;background:var(--disputed-fill)}.mark.disputed span{background:var(--disputed)}
+.mark.unproven{border-style:dashed}
+.mark.focus{box-shadow:0 0 0 6px #83739233;z-index:2}
+.mark.dim{opacity:.25}
+.viewer-scan{position:absolute;left:0;right:0;top:0;height:90px;opacity:0;pointer-events:none;background:linear-gradient(180deg,transparent,#b8a6c955 70%,#837392aa 100%);border-bottom:2px solid #8373928a}
+.verify-page[data-working=true] .viewer-scan{animation:v-scan 2.4s ease-in-out infinite}
+.viewer-doc{margin:0;padding:28px 34px;min-height:340px;white-space:pre-wrap;font:12px/1.7 ui-monospace,SFMono-Regular,monospace;color:#4f4b44;background:#fffdf8}
+.viewer-foot{padding:10px 14px;font-size:11px;color:var(--muted);border-top:1px solid var(--line);background:#fbfaf7;overflow-wrap:anywhere}
+
+.checklist{border:1px solid var(--line);border-radius:12px;background:#fff;padding:18px 0 6px}
+.checklist-head{display:flex;justify-content:space-between;align-items:baseline;padding:0 18px 12px;border-bottom:1px solid var(--line)}
+.checklist-head h2{font-size:13px;margin:0}
+.checklist-head span{font-size:11px;color:var(--muted)}
+.conditions{list-style:none;margin:0;padding:0}
+.condition-item{display:grid;grid-template-columns:18px minmax(0,1fr);gap:10px;padding:13px 18px;border-bottom:1px solid #f0ece5;cursor:pointer;border-left:2px solid transparent;transition:background .25s,border-color .25s;animation:v-enter .4s ease-out}
+.condition-item:last-child{border-bottom:0}
+.condition-item:hover{background:#faf8f4}
+.condition-item.selected{background:#f6f3fa;border-left-color:#837392}
+.condition-item.working{background:#fbf9f3}
+.status-icon{width:14px;height:14px;margin-top:3px;border-radius:50%;border:2px solid #d4cec3;background:#fff;transition:all .35s}
+.condition-item.working .status-icon{border-color:#837392;border-top-color:transparent;animation:v-spin .9s linear infinite}
+.condition-item[data-result=pass] .status-icon{background:var(--proven-line);border-color:var(--proven);animation:v-pop .4s ease-out}
+.condition-item[data-result=fail] .status-icon{background:var(--contra-line);border-color:var(--contra);animation:v-pop .4s ease-out}
+.condition-item[data-result=disputed] .status-icon{background:linear-gradient(90deg,#a9a8d6 50%,#fff 50%);border-color:var(--disputed)}
+.condition-item[data-result=unknown] .status-icon{border-style:dashed;border-color:#a39e93}
+.condition-text{font-size:13px;line-height:1.5;color:var(--ink)}
+.condition-how{display:block;font-size:11px;color:var(--muted);margin-top:4px}
+.condition-how b{font-weight:600}
+.condition-item[data-result=pass] .condition-how b{color:var(--proven)}
+.condition-item[data-result=fail] .condition-how b{color:var(--contra)}
+.condition-item[data-result=disputed] .condition-how b{color:var(--disputed)}
+.votes{display:flex;gap:3px;margin-top:6px}
+.vote{width:7px;height:7px;border-radius:50%;background:#ece7de}
+.vote.holds{background:var(--proven-line)}.vote.does_not_hold{background:var(--contra-line)}.vote.cannot_tell{background:#cfc9be}
+.court-checks{list-style:none;margin:6px 0 0;padding:0;display:grid;gap:2px}
+.court-checks:empty{display:none}
+.court-check{font-size:11px;color:var(--muted);padding-left:12px;position:relative;overflow-wrap:anywhere}
+.court-check:before{content:'';position:absolute;left:0;top:6px;width:6px;height:6px;border-radius:50%;background:#cfc9be}
+.court-check.pass:before{background:var(--proven-line)}.court-check.fail{color:var(--contra)}.court-check.fail:before{background:var(--contra-line)}
+.tag-missed{display:inline-block;font-size:10px;font-weight:600;color:#8c5a1c;background:#fbefdc;border:1px solid #ecd5b3;border-radius:4px;padding:1px 6px;margin-right:6px;vertical-align:1px}
+.condition-ava{display:block;font-size:11px;color:#9a948a;margin-top:5px;font-style:italic}
+
+/* Outcome: the run page's outcome panel */
+.outcome{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:28px;margin-top:22px;padding:28px 32px;border:1px solid #d8ddcf;background:#f2f4ed;border-radius:12px;animation:v-enter .5s ease-out}
+.outcome[data-result=fail]{background:#fbf3ec;border-color:#ecd8c8}
+.outcome[data-result=disputed]{background:#f4f2fa;border-color:#dedbef}
+.outcome[data-result=unknown]{background:#f5f3ee;border-color:#e2ddd2}
+.outcome .eyebrow{font-size:10px;letter-spacing:.12em}
+.outcome h2{font-size:24px;line-height:1.35;font-weight:500;margin:6px 0 8px;letter-spacing:-.5px}
+.outcome p{font-size:13px;line-height:1.8;color:#5f5d56;margin:0 0 16px}
+.witnesses{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.witnesses div{background:#fff;border:1px solid #dfe3d8;border-radius:8px;padding:11px 13px}
+.witnesses span{display:block;font-size:10px;color:var(--muted)}
+.witnesses strong{font-size:16px;font-weight:500}
+.unsupported:empty{display:none}
+.unsupported{margin-top:16px;background:#fff5e7;border-left:2px solid #bb965b;padding:10px 14px;font-size:12px}
+.unsupported h3{font-size:12px;margin:0 0 6px}
+.unsupported ul{margin:0;padding-left:16px}.unsupported li{margin:4px 0}
+.conduct h3{font-size:12px;margin:0 0 10px}
+#audit-list{list-style:none;margin:0;padding:0}
+#audit-list li{border-left:2px solid var(--proven-line);padding-left:10px;margin-bottom:11px;font-size:12px}
+#audit-list li.fail{border-color:var(--contra-line)}
+#audit-list small{display:block;font-size:10px;color:var(--muted);margin-top:2px}
+
+/* Loki: Ava's body and face, a horned helm in place of her ears, a moss cape and a
+   crescent scepter. Warm pastels in the same family as Ava's. */
+
+
+@keyframes v-body{50%{transform:scale(1.012,.988)}}
+@keyframes v-blink{0%,46%,50%,100%{transform:scaleY(1)}48%{transform:scaleY(.1)}}
+@keyframes v-halo{0%,100%{opacity:.12}50%{opacity:.3}}
+@keyframes v-beam{0%,100%{opacity:0}50%{opacity:.16}}
+@keyframes v-tap{0%,100%{transform:rotate(0)}40%{transform:rotate(-16deg) translateY(-6px)}70%{transform:rotate(4deg) translateY(2px)}}
+@keyframes v-seal{0%{opacity:0;transform:scale(.3)}100%{opacity:1;transform:scale(1)}}
+@keyframes v-hop{0%,100%{transform:translateY(0)}40%{transform:translateY(-7px)}}
+@keyframes v-breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.18)}}
+@keyframes v-scan{0%{top:-90px;opacity:0}15%{opacity:1}85%{opacity:1}100%{top:100%;opacity:0}}
+@keyframes v-mark{0%{opacity:0;transform:scale(1.08)}100%{opacity:1;transform:scale(1)}}
+@keyframes v-pop{0%{transform:scale(.4)}70%{transform:scale(1.2)}100%{transform:scale(1)}}
+@keyframes v-spin{to{transform:rotate(360deg)}}
+@keyframes v-enter{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.verify-page *,.loki *{animation-duration:.01ms!important;animation-iteration-count:1!important;transition:none!important}}
+
+@media(max-width:1100px){.verify-hero{padding-bottom:130px}.verify-grid{grid-template-columns:1fr}.viewer{position:static}.outcome{grid-template-columns:1fr}}
+@media(max-width:760px){.verify-page{padding:18px 16px 60px}.verify-hero{grid-template-columns:1fr;padding:26px 22px}.hero-loki{order:-1}.hero-loki .loki{width:130px}.hero-loki:before{width:150px;height:150px}.verify-hero h1{font-size:32px}.rungs{grid-template-columns:1fr;gap:12px}.rungs:before,.rungs:after{display:none}.rungs li{display:grid;grid-template-columns:22px 1fr;column-gap:8px}.rungs li .rung-dot{grid-row:span 2;margin:2px 0 0}.witnesses{grid-template-columns:1fr}}

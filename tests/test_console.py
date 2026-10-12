@@ -89,6 +89,21 @@ def test_foreign_events_do_not_authorize_captures(tmp_path):
     assert client.get("/runs/r2/shots/view-1.png").status_code == 404
 
 
+def test_independent_grade_does_not_promote_worker_checks(tmp_path):
+    log = EventLog("r1", root=tmp_path)
+    started(log)
+    log.emit(
+        "goal_contract",
+        conditions=[{"id": "c1", "kind": "must_be_true", "text": "Verified"}],
+    )
+    log.emit("run_finished", outcome="unknown")
+    (log.dir / "grade.json").write_text(json.dumps({"overall": "pass"}))
+    state = TestClient(create_app(tmp_path)).get("/runs/r1/state").json()
+    assert state["status"] == "Completed · independent grade"
+    assert state["display_outcome"] == "unknown"
+    assert state["conditions"][0]["state"] == "Pending"
+
+
 def test_run_specific_question_answers_and_duplicates(tmp_path):
     log = EventLog("r1", root=tmp_path)
     started(log)
@@ -128,7 +143,8 @@ def test_question_timeout_is_a_system_answer(tmp_path):
     assert answer["by"] == "system" and "blocked" in answer["text"]
 
 
-def test_start_binds_seed_environment_and_single_concurrency(tmp_path):
+@pytest.mark.parametrize("headed", [False, True])
+def test_start_binds_seed_environment_and_single_concurrency(tmp_path, headed):
     calls = []
     process = SimpleNamespace(poll=lambda: None)
 
@@ -136,7 +152,8 @@ def test_start_binds_seed_environment_and_single_concurrency(tmp_path):
         calls.append((command, kwargs))
         return process
 
-    manager = RunManager(tmp_path, "http://company:8100", launcher=launch)
+    app = create_app(tmp_path, "http://company:8100", launcher=launch, headed=headed)
+    manager = app.state.manager
 
     async def company():
         return {"seed": 8, "name": "Alternate Company"}
@@ -149,6 +166,11 @@ def test_start_binds_seed_environment_and_single_concurrency(tmp_path):
     assert calls[0][1]["env"]["PRECEDENT_RUN_ID"] == run_id
     assert "--seed" in calls[0][0] and "8" in calls[0][0]
     assert calls[0][1]["start_new_session"]
+    assert ("--headed" in calls[0][0]) is headed
+    assert json.loads((tmp_path / run_id / "launch.json").read_text())["headed"] is headed
+    page = TestClient(app).get("/").text
+    assert ("Tasks open in Ava’s own Chrome for Testing window" in page) is headed
+    assert TestClient(app).get(f"/runs/{run_id}/state").json()["headed"] is headed
     with pytest.raises(Exception, match="already working"):
         asyncio.run(manager.start("second", 8))
 
@@ -294,3 +316,56 @@ def test_recorded_view_uses_evidence_available_at_that_observation(tmp_path):
     assert early["status"] == "Recorded step"
     assert client.get("/runs/r1/state?at=999").status_code == 400
     assert client.get("/runs/r1/state").json()["finished"]["outcome"] == "unknown"
+
+
+def test_preparation_phase_uses_events_and_stops_native_focus_on_finish(tmp_path):
+    log = EventLog("r1", root=tmp_path)
+    started(log)
+    log.emit(
+        "note",
+        kind="screen",
+        url="http://127.0.0.1:1234/screen.mjpg",
+        focus_url="http://127.0.0.1:1234/focus/test",
+    )
+    log.emit("note", kind="context_gathered", items=["policy", "history"], rows=12)
+    log.emit("goal_contract", outcome="Routed", conditions=[])
+    state = reconstruct(read_events(log.path), active=True)
+    assert state["phase"] == "prepare" and state["preparation"]["goal"] == "Ready"
+    assert state["preparation"]["rows"] == 12
+    log.emit("plan", steps=[{"id": "s1", "intent": "Inspect", "status": "todo"}])
+    assert reconstruct(read_events(log.path), active=True)["phase"] == "execute"
+    log.emit("note", kind="phase", phase="verify", text="Fresh checks")
+    assert reconstruct(read_events(log.path), active=True)["phase"] == "verify"
+    log.emit("run_finished", outcome="unknown")
+    final = reconstruct(read_events(log.path), active=True)
+    assert final["phase"] == "finish" and final["browser_focus"] is None
+
+
+def test_result_links_come_from_observed_records_and_keep_company_binding(tmp_path):
+    log = EventLog("r1", root=tmp_path)
+    started(log)
+    (log.dir / "launch.json").write_text(json.dumps({"apps_url": "http://company-a:8115"}))
+    log.emit("decision_record", decided="Create /books/bills/INV-fictional")
+    log.emit("observation", url="http://gateway/books/bills/INV-123")
+    log.emit("run_finished", outcome="unknown")
+    data = TestClient(create_app(tmp_path, "http://company-b:8116")).get("/runs/r1/state").json()
+    assert data["apps_url"] == "http://company-a:8115"
+    assert data["artifacts"][0]["path"] == "/books/bills/INV-123"
+    assert all("fictional" not in a["path"] for a in data["artifacts"])
+    assert data["artifacts"][1]["path"].endswith("#approvals")
+
+
+def test_browser_focus_rejects_inactive_foreign_and_cross_origin_targets(tmp_path):
+    log = EventLog("r1", root=tmp_path)
+    started(log)
+    (log.dir / "launch.json").write_text(json.dumps({"headed": True}))
+    app = create_app(tmp_path)
+    client = TestClient(app)
+    assert client.post("/runs/r1/focus").status_code == 409
+    app.state.manager.processes["r1"] = SimpleNamespace(poll=lambda: None)
+    log.emit("note", kind="screen", focus_url="https://external.example/focus/test")
+    assert client.post("/runs/r1/focus").status_code == 409
+    assert (
+        client.post("/runs/r1/focus", headers={"Origin": "http://external.example"}).status_code
+        == 403
+    )

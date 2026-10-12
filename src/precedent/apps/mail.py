@@ -44,4 +44,150 @@ def message(request: Request, conn: Conn, mid: str):
         " AND id != ? ORDER BY sent_at",
         [msg["thread_id"], mid],
     ).fetchall()
-    return render(request, "mail/message.html", msg=msg, files=files, thread=thread)
+    # The sender's address is visible on the page; name the vendor only on an exact match.
+    vendor = conn.execute(
+        "SELECT name FROM vendors WHERE lower(email) = lower(?) AND status = 'active'",
+        [msg["from_addr"] or ""],
+    ).fetchone()
+    return render(
+        request,
+        "mail/message.html",
+        msg=msg,
+        files=files,
+        thread=thread,
+        sender_vendor=vendor["name"] if vendor else None,
+    )
+
+
+# Persisted company email drafts. Task handoffs remain a separate human-only feature.
+@router.get("/drafts")
+def drafts(request: Request, conn: Conn, q: str = ""):
+    rows = conn.execute(
+        (
+            "SELECT * FROM mail_drafts WHERE subject LIKE ? OR topic LIKE ? "
+            "OR recipient_email LIKE ? ORDER BY updated_at DESC"
+        ),
+        [f"%{q}%"] * 3,
+    ).fetchall()
+    return render(request, "mail/drafts.html", rows=rows, q=q)
+
+
+@router.get("/drafts/new")
+def new_draft(request: Request, conn: Conn):
+    from precedent.apps.calendar import context
+    from precedent.scheduling import next_week
+
+    try:
+        ctx = context(conn)
+    except ValueError as exc:
+        return render(request, "calendar/unavailable.html", error=str(exc), code=409)
+    start, end = next_week(ctx["cfg"]["reference_date"])
+    return render(
+        request,
+        "mail/draft_form.html",
+        **ctx,
+        values={
+            "timezone": ctx["cfg"]["timezone"],
+            "duration": 30,
+            "range_start": start,
+            "range_end": end,
+        },
+        draft_id=None,
+        error=None,
+    )
+
+
+@router.get("/drafts/{draft_id}")
+def draft_detail(request: Request, conn: Conn, draft_id: str):
+    from precedent.apps.calendar import context
+
+    row = conn.execute("SELECT * FROM mail_drafts WHERE id=?", [draft_id]).fetchone()
+    if row is None:
+        return render(request, "calendar/unavailable.html", error="Draft not found", code=404)
+    hold = conn.execute(
+        "SELECT * FROM calendar_events WHERE draft_id=? AND status!='cancelled'", [draft_id]
+    ).fetchone()
+    return render(
+        request,
+        "mail/draft.html",
+        **context(conn),
+        draft=dict(row),
+        hold=hold,
+        ava_context={"kind": "draft", "id": draft_id, "label": row["subject"]},
+    )
+
+
+@router.get("/drafts/{draft_id}/edit")
+def edit_draft(request: Request, conn: Conn, draft_id: str):
+    from precedent.apps.calendar import context
+
+    row = conn.execute("SELECT * FROM mail_drafts WHERE id=?", [draft_id]).fetchone()
+    if row is None:
+        return render(request, "calendar/unavailable.html", error="Draft not found", code=404)
+    return render(
+        request,
+        "mail/draft_form.html",
+        **context(conn),
+        values=dict(row),
+        draft_id=draft_id,
+        error=None,
+    )
+
+
+@router.post("/drafts/new")
+@router.post("/drafts/{draft_id}/edit")
+async def save_draft(request: Request, conn: Conn, draft_id: str | None = None):
+    from fastapi.responses import RedirectResponse
+
+    from precedent.apps import meetings
+    from precedent.apps.calendar import context
+
+    form = dict(await request.form())
+    try:
+        did = meetings.save_draft(conn, request, form, draft_id)
+    except (ValueError, sqlite3.IntegrityError) as exc:
+        return render(
+            request,
+            "mail/draft_form.html",
+            **context(conn),
+            values=form,
+            draft_id=draft_id,
+            error=str(exc),
+            code=409,
+        )
+    return RedirectResponse(f"/mail/drafts/{did}", 303)
+
+
+@router.post("/drafts/{draft_id}/discard")
+async def discard_draft(request: Request, conn: Conn, draft_id: str):
+    from fastapi.responses import RedirectResponse
+
+    from precedent.apps.meetings import actor
+    from precedent.world import db
+
+    form = await request.form()
+    conn.execute("BEGIN IMMEDIATE")
+    row = conn.execute("SELECT * FROM mail_drafts WHERE id=?", [draft_id]).fetchone()
+    if row is None or str(row["version"]) != str(form.get("version")):
+        conn.rollback()
+        return render(
+            request,
+            "calendar/unavailable.html",
+            error="Draft changed. Reopen it before discarding.",
+            code=409,
+        )
+    if conn.execute(
+        "SELECT id FROM calendar_events WHERE draft_id=? AND status!='cancelled'", [draft_id]
+    ).fetchone():
+        conn.rollback()
+        return render(
+            request,
+            "calendar/unavailable.html",
+            error="This draft has a local hold. Keep its context or edit the draft instead.",
+            code=409,
+        )
+    db.write(
+        conn, actor(request), "mail", "draft.discard", "mail_drafts", draft_id, dict(row), None
+    )
+    conn.commit()
+    return RedirectResponse("/mail/drafts", 303)

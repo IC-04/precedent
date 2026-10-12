@@ -141,5 +141,15 @@ def deliver(request: Request, conn: Conn, item: str) -> dict[str, Any]:
 
 def _next(conn: sqlite3.Connection, table: str, prefix: str) -> str:
     ids = [r[0] for r in conn.execute(f"SELECT id FROM {table}")]
-    n = max((int(i.split("-")[1]) for i in ids), default=0) + 1
+    n = (
+        max(
+            (
+                int(i.split("-")[1])
+                for i in ids
+                if i.startswith(prefix + "-") and i.split("-", 1)[1].isdigit()
+            ),
+            default=0,
+        )
+        + 1
+    )
     return f"{prefix}-{n:04d}"

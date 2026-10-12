@@ -1,0 +1,21 @@
+{% extends "base.html" %}{% set nav_active = "tasks" %}
+{% block title %}Ava's workspace{% endblock %}
+{% block company %}{{ state.company.name if state.company else 'Ava’s workspace' }}{% endblock %}
+{% block apps_url %}{{ state.apps_url }}{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="/static/live.css">
+<main id="main" class="live-workspace">
+  <header class="live-heading">
+    <div><h1>Ava's workspace</h1><p id="live-request">{{ state.request }}</p></div>
+    <div class="live-controls"><span id="live-connection" role="status">Connecting</span><a href="/runs/{{ state.run_id }}">Task details</a></div>
+  </header>
+  <div class="live-location"><span id="live-url">Opening Ava's browser</span><span id="live-activity">{{ state.activity }}</span></div>
+  <section class="live-stage" aria-label="Ava's live browser">
+    <img id="live-image" alt="Continuous live stream of Ava’s actual browser" hidden>
+    <div id="live-message" class="live-message"><h2 id="live-message-title">Connecting to Ava</h2><p id="live-message-text">The live browser will appear here when the session is ready.</p></div>
+  </section>
+  <footer class="live-footer"><span id="live-session-status">{{ state.status }}</span><span id="live-session-label">Live session · saved screenshots are in Task details</span></footer>
+</main>
+<script type="application/json" id="live-state">{{ state | tojson }}</script>
+<script src="/static/live.js" defer></script>
+{% endblock %}

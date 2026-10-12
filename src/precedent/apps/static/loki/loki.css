@@ -1,0 +1,59 @@
+/* Loki: one drawing (console/templates/loki.svg), one palette and pose vocabulary, shared by
+   the Tribunal screen and the guide. Poses: think, inspect, concern, pleased, wink, seal. */
+.loki{--l-body:#c9d6b4;--l-light:#f2f6e8;--l-deep:#8fa07a;--l-limb:#adbf97;--l-cape:#7c8b5b;--l-cape-deep:#626f45;--l-gold:#e2c27c;--l-gold-deep:#b38c44;--l-gold-light:#f6e4b5;--l-gem:#7fbf98;--l-ink:#3f3a36;--l-hair:#47392e;--l-cheek:#efc0bc;line-height:0}
+.loki-art{width:100%;height:auto;overflow:visible;display:block}
+.loki-shadow{fill:#ddd3c6;opacity:.6}
+.loki-cape{fill:var(--l-cape)}.loki-cape-fold{fill:none;stroke:var(--l-cape-deep);stroke-width:3;stroke-linecap:round;opacity:.55}
+.loki-gold{fill:var(--l-gold);stroke:var(--l-gold-deep);stroke-width:1.4;stroke-linejoin:round}
+.loki-gold-edge,.loki-helm-line{fill:none;stroke:var(--l-gold-light);stroke-width:2.2;stroke-linecap:round;opacity:.85}
+.loki-foot{fill:var(--l-deep)}
+.loki-torso{fill:var(--l-body)}.loki-shade{fill:var(--l-deep);opacity:.3}.loki-glow{fill:var(--l-light);opacity:.7}
+.loki-hair{fill:var(--l-hair)}
+.loki-gem{fill:var(--l-gem);stroke:#effaf2;stroke-width:1.4}
+.loki-brow{fill:none;stroke:var(--l-ink);stroke-width:3.4;stroke-linecap:round}
+.loki-eyes{fill:var(--l-ink)}.loki-glint{fill:#fff;opacity:.9}
+.loki-cheek{fill:var(--l-cheek);opacity:.65}
+.loki-smirk,.loki-flat,.loki-wink{fill:none;stroke:#5d4a48;stroke-width:3;stroke-linecap:round}
+.loki-grin{fill:#6a4f4d}
+.loki-limb{fill:none;stroke:var(--l-limb);stroke-width:10;stroke-linecap:round}.loki-hand{fill:var(--l-limb)}
+.loki-staff{stroke:var(--l-gold-deep);stroke-width:6;stroke-linecap:round}
+.loki-staff-band{stroke:var(--l-gold);stroke-width:4}
+.loki-halo{fill:var(--l-gem);opacity:.14;transition:opacity .4s}
+.loki-beam path{fill:var(--l-gem);opacity:0}
+.loki-seal{opacity:0;transform-origin:40px 186px}
+.loki-seal-disc{fill:var(--l-gold);stroke:var(--l-gold-deep);stroke-width:1.4}.loki-seal-ring{fill:none;stroke:var(--l-gold-light);stroke-width:2}
+.loki-grin,.loki-flat,.loki-wink{display:none}
+.loki-figure{transform-origin:113px 214px;transition:transform .45s cubic-bezier(.3,1.3,.5,1)}
+.loki-head{transform-origin:113px 165px;transition:transform .4s}
+.loki-scepter{transform-origin:201px 212px;transition:transform .4s cubic-bezier(.3,1.4,.5,1)}
+.loki-horn{transition:transform .4s}.loki-horn-l{transform-origin:70px 90px}.loki-horn-r{transform-origin:156px 90px}
+@media(prefers-reduced-motion:no-preference){
+  .loki .loki-breath{animation:v-body 5s ease-in-out infinite;transform-origin:113px 208px}
+  .loki .loki-blink{animation:v-blink 6.5s infinite;transform-origin:113px 130px}
+  .loki .loki-halo{animation:v-halo 3s ease-in-out infinite}
+}
+.loki[data-pose=inspect] .loki-head{transform:rotate(-6deg) translateX(-3px)}
+.loki[data-pose=inspect] .loki-scepter{transform:rotate(-12deg)}
+.loki[data-pose=inspect] .loki-beam path{animation:v-beam 1.3s ease-in-out infinite}
+.loki[data-pose=inspect] .loki-halo{opacity:.4}
+.loki[data-pose=think] .loki-head{transform:rotate(5deg)}
+.loki[data-pose=think] .loki-smirk{display:none}.loki[data-pose=think] .loki-flat{display:inline}
+.loki[data-pose=seal] .loki-scepter{animation:v-tap .6s ease-in-out}
+.loki[data-pose=seal] .loki-seal{animation:v-seal .7s .2s cubic-bezier(.2,1.5,.4,1) both}
+.loki[data-pose=pleased] .loki-smirk{display:none}.loki[data-pose=pleased] .loki-grin{display:inline}
+.loki[data-pose=pleased] .loki-figure{animation:v-hop .6s ease-in-out}
+.loki[data-pose=pleased] .loki-seal{opacity:1}
+.loki[data-pose=concern] .loki-smirk{display:none}.loki[data-pose=concern] .loki-flat{display:inline}
+.loki[data-pose=concern] .loki-brow{transform:translateY(-2px)}
+.loki[data-pose=concern] .loki-horn-l{transform:rotate(-4deg)}.loki[data-pose=concern] .loki-horn-r{transform:rotate(4deg)}
+.loki[data-pose=wink] .loki-head{transform:rotate(-7deg)}
+.loki[data-pose=wink] .loki-wink{display:inline}
+.loki[data-pose=wink] .loki-blink ellipse:nth-child(2),.loki[data-pose=wink] .loki-blink circle:nth-child(4){display:none}
+.loki[data-pose=wink] .loki-scepter{transform:rotate(8deg)}
+@keyframes v-body{50%{transform:scale(1.012,.988)}}
+@keyframes v-blink{0%,46%,50%,100%{transform:scaleY(1)}48%{transform:scaleY(.1)}}
+@keyframes v-halo{0%,100%{opacity:.12}50%{opacity:.3}}
+@keyframes v-beam{0%,100%{opacity:0}50%{opacity:.16}}
+@keyframes v-tap{0%,100%{transform:rotate(0)}40%{transform:rotate(-16deg) translateY(-6px)}70%{transform:rotate(4deg) translateY(2px)}}
+@keyframes v-seal{0%{opacity:0;transform:scale(.3)}100%{opacity:1;transform:scale(1)}}
+@keyframes v-hop{0%,100%{transform:translateY(0)}40%{transform:translateY(-7px)}}

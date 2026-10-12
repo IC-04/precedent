@@ -1,0 +1,76 @@
+{% extends "base.html" %}{% set nav_active = "tasks" %}{% block title %}The Tribunal · {{ task[:60] }}{% endblock %}{% block company %}{{ company or 'Generated company' }}{% endblock %}{% block apps_url %}{{ apps_url }}{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="/static/loki/loki.css?v={{ asset_version }}"><link rel="stylesheet" href="/static/tribunal/tribunal.css?v={{ asset_version }}">
+<main class="verify-page" id="main" data-run="{{ run_id }}" data-finished="{{ 'true' if finished else 'false' }}">
+
+<div class="run-kicker"><a href="/runs/{{ run_id }}">&larr; Task</a><span> / </span><span>The Tribunal</span></div>
+
+<header class="verify-hero" id="hero" data-state="idle">
+  <div class="hero-copy">
+    <div class="eyebrow" id="hero-eyebrow">The Tribunal · timeline verification</div>
+    <h1 id="hero-title">Is this the real timeline?<span class="hero-dot"></span></h1>
+    <p class="hero-task">&ldquo;{{ task }}&rdquo;</p>
+    <p class="hero-line" id="loki-says" aria-live="polite">{% if finished %}When Ava says something happened, Loki checks it against the company&rsquo;s own records. Anything she claimed that the records don&rsquo;t show is a branch: a timeline that never happened. He finds branches and prunes them before they reach you.{% else %}The Tribunal sits once Ava has finished the task.{% endif %}</p>
+    <div class="hero-actions">
+      <button id="convene" type="button" {% if not finished %}disabled{% endif %}>Check the timeline</button>
+      <button id="replay" type="button" class="secondary" hidden>Replay the check</button>
+      <div class="timeline-switch" id="timeline-switch" hidden role="group" aria-label="Which check to show"><button type="button" class="secondary" data-before="true">As caught</button><button type="button" class="secondary" data-before="false" aria-pressed="true">After pruning</button></div>
+      <label class="speed" hidden>Speed <select id="speed"><option value="1">1x</option><option value="2" selected>2x</option><option value="4">4x</option></select></label>
+    </div>
+  </div>
+  <svg class="strand" id="strand" viewBox="0 0 1000 120" preserveAspectRatio="none" aria-hidden="true"></svg>
+  <div class="hero-loki">
+    <div class="loki" id="loki" data-pose="idle">{% include "loki.svg" %}</div>
+    <span class="loki-name">Loki <span class="ai-tag">Verifier</span></span>
+  </div>
+</header>
+
+<section class="ladder" aria-label="Escalation">
+  <div class="ladder-head"><h2>Escalation</h2><p id="ladder-summary">A branch is caught at the earliest step that can settle it. A person is the last resort.</p></div>
+  <ol class="rungs" id="rungs">
+    <li id="rung-self"><span class="rung-dot"></span><strong>Ava&rsquo;s own check</strong><small data-detail>Her fresh re-read after the work</small></li>
+    <li id="rung-exact"><span class="rung-dot"></span><strong>Independent re-read</strong><small data-detail>Typed checks on records Loki reads himself</small></li>
+    <li id="rung-models"><span class="rung-dot"></span><strong>Two model families</strong><small data-detail>Qwen and Gemini must agree, 3 votes each</small></li>
+    <li id="rung-senior"><span class="rung-dot"></span><strong>Senior model</strong><small data-detail>Called only when the two disagree</small></li>
+    <li id="rung-person"><span class="rung-dot"></span><strong>A person</strong><small data-detail>Only if nothing above can settle it</small></li>
+  </ol>
+</section>
+
+<div class="verify-grid">
+  <section class="viewer" aria-label="Evidence">
+    <div class="viewer-tabs" id="viewer-tabs" role="tablist"></div>
+    <div class="viewer-stage" id="viewer-stage">
+      <div class="viewer-empty" id="viewer-empty"><p>The pages Loki reads appear here, with every proven field marked on the page itself.</p></div>
+      <div class="viewer-page" id="viewer-page" hidden>
+        <img id="viewer-img" alt="">
+        <div class="viewer-marks" id="viewer-marks"></div>
+        <div class="viewer-scan" aria-hidden="true"></div>
+      </div>
+      <pre class="viewer-doc" id="viewer-doc" hidden></pre>
+    </div>
+    <footer class="viewer-foot" id="viewer-foot">Read-only, in Loki&rsquo;s own browser. Never Ava&rsquo;s session.</footer>
+  </section>
+
+  <aside class="checklist" aria-label="Conditions">
+    <div class="checklist-head"><h2>Points on the timeline</h2><span id="checklist-count"></span></div>
+    <ol id="conditions" class="conditions"></ol>
+  </aside>
+</div>
+
+<section class="outcome" id="outcome" hidden aria-live="polite">
+  <div class="outcome-main">
+    <span class="eyebrow">The Tribunal finds</span>
+    <h2 id="outcome-title"></h2>
+    <p id="outcome-note"></p>
+    <div class="witnesses">
+      <div><span>Ava&rsquo;s account</span><strong id="w-ava"></strong></div>
+      <div><span>The real timeline</span><strong id="w-loki"></strong></div>
+      <div><span>Ground-truth grader</span><strong id="w-grader"></strong></div>
+    </div>
+    <div class="unsupported" id="unsupported"></div>
+  </div>
+  <div class="conduct"><h3>How Ava worked</h3><ul id="audit-list"></ul></div>
+</section>
+</main>
+<script src="/static/tribunal/tribunal.js?v={{ asset_version }}" defer></script>
+{% endblock %}

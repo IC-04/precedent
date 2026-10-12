@@ -1,0 +1,178 @@
+{
+  "title": "Give Ava the outcome. She brings back the proof.",
+  "subtitle": "Precedent is an autonomous company worker. Ava learns how a company works from its own records, does the work in a real browser, and does not call it done until three independent checks agree.",
+  "narration_voice": {
+    "provider": "Google Cloud TTS",
+    "model": "gemini-2.5-pro-tts",
+    "voice": "Sulafat",
+    "language": "en-US",
+    "style": "You are Ava, a friendly colleague welcoming one person into a shared workspace. Speak warmly and relaxed, with a slight smile you can hear. Use a natural, conversational rhythm and vary your emphasis; let short pauses separate ideas. Be confident and clear, gently playful, and sincere when you explain limits. Not a sales announcer and not a cartoon. Keep the same character throughout."
+  },
+  "loki_voice": {
+    "provider": "Google Cloud TTS",
+    "model": "gemini-2.5-pro-tts",
+    "voice": "Algieba",
+    "language": "en-US",
+    "style": "You are Loki, an original character: a theatrical, silver-tongued trickster who now works as the careful auditor of a friendly AI colleague called Ava. Speak with dry, amused wit and a little theatrical flourish, unhurried and precise about facts. Warm and fond of Ava underneath; never menacing, never a cartoon villain, and do not imitate any actor."
+  },
+  "chapters": [
+    {
+      "id": "hello",
+      "label": "Meet Ava",
+      "title": "One request in. Finished, checked work out.",
+      "summary": "Ask for an outcome. Ava reads the company, works in its apps through a real browser, and returns the saved work with its evidence.",
+      "paragraphs": [
+        "The frames beside this text are Ava's own browser during a recorded run. They are saved images from that run, not a mock-up or a live view.",
+        "The run entered the latest Figma invoice into Books and routed it to the approver the company's current rules name. Her own fresh checks, the Tribunal and the hidden-truth grader each passed it separately."
+      ],
+      "narration": "Hi, I'm Ava. Give me an outcome, like entering an invoice and routing it for approval. I'll read how your company works, do the work in a real browser, and bring back proof that it's done. Not just my word for it.",
+      "performance": "Hi, I'm Ava. [short pause] Give me an outcome, like entering an invoice and routing it for approval. I'll read how your company works, do the work in a real browser, [short pause] and bring back proof that it's done. Not just my word for it."
+    },
+    {
+      "id": "handbook",
+      "label": "How the company works",
+      "title": "She learns the rules from the company's own records.",
+      "summary": "Before acting, Ava reads policies, instructions and every past bill. Code, not the model, checks each rule against that history and decides which source is current.",
+      "paragraphs": [
+        "Context is gathered with read-only page requests: policy documents from Drive, internal instructions from Mail and the full bill history from Books. One model call proposes rules. Code then drops anything uncited, removes quotes that are not in the source, sets authority from where a source lives, counts how often history follows each rule and settles which source supersedes which.",
+        "This is the idea the project is named after. The rules are precedents: what this company decided, where it was written down and how often people actually followed it."
+      ],
+      "narration": "Before I touch anything, I read the company: policies, emails and three hundred past bills. Here, the procedure still says Raj approves design spend. But the CFO moved it to Ana in July, and eight of the nine bills since agree. When the same model ran without this step, it picked Raj, and the grader failed it.",
+      "performance": "Before I touch anything, I read the company: [short pause] policies, emails and three hundred past bills. Here, the procedure still says Raj approves design spend. But the CFO moved it to Ana in July, [short pause] and eight of the nine bills since agree. When the same model ran without this step, it picked Raj, [short pause] and the grader failed it."
+    },
+    {
+      "id": "work",
+      "label": "The loop",
+      "title": "Goal, plan, act, look again, adapt.",
+      "summary": "Every step below is a recorded event from the same run, in the order it happened.",
+      "paragraphs": [
+        "Google ADK runs the agent and Playwright MCP gives it the browser. A fixed input executor moves Ava's pointer and the real mouse together and types real keystrokes. The model chooses the target; it cannot run code.",
+        "Every turn, code writes the run state into Ava's instructions: budget used, write permission, plan, pages already read and remembered facts. Thinking effort is chosen by code from what just happened, and repeated reading without progress earns a nudge."
+      ],
+      "narration": "Then the loop. A goal with conditions I can check, a plan, and real clicks and keystrokes in the browser. After every action I look at the page again, and I choose the next step from what actually happened, not from what I expected.",
+      "performance": "Then the loop. A goal with conditions I can check, a plan, [short pause] and real clicks and keystrokes in the browser. After every action I look at the page again, and I choose the next step from what actually happened, [short pause] not from what I expected."
+    },
+    {
+      "id": "guardrails",
+      "label": "Safety as code",
+      "title": "Some rules are not up to the model.",
+      "summary": "Every save leaves Ava's browser through a gateway that enforces the rules in code. A prompt can be ignored. A gateway cannot.",
+      "paragraphs": [
+        "The gateway treats every request that is not a read as a consequential write. A decision with at least one source permits exactly one save. If a save has an unknown result, writes stay locked until Ava has searched for the record by its business key and decided again; a second unknown save ends the run.",
+        "Failures are named before they are handled, and each name has one fixed response. Meeting tasks get a narrower permission: saving drafts, and local holds only when asked."
+      ],
+      "narration": "Some rules aren't up to me. I can't save anything without recording a decision and its sources. If a save goes missing, I'm locked until I find out what happened. And when the records contradict the request, I stop and say so.",
+      "performance": "Some rules aren't up to me. [short pause] I can't save anything without recording a decision and its sources. If a save goes missing, I'm locked until I find out what happened. [short pause] And when the records contradict the request, I stop and say so."
+    },
+    {
+      "id": "tribunal",
+      "label": "The Tribunal",
+      "title": "Ava does not grade her own work.",
+      "summary": "The Tribunal re-reads the company under its own identity, runs exact checks, asks a jury from two model families and sends broken claims back once. A claim the records do not support is a branch. Fixed, it is pruned.",
+      "paragraphs": [
+        "This scene is scripted from a recorded run. To test the Tribunal, a scenario hook dropped the approval routing after Ava saved it, so her report no longer matched the records. The Tribunal's own fresh read found three unsupported claims, the remand sent them back, Ava requested approval again and the rehearing passed every point.",
+        "Exact checks always beat opinion. The jury is asked neutral questions with the Tribunal's own screenshots, and a third model arbitrates disputes. The verdict rules are code."
+      ],
+      "dialogue": [
+        {
+          "speaker": "ava",
+          "pose": "deliver",
+          "loki": "think",
+          "text": "Done. The Figma invoice is in Books and routed to Ana Pereira for approval.",
+          "performance": "Done. [short pause] The Figma invoice is in Books and routed to Ana Pereira for approval."
+        },
+        {
+          "speaker": "loki",
+          "pose": "listen",
+          "loki": "inspect",
+          "text": "Routed, you say? I just read Books myself. Approver: not requested. Status: draft.",
+          "performance": "Routed, you say? [short pause] I just read Books myself. Approver: not requested. [short pause] Status: draft."
+        },
+        {
+          "speaker": "ava",
+          "pose": "ask",
+          "loki": "inspect",
+          "text": "That is not what I saved.",
+          "performance": "That is not what I saved."
+        },
+        {
+          "speaker": "loki",
+          "pose": "listen",
+          "loki": "concern",
+          "text": "Then your story and the records have parted ways. Three of your claims just branched off the timeline.",
+          "performance": "Then your story and the records have parted ways. [short pause] Three of your claims just branched off the timeline."
+        },
+        {
+          "speaker": "loki",
+          "pose": "listen",
+          "loki": "think",
+          "text": "Exact checks caught it. Most of the jury agreed, but when an exact check fails, opinion does not get a vote. Back you go. One chance.",
+          "performance": "Exact checks caught it. Most of the jury agreed, [short pause] but when an exact check fails, opinion does not get a vote. [short pause] Back you go. One chance."
+        },
+        {
+          "speaker": "ava",
+          "pose": "work",
+          "loki": "think",
+          "text": "Rechecking. The routing was lost after I saved it. Requesting approval from Ana again.",
+          "performance": "Rechecking. [short pause] The routing was lost after I saved it. Requesting approval from Ana again."
+        },
+        {
+          "speaker": "loki",
+          "pose": "listen",
+          "loki": "seal",
+          "text": "Books agrees now. Thirteen of thirteen. Branches pruned. One timeline.",
+          "performance": "Books agrees now. [short pause] Thirteen of thirteen. [short pause] Branches pruned. One timeline."
+        },
+        {
+          "speaker": "ava",
+          "pose": "greet",
+          "loki": "pleased",
+          "text": "Thank you for checking my work, Loki.",
+          "performance": "Thank you for checking my work, Loki."
+        },
+        {
+          "speaker": "loki",
+          "pose": "idle",
+          "loki": "wink",
+          "text": "Somebody has to. For the record, they broke it on purpose to test us.",
+          "performance": "Somebody has to. [short pause] For the record, they broke it on purpose to test us."
+        }
+      ]
+    },
+    {
+      "id": "learn",
+      "label": "Memory and skills",
+      "title": "She remembers what was proven, and learns from being shown.",
+      "summary": "Verified work becomes memory that survives a restart. A recording of a person doing a task becomes a skill draft that must pass a sandbox rehearsal before a person activates it.",
+      "paragraphs": [
+        "Memory is scoped to one company instance and stored apart from the company's data and the grader. Recalled notes are suggestions to check against current sources, never authority.",
+        "Teach Ava watches a screen recording or reads a written procedure, checks each step against the real apps without changing anything, and writes a skill in the open SKILL.md format. Its definition of done becomes Tribunal charges whenever the skill is used."
+      ],
+      "narration": "I also learn. What's verified becomes memory that survives a restart. And you can teach me: show me a recording, and I'll take notes, check each step against the real apps, and rehearse the new skill in a sandbox before anyone switches it on.",
+      "performance": "I also learn. What's verified becomes memory that survives a restart. [short pause] And you can teach me: show me a recording, and I'll take notes, check each step against the real apps, [short pause] and rehearse the new skill in a sandbox before anyone switches it on."
+    },
+    {
+      "id": "google",
+      "label": "Your Gmail and Calendar",
+      "title": "Then the same Ava, in your own Gmail and Calendar.",
+      "summary": "In a browser profile you signed into yourself, Ava reads the company apps in one tab and works in real Gmail and Google Calendar in others. She can draft and book; she cannot send, invite, delete or discard.",
+      "paragraphs": [
+        "Google's traffic does not pass through Ava's gateway, so the rules move onto her browser actions, written as code: only the company apps, Gmail and Calendar may be visited; Send, Forward, Delete, Discard, Archive and Invite are refused, and so are keyboard shortcuts; a decision with sources comes before the first keystroke; recipients are locked to the ones named in the request; no guest can be added to an event.",
+        "Ava never sees your password or tokens. The proof does not come from her report: the draft, the Sent folder and every calendar change during the run are read back through your read-only Google connection, by Ava's own check and again by the Tribunal under its own identity."
+      ],
+      "narration": "I don't only work in the sandbox. In a browser you signed into yourself, I read the company in one tab, then wrote a real Gmail draft and booked a real calendar hold in others. I can't send, invite or delete anything. And the Tribunal read both back from Google itself.",
+      "performance": "I don't only work in the sandbox. [short pause] In a browser you signed into yourself, I read the company in one tab, then wrote a real Gmail draft and booked a real calendar hold in others. [short pause] I can't send, invite or delete anything. And the Tribunal read both back from Google itself."
+    },
+    {
+      "id": "proof",
+      "label": "The evidence",
+      "title": "Every claim on this page opens a real run.",
+      "summary": "Retained runs, failures included. The numbers were read from the run logs, the lessons and the test suite.",
+      "paragraphs": [
+        "Most early runs ended unknown: the verifier refused to call work done when it could not prove a condition. The later runs pass all three checks. That progression is the honest story, not a success rate."
+      ],
+      "narration": "Everything here comes from real runs you can open, and some of them failed. That's in here too. When you're ready, give me a task. I'll meet you in the workspace.",
+      "performance": "Everything here comes from real runs you can open, [short pause] and some of them failed. That's in here too. [short pause] When you're ready, give me a task. I'll meet you in the workspace."
+    }
+  ]
+}

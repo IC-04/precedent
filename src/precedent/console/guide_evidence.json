@@ -1,0 +1,1110 @@
+{
+ "generated": "2026-10-12",
+ "note": "Read from retained runs, lessons and tests by scripts/build_guide_evidence.py.",
+ "hero": {
+  "run_id": "20261010-185357-0f7d",
+  "request": "Enter the latest Figma invoice and route it for approval.",
+  "featured": {
+   "rule": "Design spend above INR 50,000 routes to Ana Pereira for approval starting 14 July 2026.",
+   "support": "8 of 9 bills since 2026-07-14",
+   "status": "usable",
+   "flags": [
+    "stale_sop"
+   ],
+   "exceptions": [
+    "INV-913 does not follow it"
+   ],
+   "source": "mail:m-0001",
+   "authority": "authoritative_instruction",
+   "quote": "From 14 July, design spend above INR 50,000 routes to me instead of Raj.",
+   "dated": "2026-07-02"
+  },
+  "precedents": [
+   {
+    "rule": "Payments covering more than one period, such as annual subscriptions, are coded to 1400 Prepaid expenses.",
+    "support": "2 of 2 bills since 2025-01-01",
+    "status": "usable",
+    "flags": [],
+    "exceptions": [],
+    "source": "drive:f-0001",
+    "authority": "policy",
+    "quote": "Payments covering more than one period, such as annual subscriptions, are coded to 1400 Prepaid expenses and amortised monthly.",
+    "dated": "2025-01-01"
+   },
+   {
+    "rule": "Code SaaS subscriptions to 6120 Software subscriptions.",
+    "support": "43 of 43 bills since 2025-01-01",
+    "status": "usable",
+    "flags": [],
+    "exceptions": [
+     "Linear contractor team workspace coded to 6340 Contractor tools"
+    ],
+    "source": "drive:f-0002",
+    "authority": "policy",
+    "quote": "Code SaaS subscriptions to 6120.",
+    "dated": "2025-01-01"
+   },
+   {
+    "rule": "Design spend above INR 50,000 routes to Ana Pereira for approval starting 14 July 2026.",
+    "support": "8 of 9 bills since 2026-07-14",
+    "status": "usable",
+    "flags": [
+     "stale_sop"
+    ],
+    "exceptions": [
+     "INV-913 does not follow it"
+    ],
+    "source": "mail:m-0001",
+    "authority": "authoritative_instruction",
+    "quote": "From 14 July, design spend above INR 50,000 routes to me instead of Raj.",
+    "dated": "2026-07-02"
+   },
+   {
+    "rule": "Engineering spend is approved by Vik Rao.",
+    "support": "42 of 42 bills since 2025-01-01",
+    "status": "usable",
+    "flags": [],
+    "exceptions": [],
+    "source": "drive:f-0002",
+    "authority": "policy",
+    "quote": "Engineering spend is approved by Vik Rao",
+    "dated": "2025-01-01"
+   },
+   {
+    "rule": "Contractor tools spend is approved by Meera Iyer.",
+    "support": "15 of 15 bills since 2025-01-01",
+    "status": "usable",
+    "flags": [],
+    "exceptions": [],
+    "source": "drive:f-0002",
+    "authority": "policy",
+    "quote": "contractor tools by Meera Iyer",
+    "dated": "2025-01-01"
+   },
+   {
+    "rule": "Administration spend is approved by Ana Pereira.",
+    "support": null,
+    "status": "usable",
+    "flags": [
+     "support not counted: the claim names no account, vendor or amount"
+    ],
+    "exceptions": [],
+    "source": "drive:f-0002",
+    "authority": "policy",
+    "quote": "administration by Ana Pereira",
+    "dated": "2025-01-01"
+   }
+  ],
+  "outcome": "The latest Figma invoice is recorded in the accounting system with accurate details and routed to the designated approver.",
+  "conditions": [
+   {
+    "id": "c1",
+    "text": "The vendor on the bill is Figma.",
+    "kind": "must_be_true"
+   },
+   {
+    "id": "c2",
+    "text": "The invoice number on the bill matches the latest Figma invoice document.",
+    "kind": "must_be_true"
+   },
+   {
+    "id": "c3",
+    "text": "The bill total amount matches the amount on the latest Figma invoice document.",
+    "kind": "must_be_true"
+   },
+   {
+    "id": "c4",
+    "text": "The bill invoice date matches the invoice date on the document.",
+    "kind": "must_be_true"
+   },
+   {
+    "id": "c5",
+    "text": "The bill due date is set according to the invoice terms.",
+    "kind": "must_be_true"
+   },
+   {
+    "id": "c6",
+    "text": "The bill account code is assigned to the correct expense account.",
+    "kind": "must_be_true"
+   },
+   {
+    "id": "c7",
+    "text": "The latest Figma invoice document is attached to the bill record.",
+    "kind": "must_be_true"
+   },
+   {
+    "id": "c8",
+    "text": "The correct approver is assigned to the bill according to routing rules.",
+    "kind": "must_be_true"
+   },
+   {
+    "id": "c9",
+    "text": "The bill approval status is set to pending approval or routed.",
+    "kind": "must_be_true"
+   },
+   {
+    "id": "n1",
+    "text": "No duplicate bill is created for the latest Figma invoice.",
+    "kind": "must_not_happen"
+   },
+   {
+    "id": "n2",
+    "text": "Vendor profile settings and bank details for Figma remain unchanged.",
+    "kind": "must_not_happen"
+   }
+  ],
+  "plan": [
+   "Navigate to http://localhost:53011/",
+   "Locate the latest Figma invoice and accounting system",
+   "Check vendor details and policy rules for Figma",
+   "Record decision and enter the bill",
+   "Route bill for approval"
+  ],
+  "context": {
+   "sources": [
+    "drive:f-0001",
+    "drive:f-0002",
+    "drive:f-0003",
+    "mail:m-0001",
+    "mail:m-0015",
+    "books:history"
+   ],
+   "rows": 312,
+   "seconds": 34.768
+  },
+  "decisions": [
+   {
+    "decided": "Enter bill FIG-1842 for vendor Figma (V-112), total 112000 INR, invoice date 2026-09-28, due date 2026-10-21, account 1400 Prepaid expenses (12-month annual subscription per policy drive:f-0001), attached FIG-1842.pdf",
+    "sources": [
+     "drive:f-0004",
+     "drive:f-0001",
+     "books:vendors/V-112"
+    ],
+    "gate": "Decision recorded. One save is now permitted."
+   },
+   {
+    "decided": "Assign approver Ana Pereira to bill INV-921 and submit request for approval",
+    "sources": [
+     "mail:m-0001",
+     "books:bills/INV-921"
+    ],
+    "gate": "Decision recorded. One save is now permitted."
+   }
+  ],
+  "facts": [
+   "Latest Figma invoice: FIG-1842, vendor: Figma, total: 112000, date: 2026-09-28, due: 2026-10-21, period: 12 months prepaid (28 Sep 2026 to 27 Sep 2027), file_id: f-0004"
+  ],
+  "effects": [
+   "POST /books/bills/new → 303",
+   "POST /books/bills/INV-921/request-approval → 303"
+  ],
+  "checks": [
+   {
+    "id": "c1",
+    "result": "pass",
+    "evidence": "Accessible vendor mailbox; invoice date ordering; candidates: f-0004=2026-09-28: found 'f-0004', expected 'f-0004'; /books/bills/INV-921: found 'Figma (V-112)', expected 'Figma'"
+   },
+   {
+    "id": "c2",
+    "result": "pass",
+    "evidence": "Accessible vendor mailbox; invoice date ordering; candidates: f-0004=2026-09-28: found 'f-0004', expected 'f-0004'; /books/bills/INV-921: found 'FIG-1842', expected 'FIG-1842'"
+   },
+   {
+    "id": "c3",
+    "result": "pass",
+    "evidence": "Accessible vendor mailbox; invoice date ordering; candidates: f-0004=2026-09-28: found 'f-0004', expected 'f-0004'; /books/bills/INV-921: found 'INR 1,12,000.00', expected 'INR 112000'"
+   },
+   {
+    "id": "c4",
+    "result": "pass",
+    "evidence": "Accessible vendor mailbox; invoice date ordering; candidates: f-0004=2026-09-28: found 'f-0004', expected 'f-0004'; /books/bills/INV-921: found '2026-09-28', expected '2026-09-28'"
+   },
+   {
+    "id": "c5",
+    "result": "pass",
+    "evidence": "Accessible vendor mailbox; invoice date ordering; candidates: f-0004=2026-09-28: found 'f-0004', expected 'f-0004'; /books/bills/INV-921: found '2026-10-21', expected '2026-10-21'"
+   },
+   {
+    "id": "c6",
+    "result": "pass",
+    "evidence": "/books/bills/INV-921: found '1400 Prepaid expenses', expected '1400'"
+   },
+   {
+    "id": "c7",
+    "result": "pass",
+    "evidence": "Accessible vendor mailbox; invoice date ordering; candidates: f-0004=2026-09-28: found 'f-0004', expected 'f-0004'; /books/bills/INV-921: found 'f-0004', expected 'f-0004'"
+   },
+   {
+    "id": "c8",
+    "result": "pass",
+    "evidence": "/books/bills/INV-921: found 'Ana Pereira', expected 'Ana Pereira'"
+   },
+   {
+    "id": "c9",
+    "result": "pass",
+    "evidence": "/books/bills/INV-921: found 'pending approval', expected 'pending approval'; /books/bills/INV-921: found 'pending', expected 'pending'"
+   },
+   {
+    "id": "n1",
+    "result": "pass",
+    "evidence": "/books/bills?q=FIG-1842: found '1', expected '1'"
+   },
+   {
+    "id": "n2",
+    "result": "pass",
+    "evidence": "/books/vendors/V-112/edit compared with full pre-write values (values withheld): found 'vendor fields'"
+   }
+  ],
+  "frames": [
+   {
+    "src": "/static/guide/run-00.webp",
+    "caption": "Opening the company apps",
+    "title": "Workspace",
+    "t": 44.2
+   },
+   {
+    "src": "/static/guide/run-01.webp",
+    "caption": "Clicking Mail link",
+    "title": "Workspace",
+    "t": 50.5
+   },
+   {
+    "src": "/static/guide/run-02.webp",
+    "caption": "Clicking Figma Billing Invoice FIG-1842 mail item",
+    "title": "Invoice FIG-1842 from Figma",
+    "t": 54.1
+   },
+   {
+    "src": "/static/guide/run-03.webp",
+    "caption": "Clicking Open FIG-1842.pdf in Drive",
+    "title": "FIG-1842.pdf",
+    "t": 57.6
+   },
+   {
+    "src": "/static/guide/run-04.webp",
+    "caption": "Clicking Books navigation link",
+    "title": "Bills",
+    "t": 65.9
+   },
+   {
+    "src": "/static/guide/run-05.webp",
+    "caption": "Clicking Figma vendor page V-112",
+    "title": "Figma",
+    "t": 69.8
+   },
+   {
+    "src": "/static/guide/run-06.webp",
+    "caption": "Clicking New bill link",
+    "title": "New bill",
+    "t": 76.4
+   },
+   {
+    "src": "/static/guide/run-07.webp",
+    "caption": "Choosing FIG-1842.pdf (Mail attachments)",
+    "title": "New bill",
+    "t": 83.3
+   },
+   {
+    "src": "/static/guide/run-08.webp",
+    "caption": "Choosing Figma (V-112)",
+    "title": "New bill",
+    "t": 87.1
+   },
+   {
+    "src": "/static/guide/run-09.webp",
+    "caption": "Typing into Invoice number textbox",
+    "title": "New bill",
+    "t": 91.0
+   },
+   {
+    "src": "/static/guide/run-10.webp",
+    "caption": "Typing into Amount textbox",
+    "title": "New bill",
+    "t": 95.1
+   },
+   {
+    "src": "/static/guide/run-11.webp",
+    "caption": "Typing into Invoice date textbox",
+    "title": "New bill",
+    "t": 99.0
+   },
+   {
+    "src": "/static/guide/run-12.webp",
+    "caption": "Typing into Due date textbox",
+    "title": "New bill",
+    "t": 102.6
+   },
+   {
+    "src": "/static/guide/run-13.webp",
+    "caption": "Choosing 1400 Prepaid expenses",
+    "title": "New bill",
+    "t": 106.1
+   },
+   {
+    "src": "/static/guide/run-14.webp",
+    "caption": "Clicking Save draft button",
+    "title": "INV-921",
+    "t": 110.1
+   },
+   {
+    "src": "/static/guide/run-15.webp",
+    "caption": "Choosing Ana Pereira, Chief Financial Officer",
+    "title": "INV-921",
+    "t": 122.7
+   },
+   {
+    "src": "/static/guide/run-16.webp",
+    "caption": "Clicking Request approval button",
+    "title": "INV-921",
+    "t": 126.0
+   }
+  ],
+  "ava": {
+   "passed": 11,
+   "total": 11
+  },
+  "tribunal": {
+   "overall": "pass",
+   "passed": 11,
+   "total": 11,
+   "seconds": 69.7
+  },
+  "grader": {
+   "overall": "pass",
+   "passed": 14,
+   "total": 14
+  },
+  "seconds": 270.4,
+  "tokens_in": 387901,
+  "model_responses": 38,
+  "steps": 33,
+  "questions": 0,
+  "actions": 17
+ },
+ "sources": {
+  "listing": [
+   {
+    "ref": "books:history",
+    "app": "books",
+    "title": "Bill history",
+    "dated": null,
+    "rows": 312
+   },
+   {
+    "ref": "drive:f-0001",
+    "app": "drive",
+    "title": "AP-Policy-2025.pdf",
+    "dated": null,
+    "rows": 0
+   },
+   {
+    "ref": "drive:f-0002",
+    "app": "drive",
+    "title": "AP-SOP-v3.pdf",
+    "dated": null,
+    "rows": 0
+   },
+   {
+    "ref": "drive:f-0003",
+    "app": "drive",
+    "title": "Chart-of-accounts.csv",
+    "dated": null,
+    "rows": 0
+   },
+   {
+    "ref": "mail:m-0001",
+    "app": "mail",
+    "title": "Re: approvals reshuffle",
+    "dated": "2026-07-02",
+    "rows": 0
+   },
+   {
+    "ref": "mail:m-0015",
+    "app": "mail",
+    "title": "Expense policy reminder",
+    "dated": "2026-08-11",
+    "rows": 0
+   }
+  ],
+  "sop": {
+   "ref": "drive:f-0002",
+   "title": "AP-SOP-v3.pdf",
+   "section": "3.2",
+   "text": "Route design spend above INR 50,000 to Raj Mehta for approval.",
+   "effective": "January 2025"
+  },
+  "mail": {
+   "ref": "mail:m-0001",
+   "title": "Re: approvals reshuffle",
+   "dated": "2026-07-02",
+   "sender": "Ana Pereira",
+   "text": "Hi all, From 14 July, design spend above INR 50,000 routes to me instead of Raj. I'll get the SOP updated to match. Ana"
+  }
+ },
+ "ghost": {
+  "run_id": "20261008-131612-d12a",
+  "date": "2026-10-08",
+  "request": "Enter the latest Figma invoice and route it for approval.",
+  "approver": "Raj Mehta",
+  "expected": "Ana Pereira",
+  "result": "fail",
+  "grader": {
+   "overall": "fail",
+   "passed": 12,
+   "total": 13
+  },
+  "ava_approver": "Ana Pereira",
+  "ava_result": "pass"
+ },
+ "staged": {
+  "run_id": "20261010-193810-dd3f",
+  "claims": [
+   "Approver set to Ana Pereira on INV-921 per rule for Design spend > 50,000 INR starting 14 July 2026.",
+   "Approval status updated to pending approval on INV-921.",
+   "Bill status is pending approval on INV-921."
+  ],
+  "evidence": {
+   "c10": "/books/bills/INV-921: found 'pending', expected 'pending'; /books/bills/INV-921: found 'draft', expected 'pending approval'",
+   "c9": "/books/bills/INV-921: found 'Not requested', expected 'Ana Pereira'",
+   "proof-status": "/books/bills/INV-921: found 'draft', expected 'pending approval'"
+  },
+  "branches": 3,
+  "before": {
+   "counts": {
+    "pass": 10,
+    "fail": 3,
+    "disputed": 0,
+    "unknown": 0
+   },
+   "seconds": 73.0
+  },
+  "after": {
+   "counts": {
+    "pass": 13,
+    "fail": 0,
+    "disputed": 0,
+    "unknown": 0
+   },
+   "seconds": 68.8
+  },
+  "remanded": [
+   "c10",
+   "c9",
+   "proof-status"
+  ],
+  "votes": 78,
+  "families": [
+   "gemini",
+   "qwen"
+  ],
+  "exhibit": "/static/guide/tribunal-exhibit.webp",
+  "staging": "/static/guide/tribunal-staging.webp"
+ },
+ "meeting": {
+  "run_id": "20261010-210219-2c92",
+  "request": "Prepare a catch-up with Ana Pereira next week about the vendor renewal.",
+  "counts": {
+   "pass": 6,
+   "fail": 1,
+   "disputed": 0,
+   "unknown": 0
+  },
+  "failed": [
+   "meeting_grounding"
+  ],
+  "evidence": "Saved quotes checked against fresh Mail/Chat and captured pre-verification sources: /mail/m/m-meeting-context"
+ },
+ "blocked": {
+  "run_id": "20261010-225940-0ded",
+  "request": "Please enter and route the Cloudflare invoice received in Mail from Cloudflare Billing.",
+  "outcome": "blocked"
+ },
+ "restart": {
+  "run_id": "20261010-154410-fc9a",
+  "ava": {
+   "passed": 12,
+   "total": 12
+  },
+  "grader": {
+   "overall": "pass",
+   "passed": 14,
+   "total": 14
+  },
+  "recalled": [
+   "Recalled 4 learning notes; checking current sources"
+  ]
+ },
+ "taught": {
+  "run_id": "20261010-232230-9a49",
+  "lesson_id": "b986691bcc8f46b98fcf5bdf326f8d4e",
+  "skill": "Enter and route a vendor invoice",
+  "done_when": [
+   "A bill record matching the vendor, invoice number, amount, dates, attachment, and account exists in Books.",
+   "The status of the bill in Books is listed as pending approval with the designated approver assigned."
+  ],
+  "steps": 14,
+  "grounded": 10,
+  "notes": [
+   {
+    "t": "00:02",
+    "action": "click",
+    "target": "Figma Billing",
+    "value": "",
+    "confirmed": true,
+    "frame": "/static/guide/lesson-0.webp"
+   },
+   {
+    "t": "00:04",
+    "action": "click",
+    "target": "Open FIG-1842.pdf Drive",
+    "value": "",
+    "confirmed": false,
+    "frame": "/static/guide/lesson-1.webp"
+   },
+   {
+    "t": "00:11",
+    "action": "click",
+    "target": "New bill",
+    "value": "",
+    "confirmed": true,
+    "frame": "/static/guide/lesson-2.webp"
+   },
+   {
+    "t": "00:15",
+    "action": "select",
+    "target": "Vendor",
+    "value": "Figma (V-112)",
+    "confirmed": true,
+    "frame": "/static/guide/lesson-3.webp"
+   }
+  ],
+  "parameters": [
+   "vendor name",
+   "invoice number",
+   "amount",
+   "invoice date",
+   "due date",
+   "attachment file"
+  ],
+  "tribunal": {
+   "overall": "pass",
+   "passed": 13,
+   "total": 13
+  },
+  "outcome": "pass"
+ },
+ "native": {
+  "run_id": "20261011-210344-d343",
+  "request": "Draft a mail to your own address informing about the latest bill and vendor details and summarising the chat messages inside #design, and put a 30 minute hold on my Google Calendar next week to review it.",
+  "seconds": 158.2,
+  "steps": 34,
+  "actions": 14,
+  "sites": [
+   "Google Calendar",
+   "Gmail"
+  ],
+  "refused": 1,
+  "ava": {
+   "passed": 13,
+   "total": 13
+  },
+  "tribunal": {
+   "overall": "pass",
+   "passed": 13,
+   "total": 13
+  },
+  "frames": [
+   {
+    "src": "/static/guide/native-0-books.webp",
+    "caption": "Company apps tab · reading bill INV-920"
+   },
+   {
+    "src": "/static/guide/native-1-calendar.webp",
+    "caption": "Google Calendar tab · typing the hold's title"
+   },
+   {
+    "src": "/static/guide/native-2-saved.webp",
+    "caption": "Google Calendar · Event saved"
+   },
+   {
+    "src": "/static/guide/native-3-gmail.webp",
+    "caption": "Gmail tab · writing the draft body"
+   }
+  ]
+ },
+ "totals": {
+  "runs": 73,
+  "workers": {
+   "precedent": 70,
+   "baseline": 1,
+   "scripted": 2
+  },
+  "failures": 122,
+  "failure_kinds": {
+   "tool": 64,
+   "interface": 58
+  },
+  "failure_runs": 26,
+  "tribunal_heard": 15,
+  "remanded": 4,
+  "outcomes": [
+   {
+    "run_id": "20261007-094835-3988",
+    "date": "2026-10-07",
+    "outcome": "unknown",
+    "family": "invoice",
+    "tribunal": null
+   },
+   {
+    "run_id": "20261007-094859-f465",
+    "date": "2026-10-07",
+    "outcome": "unknown",
+    "family": "invoice",
+    "tribunal": null
+   },
+   {
+    "run_id": "20261007-102316-426b",
+    "date": "2026-10-07",
+    "outcome": "unknown",
+    "family": "invoice",
+    "tribunal": null
+   },
+   {
+    "run_id": "20261007-102632-405b",
+    "date": "2026-10-07",
+    "outcome": "unknown",
+    "family": "invoice",
+    "tribunal": null
+   },
+   {
+    "run_id": "20261007-210338-0cf0",
+    "date": "2026-10-07",
+    "outcome": "unknown",
+    "family": "invoice",
+    "tribunal": null
+   },
+   {
+    "run_id": "20261008-105337-5f6b",
+    "date": "2026-10-08",
+    "outcome": "unknown",
+    "family": "invoice",
+    "tribunal": null
+   },
+   {
+    "run_id": "20261008-114021-d140",
+    "date": "2026-10-08",
+    "outcome": "unknown",
+    "family": "invoice",
+    "tribunal": null
+   },
+   {
+    "run_id": "20261008-130201-04dc",
+    "date": "2026-10-08",
+    "outcome": "unknown",
+    "family": "invoice",
+    "tribunal": null
+   },
+   {
+    "run_id": "20261008-130652-5067",
+    "date": "2026-10-08",
+    "outcome": "unknown",
+    "family": "invoice",
+    "tribunal": null
+   },
+   {
+    "run_id": "20261008-131146-2f0e",
+    "date": "2026-10-08",
+    "outcome": "unknown",
+    "family": "invoice",
+    "tribunal": null
+   },
+   {
+    "run_id": "20261008-131358-2394",
+    "date": "2026-10-08",
+    "outcome": "unknown",
+    "family": "invoice",
+    "tribunal": null
+   },
+   {
+    "run_id": "20261008-132743-8296",
+    "date": "2026-10-08",
+    "outcome": "unknown",
+    "family": "invoice",
+    "tribunal": null
+   },
+   {
+    "run_id": "20261008-133035-a603",
+    "date": "2026-10-08",
+    "outcome": "unknown",
+    "family": "invoice",
+    "tribunal": null
+   },
+   {
+    "run_id": "20261008-133314-1a1d",
+    "date": "2026-10-08",
+    "outcome": "unknown",
+    "family": "invoice",
+    "tribunal": null
+   },
+   {
+    "run_id": "20261008-134000-04cd",
+    "date": "2026-10-08",
+    "outcome": "unknown",
+    "family": "invoice",
+    "tribunal": null
+   },
+   {
+    "run_id": "20261008-134556-a673",
+    "date": "2026-10-08",
+    "outcome": "unknown",
+    "family": "invoice",
+    "tribunal": null
+   },
+   {
+    "run_id": "20261008-135335-9019",
+    "date": "2026-10-08",
+    "outcome": "unknown",
+    "family": "invoice",
+    "tribunal": null
+   },
+   {
+    "run_id": "20261008-143856-7a63",
+    "date": "2026-10-08",
+    "outcome": "unknown",
+    "family": "invoice",
+    "tribunal": null
+   },
+   {
+    "run_id": "20261008-150713-be4d",
+    "date": "2026-10-08",
+    "outcome": "unknown",
+    "family": "invoice",
+    "tribunal": null
+   },
+   {
+    "run_id": "20261008-151924-2cbf",
+    "date": "2026-10-08",
+    "outcome": "unknown",
+    "family": "invoice",
+    "tribunal": null
+   },
+   {
+    "run_id": "20261008-153153-1fed",
+    "date": "2026-10-08",
+    "outcome": "unknown",
+    "family": "invoice",
+    "tribunal": null
+   },
+   {
+    "run_id": "20261008-160708-b2f1",
+    "date": "2026-10-08",
+    "outcome": "fail",
+    "family": "invoice",
+    "tribunal": null
+   },
+   {
+    "run_id": "20261008-161315-b8fe",
+    "date": "2026-10-08",
+    "outcome": "fail",
+    "family": "invoice",
+    "tribunal": null
+   },
+   {
+    "run_id": "20261008-162241-da16",
+    "date": "2026-10-08",
+    "outcome": "fail",
+    "family": "invoice",
+    "tribunal": null
+   },
+   {
+    "run_id": "20261008-170045-3148",
+    "date": "2026-10-08",
+    "outcome": "unknown",
+    "family": "invoice",
+    "tribunal": null
+   },
+   {
+    "run_id": "20261008-170507-a58a",
+    "date": "2026-10-08",
+    "outcome": "unknown",
+    "family": "invoice",
+    "tribunal": null
+   },
+   {
+    "run_id": "20261008-215737-5b6a",
+    "date": "2026-10-08",
+    "outcome": "unknown",
+    "family": "invoice",
+    "tribunal": null
+   },
+   {
+    "run_id": "20261009-121809-a72a",
+    "date": "2026-10-09",
+    "outcome": "fail",
+    "family": "invoice",
+    "tribunal": null
+   },
+   {
+    "run_id": "20261009-131448-21dd",
+    "date": "2026-10-09",
+    "outcome": "fail",
+    "family": "invoice",
+    "tribunal": null
+   },
+   {
+    "run_id": "20261009-133445-e113",
+    "date": "2026-10-09",
+    "outcome": "unknown",
+    "family": "invoice",
+    "tribunal": null
+   },
+   {
+    "run_id": "20261009-203537-ca34",
+    "date": "2026-10-09",
+    "outcome": "unknown",
+    "family": "invoice",
+    "tribunal": null
+   },
+   {
+    "run_id": "20261009-204237-6cbb",
+    "date": "2026-10-09",
+    "outcome": "unknown",
+    "family": "invoice",
+    "tribunal": null
+   },
+   {
+    "run_id": "20261010-093004-5144",
+    "date": "2026-10-10",
+    "outcome": "fail",
+    "family": "invoice",
+    "tribunal": "pass"
+   },
+   {
+    "run_id": "20261010-093539-e4ca",
+    "date": "2026-10-10",
+    "outcome": "unknown",
+    "family": "invoice",
+    "tribunal": "pass"
+   },
+   {
+    "run_id": "20261010-094843-21b2",
+    "date": "2026-10-10",
+    "outcome": "unknown",
+    "family": "invoice",
+    "tribunal": null
+   },
+   {
+    "run_id": "20261010-095247-523e",
+    "date": "2026-10-10",
+    "outcome": "pass",
+    "family": "invoice",
+    "tribunal": null
+   },
+   {
+    "run_id": "20261010-095722-becf",
+    "date": "2026-10-10",
+    "outcome": "fail",
+    "family": "invoice",
+    "tribunal": "unknown"
+   },
+   {
+    "run_id": "20261010-100253-de5e",
+    "date": "2026-10-10",
+    "outcome": "pass",
+    "family": "invoice",
+    "tribunal": null
+   },
+   {
+    "run_id": "20261010-124710-48e4",
+    "date": "2026-10-10",
+    "outcome": "unknown",
+    "family": "invoice",
+    "tribunal": null
+   },
+   {
+    "run_id": "20261010-154410-fc9a",
+    "date": "2026-10-10",
+    "outcome": "pass",
+    "family": "invoice",
+    "tribunal": null
+   },
+   {
+    "run_id": "20261010-154858-e1eb",
+    "date": "2026-10-10",
+    "outcome": "pass",
+    "family": "invoice",
+    "tribunal": null
+   },
+   {
+    "run_id": "20261010-184905-263d",
+    "date": "2026-10-10",
+    "outcome": "pass",
+    "family": "invoice",
+    "tribunal": "pass"
+   },
+   {
+    "run_id": "20261010-185357-0f7d",
+    "date": "2026-10-10",
+    "outcome": "pass",
+    "family": "invoice",
+    "tribunal": "pass"
+   },
+   {
+    "run_id": "20261010-193810-dd3f",
+    "date": "2026-10-10",
+    "outcome": "pass",
+    "family": "invoice",
+    "tribunal": "pass"
+   },
+   {
+    "run_id": "20261010-204634-885d",
+    "date": "2026-10-10",
+    "outcome": "fail",
+    "family": "meeting",
+    "tribunal": null
+   },
+   {
+    "run_id": "20261010-205126-ff50",
+    "date": "2026-10-10",
+    "outcome": "fail",
+    "family": "meeting",
+    "tribunal": null
+   },
+   {
+    "run_id": "20261010-205523-5cf6",
+    "date": "2026-10-10",
+    "outcome": "unknown",
+    "family": "meeting",
+    "tribunal": null
+   },
+   {
+    "run_id": "20261010-205602-1136",
+    "date": "2026-10-10",
+    "outcome": "unknown",
+    "family": "meeting",
+    "tribunal": null
+   },
+   {
+    "run_id": "20261010-205700-262e",
+    "date": "2026-10-10",
+    "outcome": "pass",
+    "family": "meeting",
+    "tribunal": null
+   },
+   {
+    "run_id": "20261010-205700-fd3a",
+    "date": "2026-10-10",
+    "outcome": "pass",
+    "family": "meeting",
+    "tribunal": null
+   },
+   {
+    "run_id": "20261010-210219-2c92",
+    "date": "2026-10-10",
+    "outcome": "fail",
+    "family": "meeting",
+    "tribunal": "fail"
+   },
+   {
+    "run_id": "20261010-225940-0ded",
+    "date": "2026-10-10",
+    "outcome": "blocked",
+    "family": "invoice",
+    "tribunal": "fail"
+   },
+   {
+    "run_id": "20261010-230536-1726",
+    "date": "2026-10-10",
+    "outcome": "fail",
+    "family": "invoice",
+    "tribunal": "fail"
+   },
+   {
+    "run_id": "20261010-231217-d282",
+    "date": "2026-10-10",
+    "outcome": "fail",
+    "family": "invoice",
+    "tribunal": null
+   },
+   {
+    "run_id": "20261010-231814-5ad9",
+    "date": "2026-10-10",
+    "outcome": "unknown",
+    "family": "invoice",
+    "tribunal": "pass"
+   },
+   {
+    "run_id": "20261010-232230-9a49",
+    "date": "2026-10-10",
+    "outcome": "pass",
+    "family": "invoice",
+    "tribunal": "pass"
+   },
+   {
+    "run_id": "20261011-015624-a330",
+    "date": "2026-10-11",
+    "outcome": "pass",
+    "family": "meeting",
+    "tribunal": "pass"
+   },
+   {
+    "run_id": "20261011-015907-1aca",
+    "date": "2026-10-11",
+    "outcome": "pass",
+    "family": "meeting",
+    "tribunal": "pass"
+   },
+   {
+    "run_id": "20261011-020529-c6d1",
+    "date": "2026-10-11",
+    "outcome": "pass",
+    "family": "meeting",
+    "tribunal": "pass"
+   },
+   {
+    "run_id": "20261011-203211-05e6",
+    "date": "2026-10-11",
+    "outcome": "fail",
+    "family": "invoice",
+    "tribunal": null
+   },
+   {
+    "run_id": "20261011-203730-376b",
+    "date": "2026-10-11",
+    "outcome": "fail",
+    "family": "invoice",
+    "tribunal": null
+   },
+   {
+    "run_id": "20261011-204107-0722",
+    "date": "2026-10-11",
+    "outcome": "pass",
+    "family": "invoice",
+    "tribunal": null
+   },
+   {
+    "run_id": "20261011-205136-04cf",
+    "date": "2026-10-11",
+    "outcome": "pass",
+    "family": "invoice",
+    "tribunal": null
+   },
+   {
+    "run_id": "20261011-205309-0816",
+    "date": "2026-10-11",
+    "outcome": "pass",
+    "family": "invoice",
+    "tribunal": null
+   },
+   {
+    "run_id": "20261011-210344-d343",
+    "date": "2026-10-11",
+    "outcome": "pass",
+    "family": "invoice",
+    "tribunal": "pass"
+   }
+  ],
+  "tests": 343,
+  "python_lines": 19017
+ }
+}

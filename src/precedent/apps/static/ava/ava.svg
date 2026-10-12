@@ -1,0 +1,41 @@
+<svg class="ava-art" viewBox="0 0 220 230" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+<ellipse class="ava-shadow" cx="111" cy="211" rx="54" ry="7"/>
+<g class="ava-figure">
+<g class="ava-ear ava-ear-l"><g class="ava-twitch"><path class="ava-ear-outer" d="M63 71C38 34 13 45 24 86L48 128 75 97Z"/><path class="ava-ear-inner" d="M56 79C42 57 30 61 34 84L48 108 63 93Z"/></g></g>
+<g class="ava-ear ava-ear-r"><g class="ava-twitch"><path class="ava-ear-outer" d="M156 72C181 27 205 44 195 88L174 125 145 97Z"/><path class="ava-ear-inner" d="M163 80C178 56 191 62 187 86L173 107 157 93Z"/></g></g>
+<path class="ava-foot" d="M62 183Q47 208 72 207L92 194Z"/><path class="ava-foot" d="M135 192Q157 212 174 201L160 178Z"/>
+<g class="ava-head"><g class="ava-breath">
+<path class="ava-torso" d="M48 116C48 54 171 45 179 115L183 157C184 214 41 209 43 157Z"/>
+<path class="ava-shade" d="M183 148C186 206 66 214 44 166C86 196 158 194 183 148Z"/>
+<ellipse class="ava-glow" cx="93" cy="90" rx="35" ry="19" transform="rotate(-18 93 90)"/>
+<path class="ava-sheen" d="M71 79Q99 63 123 69"/>
+<g class="ava-face">
+<g class="ava-eyes"><g class="ava-blink"><ellipse cx="88" cy="128" rx="5" ry="9"/><ellipse cx="138" cy="128" rx="5" ry="9"/><circle class="ava-glint" cx="90" cy="123" r="1.8"/><circle class="ava-glint" cx="140" cy="123" r="1.8"/></g></g>
+<g class="ava-eyes-closed"><path d="M81 129Q88 135 95 129"/><path d="M131 129Q138 135 145 129"/></g>
+<ellipse class="ava-cheek" cx="74" cy="145" rx="10" ry="5"/><ellipse class="ava-cheek" cx="151" cy="145" rx="10" ry="5"/>
+<path class="ava-mouth ava-smile" d="M106 147Q113 154 120 147"/>
+<path class="ava-mouth ava-grin" d="M104 145Q113 159 122 145Z"/>
+<ellipse class="ava-mouth ava-talk" cx="113" cy="149" rx="5" ry="6"/>
+<path class="ava-mouth ava-flat" d="M108 150Q113 148 118 150"/>
+</g>
+</g></g>
+<g class="ava-arms ava-arms-rest"><path d="M48 150Q34 168 46 176"/><path d="M178 150Q191 166 181 176"/></g>
+<g class="ava-arms ava-arms-wave"><path d="M48 150Q34 168 46 176"/><g class="ava-wave-arm"><path d="M178 148Q199 132 197 106"/><circle cx="197" cy="102" r="7"/></g></g>
+<g class="ava-arms ava-arms-chin"><path d="M48 150Q34 168 46 176"/><path d="M178 150Q170 176 136 166"/><circle cx="132" cy="165" r="7"/></g>
+<g class="ava-prop ava-laptop">
+<path class="ava-laptop-lid" d="M71 154H155Q159 154 158 158L153 188H73L68 158Q67 154 71 154Z"/>
+<circle class="ava-laptop-mark" cx="113" cy="171" r="5"/>
+<path class="ava-laptop-base" d="M58 188H168Q170 196 162 197H64Q56 196 58 188Z"/>
+<g class="ava-typing"><path class="ava-typing-l" d="M48 150Q48 178 78 188"/><path class="ava-typing-r" d="M178 150Q178 178 148 188"/></g>
+</g>
+<g class="ava-prop ava-hold">
+<g class="ava-paper"><path class="ava-paper-sheet" d="M80 152H138L148 162V202H80Z"/><path class="ava-paper-fold" d="M138 152V162H148"/><path class="ava-paper-lines" d="M89 166H129M89 175H138M89 184H120M89 193H131"/><g class="ava-seal"><circle cx="136" cy="191" r="9"/><path d="M131 199L129 208 135 204 139 209 140 199"/></g></g>
+<path class="ava-hold-arm" d="M48 150Q46 172 82 174"/><path class="ava-hold-arm" d="M178 150Q180 172 146 174"/>
+<g class="ava-lens"><circle cx="104" cy="178" r="11"/><path d="M112 186L121 195"/></g>
+</g>
+<g class="ava-prop ava-bubble-ask"><g transform="translate(14 -24)"><path d="M171 40H205Q213 40 213 48V64Q213 72 205 72H190L182 80 183 72H171Q163 72 163 64V48Q163 40 171 40Z"/><text x="188" y="64">?</text></g></g>
+<g class="ava-prop ava-thought"><circle cx="122" cy="44" r="3.5"/><circle cx="134" cy="29" r="5"/><circle cx="151" cy="12" r="7.5"/></g>
+<g class="ava-prop ava-sound"><path d="M196 92Q203 100 197 109"/><path d="M204 86Q214 100 205 115"/></g>
+<g class="ava-prop ava-rest"><g transform="translate(14 -28)"><path d="M171 48H205Q213 48 213 56V66Q213 74 205 74H171Q163 74 163 66V56Q163 48 171 48Z"/><path class="ava-rest-bars" d="M184 55V67M192 55V67"/></g></g>
+</g>
+</svg>

@@ -96,7 +96,11 @@ class Builder:
         story.write_all()
         self.flush_mail()
         self.conn.commit()
+        from precedent.world.meetings import seed as seed_meetings
+
         hidden = story.hidden_truth()
+        hidden.tasks.extend(seed_meetings(self))
+        self.conn.commit()
         (self.out / "hidden.json").write_text(hidden.model_dump_json(indent=2))
         manifest = self.manifest()
         (self.out / "manifest.json").write_text(manifest.model_dump_json(indent=2))
@@ -524,6 +528,10 @@ class Builder:
             "chat_channels",
             "chat_messages",
             "audit_log",
+            "scheduling_settings",
+            "calendars",
+            "calendar_events",
+            "mail_drafts",
         ]
         counts = {t: self.conn.execute(f"SELECT count(*) FROM {t}").fetchone()[0] for t in tables}
         files = {

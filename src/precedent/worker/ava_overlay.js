@@ -1,94 +1,115 @@
-// Ava's cursor and captions. Injected only into Ava's own browser (never served by the
-// company apps). Hidden from accessibility (aria-hidden) so it never appears in her page
-// snapshots, and pointer-events: none so it can never intercept a click.
+// Worker pointer, Ava's companion and captions. Only the executor calls move/clicked
+// and only trusted runner callbacks call show/say; native human pointer and focus
+// events are not listeners and cannot drive Ava. The host is aria-hidden with a
+// closed shadow root and no pointer events, so page snapshots and clicks ignore it.
+// AVA_ART is replaced by screen.py with the shared drawing (apps/static/ava).
 (() => {
-  if (window.__ava) return;
+  if (window.__ava && window.__ava.show) return;
+  const ART = /*AVA_ART*/ null;
   const KEY = "__ava_overlay";
-  const saved = (() => {
-    try { return JSON.parse(sessionStorage.getItem(KEY) || "{}"); } catch { return {}; }
-  })();
-  const save = (patch) => {
-    Object.assign(saved, patch);
-    try { sessionStorage.setItem(KEY, JSON.stringify(saved)); } catch {}
-  };
-
+  const POSES = ["idle", "read", "think", "work", "check", "ask", "listen", "deliver", "away"];
+  const STATUS = { idle: "Ready", read: "Reading", think: "Choosing the next step", work: "Working",
+    check: "Verifying", ask: "Needs your input", listen: "Reading your answer", deliver: "Verified result", away: "Stopped" };
+  let caption = "", pose = "read", seq = 0;
+  let point = { x: 35, y: 80 };
+  try {
+    const saved = JSON.parse(sessionStorage.getItem(KEY) || "{}");
+    caption = saved.caption || ""; point = saved.point || point;
+    pose = POSES.includes(saved.pose) ? saved.pose : pose; seq = saved.seq || 0;
+  } catch {}
+  function remember() {
+    try { sessionStorage.setItem(KEY, JSON.stringify({ caption, point, pose, seq })); } catch {}
+  }
   function mount() {
     if (document.getElementById("__ava_host")) return;
     const host = document.createElement("div");
     host.id = "__ava_host";
     host.setAttribute("aria-hidden", "true");
-    host.style.cssText =
-      "position:fixed;inset:0;pointer-events:none;z-index:2147483647;view-transition-name:none";
+    host.style.cssText = "position:fixed;inset:0;pointer-events:none;z-index:2147483647;view-transition-name:none";
     const root = host.attachShadow({ mode: "closed" });
-    root.innerHTML = `
+    const markup = `
       <style>
-        .cursor{position:fixed;left:0;top:0;width:22px;height:22px;transform:translate(-100px,-100px);
-          transition:transform .45s cubic-bezier(.22,.8,.3,1);will-change:transform}
-        .cursor svg{filter:drop-shadow(0 2px 3px rgba(0,0,0,.35))}
-        .tag{position:absolute;left:18px;top:16px;font:600 11px/1 system-ui,sans-serif;color:#fff;
-          background:#4338ca;border-radius:9px;padding:3px 7px;white-space:nowrap}
-        .ripple{position:fixed;width:34px;height:34px;margin:-17px 0 0 -17px;border-radius:50%;
-          border:2px solid #6366f1;opacity:0;pointer-events:none}
-        .ripple.on{animation:rip .55s ease-out}
-        @keyframes rip{from{opacity:.9;transform:scale(.3)}to{opacity:0;transform:scale(1.6)}}
-        .focus{position:fixed;border:2px solid #6366f1;border-radius:6px;opacity:0;
-          box-shadow:0 0 0 4px rgba(99,102,241,.18);transition:all .3s ease}
-        .caption{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);max-width:70vw;
-          font:500 14px/1.35 system-ui,sans-serif;color:#fff;background:rgba(17,24,39,.88);
-          border-radius:10px;padding:9px 14px;opacity:0;transition:opacity .25s ease}
-        .caption b{color:#a5b4fc;font-weight:600;margin-right:6px}
-        @media (prefers-reduced-motion: reduce){.cursor,.focus{transition:none}}
+        ${ART ? ART.css : ""}
+        .companion{position:fixed;left:14px;bottom:10px;display:flex;align-items:flex-end;gap:8px;max-width:min(520px,70vw)}
+        .companion .ava{width:74px;flex:none;filter:drop-shadow(0 3px 6px #2a1d3322)}
+        .bubble{margin-bottom:16px;font:500 13px/1.35 system-ui,sans-serif;color:#2f2536;background:rgba(255,253,250,.96);
+          border:1px solid #d8cce2;border-radius:12px 12px 12px 3px;padding:8px 12px;box-shadow:0 6px 20px #2a1d3320;opacity:0;transition:opacity .2s}
+        .bubble small{display:block;font:600 10px/1.3 system-ui,sans-serif;letter-spacing:.06em;text-transform:uppercase;color:#7d5f8f;margin-bottom:2px}
+        .pointer{position:fixed;left:0;top:0;width:22px;height:22px;filter:drop-shadow(0 2px 2px #0005)}
+        .tag{position:absolute;left:17px;top:18px;padding:3px 7px;background:#4338ca;color:white;
+          border-radius:8px;font:600 11px/1 system-ui}
+        .click{position:fixed;width:30px;height:30px;margin:-15px;border:2px solid #4338ca;
+          border-radius:50%;opacity:0}
+        .click.on{animation:pulse .6s ease-out}
+        @media(prefers-reduced-motion:reduce){.click.on{animation:none}}
+        @keyframes pulse{from{opacity:1;transform:scale(.4)}to{opacity:0;transform:scale(1.4)}}
       </style>
-      <div class="focus"></div><div class="ripple"></div>
-      <div class="cursor"><svg width="22" height="22" viewBox="0 0 22 22">
-        <path d="M3 2 L3 18 L7.5 14 L10.5 20.5 L13 19.4 L10 13 L16 13 Z" fill="#4338ca" stroke="#fff" stroke-width="1.4"/>
-      </svg><span class="tag">Ava</span></div>
-      <div class="caption"><b>Ava</b><span></span></div>`;
-    (document.body || document.documentElement).appendChild(host);
-    const cursor = root.querySelector(".cursor");
-    const ripple = root.querySelector(".ripple");
-    const focus = root.querySelector(".focus");
-    const caption = root.querySelector(".caption");
-    const captionText = caption.querySelector("span");
-
-    const move = (x, y) => {
-      cursor.style.transform = `translate(${x}px, ${y}px)`;
-      save({ x, y });
-    };
-    if (saved.x != null) {
-      cursor.style.transition = "none";
-      move(saved.x, saved.y);
-      requestAnimationFrame(() => { cursor.style.transition = ""; });
+      <div class="click"></div>
+      <div class="pointer"><svg width="22" height="22" viewBox="0 0 22 22"><path d="M3 2 L3 18 L7.5 14 L10.5 20.5 L13 19.4 L10 13 L16 13 Z" fill="#4338ca" stroke="white" stroke-width="1.4"/></svg><span class="tag">Ava</span></div>
+      <div class="companion">${ART ? `<div class="ava ava-motion" data-pose="read">${ART.svg}</div>` : ""}<div class="bubble"><small></small><span></span></div></div>`;
+    // Pages that enforce Trusted Types (Gmail, Calendar) refuse raw innerHTML. Try a named
+    // policy; if the page forbids that too, build the pointer and caption with DOM calls and
+    // leave the drawing out. Decoration must never stop Ava's work.
+    try {
+      const policy = window.trustedTypes && window.trustedTypes.createPolicy
+        ? window.trustedTypes.createPolicy("ava-overlay-" + Math.random().toString(36).slice(2), { createHTML: (v) => v })
+        : null;
+      root.innerHTML = policy ? policy.createHTML(markup) : markup;
+    } catch {
+      const css = markup.slice(markup.indexOf("<style>") + 7, markup.indexOf("</style>"));
+      try { const sheet = new CSSStyleSheet(); sheet.replaceSync(css); root.adoptedStyleSheets = [sheet]; } catch {}
+      const make = (tag, cls, ns) => { const n = ns ? document.createElementNS(ns, tag) : document.createElement(tag); if (cls) n.setAttribute("class", cls); return n; };
+      const SVG = "http://www.w3.org/2000/svg";
+      const svg = make("svg", "", SVG); svg.setAttribute("width", "22"); svg.setAttribute("height", "22"); svg.setAttribute("viewBox", "0 0 22 22");
+      const path = make("path", "", SVG);
+      for (const [k, v] of [["d", "M3 2 L3 18 L7.5 14 L10.5 20.5 L13 19.4 L10 13 L16 13 Z"], ["fill", "#4338ca"], ["stroke", "white"], ["stroke-width", "1.4"]]) path.setAttribute(k, v);
+      svg.append(path);
+      const tag = make("span", "tag"); tag.textContent = "Ava";
+      const pointerNode = make("div", "pointer"); pointerNode.append(svg, tag);
+      const bubbleNode = make("div", "bubble"); bubbleNode.append(make("small"), make("span"));
+      const companion = make("div", "companion"); companion.append(bubbleNode);
+      root.append(make("div", "click"), pointerNode, companion);
     }
-    window.addEventListener("mousemove", (e) => move(e.clientX, e.clientY), { capture: true, passive: true });
-    window.addEventListener("mousedown", (e) => {
-      move(e.clientX, e.clientY);
-      ripple.style.left = e.clientX + "px";
-      ripple.style.top = e.clientY + "px";
-      ripple.classList.remove("on");
-      void ripple.offsetWidth;
-      ripple.classList.add("on");
-    }, { capture: true, passive: true });
-    window.addEventListener("focusin", (e) => {
-      const r = e.target && e.target.getBoundingClientRect ? e.target.getBoundingClientRect() : null;
-      if (!r || !r.width) return;
-      Object.assign(focus.style, { left: r.left - 3 + "px", top: r.top - 3 + "px",
-        width: r.width + 6 + "px", height: r.height + 6 + "px", opacity: "1" });
-      move(r.left + Math.min(24, r.width / 2), r.top + r.height / 2);
-    }, { capture: true });
-    window.addEventListener("focusout", () => { focus.style.opacity = "0"; }, { capture: true });
-
+    (document.body || document.documentElement).appendChild(host);
+    const bubble = root.querySelector(".bubble"), text = bubble.querySelector("span"), state = bubble.querySelector("small");
+    const figure = root.querySelector(".ava");
+    const pointer = root.querySelector(".pointer"), click = root.querySelector(".click");
+    function paint() {
+      text.textContent = caption; state.textContent = STATUS[pose] || "";
+      bubble.style.opacity = caption ? "1" : "0";
+      if (figure) figure.dataset.pose = pose;
+      host.dataset.pose = pose;
+    }
     window.__ava = {
-      say(text) {
-        captionText.textContent = text || "";
-        caption.style.opacity = text ? "1" : "0";
-        save({ caption: text || "" });
+      say(value) { caption = value || ""; remember(); paint(); },
+      // A newer trusted state always wins; an older one arriving late is ignored.
+      show(value) {
+        if (!value || (value.seq && value.seq < seq)) return;
+        if (value.seq) seq = value.seq;
+        if (POSES.includes(value.pose)) pose = value.pose;
+        if (typeof value.text === "string") caption = value.text;
+        remember(); paint();
+      },
+      position() { return { ...point }; },
+      move(value) {
+        point = { x: value.x, y: value.y };
+        pointer.style.transform = `translate(${point.x}px, ${point.y}px)`;
+        host.dataset.pointerX = point.x; host.dataset.pointerY = point.y;
+        host.dataset.pointerSource = 'worker';
+        remember();
+      },
+      clicked() {
+        click.style.left = point.x + 'px'; click.style.top = point.y + 'px';
+        click.classList.remove('on'); void click.offsetWidth; click.classList.add('on');
       },
     };
-    if (saved.caption) window.__ava.say(saved.caption);
+    paint();
+    window.__ava.move(point);
   }
-
-  window.__ava = { say(text) { save({ caption: text || "" }); } };
+  window.__ava = {
+    say(value) { caption = value || ""; remember(); },
+    show(value) { if (value && !(value.seq && value.seq < seq)) { seq = value.seq || seq; if (POSES.includes(value.pose)) pose = value.pose; if (typeof value.text === "string") caption = value.text; remember(); } },
+  };
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", mount, { once: true });
   } else {

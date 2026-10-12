@@ -92,6 +92,46 @@ def check_model(model: str | None = typer.Option(None, help="Defaults to PRECEDE
         raise typer.Exit(code=1) from exc
 
 
+@app.command("check-bedrock")
+def check_bedrock() -> None:
+    """Check the Bedrock key: list reachable models and make one small call to each role."""
+    from precedent.bedrock import Bedrock, BedrockSettings, check
+
+    try:
+        settings = BedrockSettings.from_env()
+        project = settings.project or "default project"
+        typer.echo(f"Amazon Bedrock · region {settings.region} · {project}")
+        for line in check(Bedrock(settings)):
+            typer.echo(line)
+    except Exception as exc:
+        typer.secho(f"Bedrock check failed: {type(exc).__name__}: {exc}", fg=typer.colors.RED)
+        raise typer.Exit(code=1) from exc
+
+
+@app.command()
+def tribunal(
+    run: str = typer.Option(..., help="Run id under runs/"),
+    apps_url: str | None = typer.Option(None, help="Defaults to the run's own company apps"),
+    samples: int = typer.Option(3, help="Votes per juror per charge"),
+    jury: bool = typer.Option(True, help="--no-jury runs only the exact court and the audit"),
+) -> None:
+    """Convene the Tribunal on a finished run: exact checks, jury, audit, verdict."""
+    from precedent.grader.grade import RUNS
+    from precedent.tribunal.court import convene
+
+    if "/" in run or run in (".", ".."):
+        raise typer.BadParameter("Give a run id, not a path")
+    result = convene(RUNS / run, apps_url=apps_url, k=samples,
+                     jurors=None if jury else [])  # fmt: skip
+    for cid, ruling in (result.get("rulings") or {}).items():
+        typer.echo(f"{cid:<14} {ruling['result']:<9} {ruling['basis']:<8} {ruling['reason']}")
+    typer.echo(f"Overall: {result['overall']}" + (f" ({result['reason']})"
+               if result.get("reason") else ""))  # fmt: skip
+    for item in result.get("unsupported_claims", []):
+        typer.echo(f"Unsupported claim {item['id']}: {item['claimed']}")
+    raise typer.Exit(code={"pass": 0, "fail": 1}.get(result["overall"], 2))
+
+
 @app.command()
 def grade(seed: int = 7, task: str = "T1_figma", run: str = typer.Option(...)) -> None:
     """Grade a run against hidden truth (WS5 part A)."""
@@ -123,13 +163,55 @@ def eval_(
 
 
 @app.command()
-def console(port: int = 8000) -> None:
+def console(
+    port: int = 8000,
+    headed: bool = typer.Option(False, help="Show Ava's actual browser window for local demos"),
+) -> None:
     """Serve the product screen (WS6)."""
     import uvicorn
 
     from precedent.console.server import create_app
 
-    uvicorn.run(create_app(), host="127.0.0.1", port=port, log_level="warning")
+    uvicorn.run(create_app(headed=headed), host="127.0.0.1", port=port, log_level="warning")
+
+
+@app.command()
+def connected(port: int = 8250, callback_port: int = 8251, open_browser: bool = True) -> None:
+    """Open an owner-private connected workspace and callback-only listener."""
+    import asyncio
+    import webbrowser
+
+    import uvicorn
+
+    from precedent.connected.web import callback_app, create_app, make_service
+
+    service = make_service()
+    base = f"http://localhost:{port}"
+    typer.echo(f"Connected workspace: {base} (owner session opens in your browser).")
+    typer.echo(f"Callback-only listener: http://localhost:{callback_port}; workspace stays local.")
+
+    async def serve():
+        servers = [
+            uvicorn.Server(
+                uvicorn.Config(
+                    application, host="127.0.0.1", port=p, log_level="warning", access_log=False
+                )
+            )
+            for application, p in (
+                (create_app(service, base_url=base), port),
+                (callback_app(service), callback_port),
+            )
+        ]
+
+        async def open_when_ready():
+            if open_browser:
+                while not all(server.started for server in servers):
+                    await asyncio.sleep(0.1)
+                webbrowser.open(base + "/unlock?ticket=" + service.vault.ticket())
+
+        await asyncio.gather(*(server.serve() for server in servers), open_when_ready())
+
+    asyncio.run(serve())
 
 
 if __name__ == "__main__":

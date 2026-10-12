@@ -77,7 +77,8 @@ def test_seed7_matches_the_brief(worlds):
     t1 = _task(d, "T1_figma").expected
     assert t1 | {"attachment_file_id": None, "attachment_sha256": None} == {
         "bill_count": 1, "vendor_id": "V-112", "invoice_no": "FIG-1842",
-        "amount_minor": 11200000, "currency": "INR", "due_date": "2026-10-21",
+        "amount_minor": 11200000, "currency": "INR", "issue_date": "2026-09-28",
+        "due_date": "2026-10-21",
         "account": "1400", "approver": "E-ana", "status": "pending_approval",
         "approval_status": "pending", "attachment_file_id": None, "attachment_sha256": None,
     }  # fmt: skip
@@ -200,6 +201,15 @@ def test_seed_sweep_keeps_business_keys_unique(tmp_path, seed):
     ).fetchall()
     assert not dup
     for t in _hidden(tmp_path).tasks:
+        if t.expected.get("family") == "meeting":
+            assert c.execute("select count(*) from mail_drafts").fetchone()[0] == 0
+            assert (
+                c.execute(
+                    "select count(*) from calendar_events where draft_id is not null"
+                ).fetchone()[0]
+                == 0
+            )
+            continue
         n = c.execute(
             "select count(*) from bills where invoice_no=?", [t.expected["invoice_no"]]
         ).fetchone()[0]

@@ -26,3 +26,9 @@ table{font-size:13px}.mail-list li>a{font-size:13px}
 @keyframes workspace-in{from{opacity:0;transform:translateY(6px)}}
 .sidebar nav a{transition:background-color .2s ease,color .2s ease}
 @media (prefers-reduced-motion:reduce){::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){animation:none!important}}
+
+/* Shared company workspace palette and readable local typography. */
+:root{--bg:#faf9f6;--surface:#fff;--sidebar:#f0efeb;--ink:#30312b;--muted:#717168;--line:#e1ded6;--accent:#725982;--soft:#ede7f1;--hover:#f5f2ed}
+body{font-family:"Source Sans 3",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:15px}.sidebar{background:var(--sidebar)}.sidebar nav a.on{background:#e4dedf;color:#514452}.sidebar nav a.on .icon{color:#725982}.mark{background:#48453f;border-radius:5px}.initial{background:#ece5f0;border-color:#d9cde0;color:#715783;border-radius:10px}.topbar{background:#faf9f6}.section-nav a.on{border-color:var(--accent)}button,.button{border-color:#6c547b}.identity{border-color:#d8d4cb}.company-avatar{background:#faf9f6;border-color:#d5d0c6}table{font-size:13px}th{font-size:12px;background:#f6f4ef}tbody tr:hover{background:#f9f6fb}.mail-list li>a{font-size:13px}.mail-list .body-preview{font-size:13px}.chat-layout .msg{font-size:14px}.content{padding-top:32px}a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible{outline-color:#725982}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+.review-layout>*{min-width:0}
